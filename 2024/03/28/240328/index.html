@@ -1,18 +1,16 @@
-<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Linux；锁、并发 | Apong's Blog</title><meta name="author" content="Apong"><meta name="copyright" content="Apong"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="今天学习了 Linux 的部分命令，黑马点评的秒杀券超卖、一人一单并发问题。">
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Linux，分布式锁 | Apong's Blog</title><meta name="author" content="Apong"><meta name="copyright" content="Apong"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="今天学了 Linux 的链接和vim编辑器，还有分布式锁">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Linux；锁、并发">
+<meta property="og:title" content="Linux，分布式锁">
 <meta property="og:url" content="https://blueapong.github.io/2024/03/28/240328/index.html">
 <meta property="og:site_name" content="Apong&#39;s Blog">
-<meta property="og:description" content="今天学习了 Linux 的部分命令，黑马点评的秒杀券超卖、一人一单并发问题。">
+<meta property="og:description" content="今天学了 Linux 的链接和vim编辑器，还有分布式锁">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://blueapong.github.io/config/avatar.jpg">
-<meta property="article:published_time" content="2024-03-27T16:12:34.000Z">
-<meta property="article:modified_time" content="2024-03-28T01:59:22.793Z">
+<meta property="article:published_time" content="2024-03-28T13:35:34.000Z">
+<meta property="article:modified_time" content="2024-03-29T05:27:54.026Z">
 <meta property="article:author" content="Apong">
 <meta property="article:tag" content="Linux">
-<meta property="article:tag" content="并发">
-<meta property="article:tag" content="锁">
-<meta property="article:tag" content="订单超卖">
+<meta property="article:tag" content="分布式锁">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://blueapong.github.io/config/avatar.jpg"><link rel="shortcut icon" href="/config/favicon.png"><link rel="canonical" href="https://blueapong.github.io/2024/03/28/240328/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
   root: '/',
@@ -54,12 +52,12 @@
   },
   autoDarkmode: false
 }</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
-  title: 'Linux；锁、并发',
+  title: 'Linux，分布式锁',
   isPost: true,
   isHome: false,
   isHighlightShrink: false,
   isToc: true,
-  postUpdate: '2024-03-28 09:59:22'
+  postUpdate: '2024-03-29 13:27:54'
 }</script><script>(win=>{
       win.saveToLocal = {
         set: (key, value, ttl) => {
@@ -156,89 +154,81 @@
         }
       }
       detectApple()
-    })(window)</script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/config/avatar.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/categories/daily/"><i class="fa-fw fas fa-mug-saucer"></i><span> 每日总结</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/config/default_top_img.png')"><nav id="nav"><span id="blog-info"><a href="/" title="Apong's Blog"><span class="site-name">Apong's Blog</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/categories/daily/"><i class="fa-fw fas fa-mug-saucer"></i><span> 每日总结</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Linux；锁、并发</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-03-27T16:12:34.000Z" title="发表于 2024-03-28 00:12:34">2024-03-28</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-03-28T01:59:22.793Z" title="更新于 2024-03-28 09:59:22">2024-03-28</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/daily/">每日总结</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">908</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>3分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Linux；锁、并发"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h2 id="Linux"><a href="#Linux" class="headerlink" title="Linux"></a>Linux</h2><h3 id="开关机"><a href="#开关机" class="headerlink" title="开关机"></a>开关机</h3><p><code>shutdown -h &lt;time&gt;</code> </p>
-<p>h: halt 停止</p>
-<p>这里的 time 可以是数字（分钟），也可以是时间（时:分），还可以是 now （等时间说明？）</p>
-<p><code>shutdown -r &lt;time&gt;</code></p>
-<p>r: reboot 重启</p>
-<p>time 同上方命令</p>
-<p><code>reboot</code> ：直接重启</p>
-<p><code>halt</code>、<code>poweroff</code>：关闭系统，等同于 <code>shutdown -h now</code></p>
-<p><code>sync</code> ：将内存数据同步到硬盘，关机重启前应执行此命令保证数据不被丢失。</p>
-<h3 id="目录管理"><a href="#目录管理" class="headerlink" title="目录管理"></a>目录管理</h3><p><strong>目录操作</strong></p>
-<p><code>mkdir -p &lt;file&gt;</code> </p>
-<p>p: parent 父级</p>
-<p>创建目录，可以选择添加 p 参数创建多级目录</p>
-<p><code>rmdir -p &lt;file&gt;</code></p>
-<p>删除目录，可以选择添加 p 参数删除多级目录（目录不为空无法删除）</p>
-<p><code>rm -rfi &lt;file / path&gt;</code></p>
-<p>r: recursive 递归</p>
-<p>f: force 强制</p>
-<p>i: interactive 交互（询问是否删除）</p>
+    })(window)</script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/config/avatar.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">4</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">6</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/categories/daily/"><i class="fa-fw fas fa-mug-saucer"></i><span> 每日总结</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/config/default_top_img.png')"><nav id="nav"><span id="blog-info"><a href="/" title="Apong's Blog"><span class="site-name">Apong's Blog</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/categories/daily/"><i class="fa-fw fas fa-mug-saucer"></i><span> 每日总结</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Linux，分布式锁</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-03-28T13:35:34.000Z" title="发表于 2024-03-28 21:35:34">2024-03-28</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-03-29T05:27:54.026Z" title="更新于 2024-03-29 13:27:54">2024-03-29</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/daily/">每日总结</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">846</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>2分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Linux，分布式锁"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="Linux"><a href="#Linux" class="headerlink" title="Linux"></a>Linux</h1><h3 id="链接"><a href="#链接" class="headerlink" title="链接"></a>链接</h3><p>链接文件：一个可以“通向”其他文件的文件。</p>
+<p>分为 软链接 和 硬链接。</p>
+<p><strong>软链接：</strong>类似 Windows 的快捷方式，不是一个实质的文件，当链接的文件被销毁后，也就失去作用了</p>
+<p><strong>硬链接：</strong>直接和 另一个文件 通向 相同的内存，和链接的文件共享文件内容，这边修改了那边也会跟着变</p>
 <blockquote>
-<p>linux 中命令参数可以合并在一起写，所以写成了 -rfi</p>
+<p>和 Docker 的 Volume 有点像</p>
 </blockquote>
-<p>删除文件或目录</p>
-<p><code>pwd</code>：print working directory 打印当前目录</p>
-<p><strong>列出目录内容</strong></p>
-<p><code>ls -al</code> 列举目录内容</p>
-<p>a: all 全部</p>
-<p>l: long 长格式（详细信息：权限、属主、分组、大小、创建时间、名称）</p>
-<p><code>ll</code> 列出目录内详细，等同于 <code>ls -l</code></p>
-<h3 id="文件管理"><a href="#文件管理" class="headerlink" title="文件管理"></a>文件管理</h3><p><strong>权限管理</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-rwxr-xr-x. 2 root root   24 3月   7 11:13 nacos.txt</span><br><span class="line">drwxr-xr-x. 3 root root   59 3月  18 13:44 nginx</span><br></pre></td></tr></table></figure>
-
-<p><code>- rwx rwx rwx</code> 可以分为 4 组</p>
-<p>第一组：文件类型，- 表示这是一个可执行文件，d 表示目录，l 表示链接（软 &#x2F; 硬）</p>
-<p>第二、三、四组：当前用户、所属用户、分组用户可操作的文件权限</p>
-<p>第一个root：创建用户</p>
-<p>第二个root：分组</p>
-<p>r：读，w：写，x：执行 execute</p>
-<p><code>chgrp &lt;group&gt; &lt;file&gt;</code> 修改文件分组</p>
-<p><code>chmod (rwx)(rwx)(rwx) &lt;file&gt;</code> 修改文件对应当前、属主、分组的可操作权限</p>
-<p>这里的 rwx 分别用对应数字的累加来声明</p>
-<p>r：4，w：2，x：1</p>
-<blockquote>
-<p>为什么 r 是 4 ？</p>
-<p>因为如果是 3，会出现组合重复，r: 3 等同 wx: 3</p>
-</blockquote>
-<p>如 <code>chmod 775 file</code> </p>
-<p>表示当前用户权限：r+w+x &#x3D; 7</p>
-<p>表示创建用户权限：r+w+x &#x3D; 7</p>
-<p>表示分组用户权限：r+w+0 &#x3D; 5</p>
-<p><strong>文件查看</strong></p>
-<p><code>cat</code> 从上往下打印文件内容，<code>tac</code> 倒序打印，cat反过来</p>
-<p><code>less、more</code> 分页显示文件内容</p>
-<p>less 区别于 more，less 可以上下翻页 “PageUp”，“PagesDown” 按键和上下单行移动 “ArrowUp”，“ArrowDown” 按键。</p>
-<p>操作：</p>
+<p><strong>命令</strong>：<code>ln -s &lt;linked&gt; &lt;link&gt;</code></p>
+<p>s: symbolic 符号，表示创建软链接（符号链接）</p>
+<p>如 ln b.txt a.txt：创建 a 对 b 的硬链接。</p>
+<p><strong>注意：</strong>硬链接不能指向目录，因为目录只是一个层级，不是文件，无法让你修改。</p>
+<h3 id="vi编辑器"><a href="#vi编辑器" class="headerlink" title="vi编辑器"></a>vi编辑器</h3><p>打开方式：<code>vi &lt;file&gt;</code> </p>
+<p>如果文件不存在则会创建新文件。</p>
+<p>vim编辑器中分为三种状态 </p>
+<ol>
+<li>命令模式，按下按键不会输入字符，而是执行命令。</li>
+<li>输入模式，可以插入字符</li>
+<li>底线命令模式，在界面最低端，输入命令执行相应操作</li>
+</ol>
+<p><strong>命令模式常用</strong></p>
+<ol>
+<li>i、a、o，分别是在光标当前、随后、下一行进入输入模式，可以输入字符</li>
+<li>u，复原操作</li>
+<li>dd，删除这一行</li>
+<li><code>:</code>，切换到底线命令模式</li>
+</ol>
+<p><strong>输入模式常用</strong></p>
+<ol>
+<li>ctrl + u，撤回操作</li>
+</ol>
+<p><strong>底线命令模式</strong></p>
+<ol>
+<li>q 退出</li>
+<li>q！强制退出，加一个！表示强制的意思</li>
+<li>w 保存</li>
+<li>wq 保存退出</li>
+<li>！暂时离开进入terminal查看信息</li>
+<li>set nu 显示行号</li>
+<li>set nonu 取消显示行号</li>
+</ol>
+<h1 id="分布式锁"><a href="#分布式锁" class="headerlink" title="分布式锁"></a>分布式锁</h1><p>在集群部署的情况下，保证某个操作只能单线程执行。</p>
+<h3 id="实现方式"><a href="#实现方式" class="headerlink" title="实现方式"></a><strong>实现方式</strong></h3><ol>
+<li>MySQL 本身的互斥锁机制（还没学）</li>
+<li>Redis setnx 互斥命令</li>
+<li>zookeeper 唯一有序节点</li>
+</ol>
+<p><strong>定义 Lock 接口</strong></p>
 <ul>
-<li>空格翻页</li>
-<li>回车显示下一行</li>
-<li>输入 &#x2F;xxx，查询 xxx ，<strong>less 才能查</strong>，n 向上搜索，N 向下搜索</li>
-<li>q 退出分页查看</li>
+<li><p><code>boolean tryLock(long timeSec)</code> 尝试获取锁，并设置过期时间，防止服务宕机造成死锁</p>
+<blockquote>
+<p>MySQL 断连会自动释放，zookeeper 是临时节点</p>
+</blockquote>
+</li>
+<li><p><code>void unlock()</code></p>
+</li>
 </ul>
-<p><code>head / tail -n &lt;line&gt; &lt;file&gt;</code> 分别显示头尾 n 行</p>
-<p><code>nl &lt;file&gt;</code> 输出文件内容，并标注行号</p>
-<h2 id="对并发的理解"><a href="#对并发的理解" class="headerlink" title="对并发的理解"></a>对并发的理解</h2><p>什么时候需要考虑并发：</p>
+<h3 id="防止误删"><a href="#防止误删" class="headerlink" title="防止误删"></a><strong>防止误删</strong></h3><p>如果某次操作执行非常慢或者被阻塞了，导致他获取的锁被过期释放了，此时其他线程获取到了新的锁，但由于锁的 key 都是一致的，最后这个被阻塞的操作完成后会误删了其他线程的锁。</p>
+<p><strong>一、给锁加上标识</strong></p>
+<p>为了误删其他线程的锁，需要再释放之前，判断这把锁是否是为当前线程的锁。</p>
+<p>利用 UUID + 线程id 生成不同服务器不同的标识</p>
+<blockquote>
+<p>如果只用id的话，由于这个id是顺序生成的，不同服务器之间会冲突。</p>
+</blockquote>
+<p><strong>二、原子性</strong></p>
+<p>既然出现了判断，就会有数据不一致的并发问题。</p>
+<p>如果因为 JVM 的 GC 垃圾回收等机制造成了阻塞，导致在判断完之后锁又过期的情况下，又会误删其他线程的锁。</p>
+<p>因此，需要保证 判断 和 释放 两个操作的原子性。</p>
+<p>这里采用脱离 JVM，让 Redis 执行 lua 脚本的方法。</p>
+<p>实现步骤：</p>
 <ol>
-<li>涉及数据一致性</li>
-<li>涉及数据库操作</li>
+<li>编写 lua 脚本</li>
+<li>借助 StringRedisTemplate 的 execute 方法执行脚本</li>
 </ol>
-<p>并发在哪里产生问题：</p>
-<ol>
-<li>“判断”：只要同时存在多个线程绕过这个限制，就会出现并发问题</li>
-</ol>
-<p>如何处理并发问题：“锁”</p>
-<ol>
-<li>悲观锁：全程阻塞，整个过程保证同时只有一个线程。</li>
-<li>乐观锁：阻塞不符合条件的线程。</li>
-<li>id锁：保证同时只有一个线程访问这个id。</li>
-</ol>
-<h2 id="订单超卖"><a href="#订单超卖" class="headerlink" title="订单超卖"></a>订单超卖</h2><p>场景描述：一共只有 100 份，却卖出了 110 份，这就是超卖。</p>
-<p>造成原因：高并发，一份的空隙被 10 个用户绕了过去，同时进行了操作。</p>
-<p>解决办法：</p>
-<ol>
-<li>全程加锁，限制同时只能有一份被一个用户操作，但是<strong>效率太低</strong>。</li>
-<li>乐观锁，只要没有超出限制，就允许同时操作，保证了效率和业务正常。</li>
-</ol>
-</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a target="_blank" rel="noopener" href="https://github.com/blueapong">Apong</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://blueapong.github.io/2024/03/28/240328/">https://blueapong.github.io/2024/03/28/240328/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://blueapong.github.io" target="_blank">Apong's Blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Linux/">Linux</a><a class="post-meta__tags" href="/tags/%E5%B9%B6%E5%8F%91/">并发</a><a class="post-meta__tags" href="/tags/%E9%94%81/">锁</a><a class="post-meta__tags" href="/tags/%E8%AE%A2%E5%8D%95%E8%B6%85%E5%8D%96/">订单超卖</a></div><div class="post_share"><div class="social-share" data-image="/config/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2024/03/27/Linux-1/" title="Linux学习第一天"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Linux学习第一天</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/03/27/Linux-1/" title="Linux学习第一天"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-27</div><div class="title">Linux学习第一天</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/config/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Apong</div><div class="author-info__description">Think less useless, Do more!</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/blueapong"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Linux"><span class="toc-number">1.</span> <span class="toc-text">Linux</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%85%B3%E6%9C%BA"><span class="toc-number">1.1.</span> <span class="toc-text">开关机</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%AE%E5%BD%95%E7%AE%A1%E7%90%86"><span class="toc-number">1.2.</span> <span class="toc-text">目录管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86"><span class="toc-number">1.3.</span> <span class="toc-text">文件管理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%B9%E5%B9%B6%E5%8F%91%E7%9A%84%E7%90%86%E8%A7%A3"><span class="toc-number">2.</span> <span class="toc-text">对并发的理解</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%A2%E5%8D%95%E8%B6%85%E5%8D%96"><span class="toc-number">3.</span> <span class="toc-text">订单超卖</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/03/28/240328/" title="Linux；锁、并发">Linux；锁、并发</a><time datetime="2024-03-27T16:12:34.000Z" title="发表于 2024-03-28 00:12:34">2024-03-28</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/03/27/Linux-1/" title="Linux学习第一天">Linux学习第一天</a><time datetime="2024-03-27T11:41:17.000Z" title="发表于 2024-03-27 19:41:17">2024-03-27</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/03/25/Git-1/" title="Git 文件状态梳理">Git 文件状态梳理</a><time datetime="2024-03-25T13:54:47.000Z" title="发表于 2024-03-25 21:54:47">2024-03-25</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2021 - 2024 By Apong</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
+<blockquote>
+<p>Redis 会不会产生数据不一致的问题，在查询到标识之后被其他线程改了？多线程？</p>
+</blockquote>
+<p>Redis 在 5 版本之前都是单线程的，而且事务保证了原子性。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a target="_blank" rel="noopener" href="https://github.com/blueapong">Apong</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://blueapong.github.io/2024/03/28/240328/">https://blueapong.github.io/2024/03/28/240328/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://blueapong.github.io" target="_blank">Apong's Blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Linux/">Linux</a><a class="post-meta__tags" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">分布式锁</a></div><div class="post_share"><div class="social-share" data-image="/config/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2024/03/28/240327/" title="Linux；锁、并发"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Linux；锁、并发</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/03/27/Linux-1/" title="Linux学习第一天"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-27</div><div class="title">Linux学习第一天</div></div></a></div><div><a href="/2024/03/28/240327/" title="Linux；锁、并发"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-28</div><div class="title">Linux；锁、并发</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/config/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Apong</div><div class="author-info__description">Think less useless, Do more!</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">4</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">6</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/blueapong"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Linux"><span class="toc-number">1.</span> <span class="toc-text">Linux</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%93%BE%E6%8E%A5"><span class="toc-number">1.0.1.</span> <span class="toc-text">链接</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#vi%E7%BC%96%E8%BE%91%E5%99%A8"><span class="toc-number">1.0.2.</span> <span class="toc-text">vi编辑器</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81"><span class="toc-number">2.</span> <span class="toc-text">分布式锁</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F"><span class="toc-number">2.0.1.</span> <span class="toc-text">实现方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%B2%E6%AD%A2%E8%AF%AF%E5%88%A0"><span class="toc-number">2.0.2.</span> <span class="toc-text">防止误删</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/03/28/240328/" title="Linux，分布式锁">Linux，分布式锁</a><time datetime="2024-03-28T13:35:34.000Z" title="发表于 2024-03-28 21:35:34">2024-03-28</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/03/28/240327/" title="Linux；锁、并发">Linux；锁、并发</a><time datetime="2024-03-27T16:12:34.000Z" title="发表于 2024-03-28 00:12:34">2024-03-28</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/03/27/Linux-1/" title="Linux学习第一天">Linux学习第一天</a><time datetime="2024-03-27T11:41:17.000Z" title="发表于 2024-03-27 19:41:17">2024-03-27</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/03/25/Git-1/" title="Git 文件状态梳理">Git 文件状态梳理</a><time datetime="2024-03-25T13:54:47.000Z" title="发表于 2024-03-25 21:54:47">2024-03-25</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2021 - 2024 By Apong</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
