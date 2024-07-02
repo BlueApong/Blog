@@ -1,0 +1,476 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>第 2 页 | Apong&#39;s Blog | 当你快坚持不住的时候，困难也快坚持不住了</title>
+
+  
+  <meta name="author" content="Apong">
+  
+
+  
+  <meta name="description" content="个人博客">
+  
+
+  
+  <meta name="keywords" content="博客, 知识分享, 开源">
+  
+
+  <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  
+
+  <meta property="og:site_name" content="Apong&#39;s Blog"/>
+
+  
+  <meta property="og:image" content="/favicon.ico"/>
+  
+
+  <link href="/favicon.ico" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="Apong&#39;s Blog" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+<div class="blog">
+  <div class="content">
+
+    <header>
+  <div class="site-branding">
+    <h1 class="site-title">
+      <a href="/">Apong&#39;s Blog</a>
+    </h1>
+    <p class="site-description">当你快坚持不住的时候，困难也快坚持不住了</p>
+  </div>
+  <nav class="site-navigation">
+    <ul>
+      
+        <li><a href="/">首页</a></li>
+      
+        <li><a href="/archives/">归档</a></li>
+      
+        <li><a href="/tags/">标签</a></li>
+      
+        <li><a href="/categories/">分类</a></li>
+      
+        <li><a href="/categories/daily/">每日总结</a></li>
+      
+        <li><a target="_blank" rel="noopener" href="https://github.com/blueapong">Github</a></li>
+      
+    </ul>
+  </nav>
+</header>
+
+    <main class="site-main posts-loop">
+    
+  <article>
+
+  
+    
+    <h3 class="article-title"><a href="/2024/03/28/240327/"><span>Linux；锁、并发</span></a></h3>
+    
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2024/03/28/240327/" rel="bookmark">
+        <time class="entry-date published" datetime="2024-03-27T16:12:34.000Z">
+          2024-03-28
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+        <h2 id="Linux"><a href="#Linux" class="headerlink" title="Linux"></a>Linux</h2><h3 id="开关机"><a href="#开关机" class="headerlink" title="开关机"></a>开关机</h3><p><code>shutdown -h &lt;time&gt;</code> </p>
+<p>h: halt 停止</p>
+<p>这里的 time 可以是数字（分钟），也可以是时间（时:分），还可以是 now （等时间说明？）</p>
+<p><code>shutdown -r &lt;time&gt;</code></p>
+<p>r: reboot 重启</p>
+<p>time 同上方命令</p>
+<p><code>reboot</code> ：直接重启</p>
+<p><code>halt</code>、<code>poweroff</code>：关闭系统，等同于 <code>shutdown -h now</code></p>
+<p><code>sync</code> ：将内存数据同步到硬盘，关机重启前应执行此命令保证数据不被丢失。</p>
+<h3 id="目录管理"><a href="#目录管理" class="headerlink" title="目录管理"></a>目录管理</h3><p><strong>目录操作</strong></p>
+<p><code>mkdir -p &lt;file&gt;</code> </p>
+<p>p: parent 父级</p>
+<p>创建目录，可以选择添加 p 参数创建多级目录</p>
+<p><code>rmdir -p &lt;file&gt;</code></p>
+<p>删除目录，可以选择添加 p 参数删除多级目录（目录不为空无法删除）</p>
+<p><code>rm -rfi &lt;file / path&gt;</code></p>
+<p>r: recursive 递归</p>
+<p>f: force 强制</p>
+<p>i: interactive 交互（询问是否删除）</p>
+<blockquote>
+<p>linux 中命令参数可以合并在一起写，所以写成了 -rfi</p>
+</blockquote>
+<p>删除文件或目录</p>
+<p><code>pwd</code>：print working directory 打印当前目录</p>
+<p><strong>列出目录内容</strong></p>
+<p><code>ls -al</code> 列举目录内容</p>
+<p>a: all 全部</p>
+<p>l: long 长格式（详细信息：权限、属主、分组、大小、创建时间、名称）</p>
+<p><code>ll</code> 列出目录内详细，等同于 <code>ls -l</code></p>
+<h3 id="文件管理"><a href="#文件管理" class="headerlink" title="文件管理"></a>文件管理</h3><p><strong>权限管理</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-rwxr-xr-x. 2 root root   24 3月   7 11:13 nacos.txt</span><br><span class="line">drwxr-xr-x. 3 root root   59 3月  18 13:44 nginx</span><br></pre></td></tr></table></figure>
+
+<p><code>- rwx rwx rwx</code> 可以分为 4 组</p>
+<p>第一组：文件类型，- 表示这是一个可执行文件，d 表示目录，l 表示链接（软 &#x2F; 硬）</p>
+<p>第二、三、四组：当前用户、所属用户、分组用户可操作的文件权限</p>
+<p>第一个root：创建用户</p>
+<p>第二个root：分组</p>
+<p>r：读，w：写，x：执行 execute</p>
+<p><code>chgrp &lt;group&gt; &lt;file&gt;</code> 修改文件分组</p>
+<p><code>chmod (rwx)(rwx)(rwx) &lt;file&gt;</code> 修改文件对应当前、属主、分组的可操作权限</p>
+<p>这里的 rwx 分别用对应数字的累加来声明</p>
+<p>r：4，w：2，x：1</p>
+<blockquote>
+<p>为什么 r 是 4 ？</p>
+<p>因为如果是 3，会出现组合重复，r: 3 等同 wx: 3</p>
+</blockquote>
+<p>如 <code>chmod 775 file</code> </p>
+<p>表示当前用户权限：r+w+x &#x3D; 7</p>
+<p>表示创建用户权限：r+w+x &#x3D; 7</p>
+<p>表示分组用户权限：r+w+0 &#x3D; 5</p>
+<p><strong>文件查看</strong></p>
+<p><code>cat</code> 从上往下打印文件内容，<code>tac</code> 倒序打印，cat反过来</p>
+<p><code>less、more</code> 分页显示文件内容</p>
+<p>less 区别于 more，less 可以上下翻页 “PageUp”，“PagesDown” 按键和上下单行移动 “ArrowUp”，“ArrowDown” 按键。</p>
+<p>操作：</p>
+<ul>
+<li>空格翻页</li>
+<li>回车显示下一行</li>
+<li>输入 &#x2F;xxx，查询 xxx ，<strong>less 才能查</strong>，n 向上搜索，N 向下搜索</li>
+<li>q 退出分页查看</li>
+</ul>
+<p><code>head / tail -n &lt;line&gt; &lt;file&gt;</code> 分别显示头尾 n 行</p>
+<p><code>nl &lt;file&gt;</code> 输出文件内容，并标注行号</p>
+<h2 id="对并发的理解"><a href="#对并发的理解" class="headerlink" title="对并发的理解"></a>对并发的理解</h2><p>什么时候需要考虑并发：</p>
+<ol>
+<li>涉及数据一致性</li>
+<li>涉及数据库操作</li>
+</ol>
+<p>并发在哪里产生问题：</p>
+<ol>
+<li>“判断”：只要同时存在多个线程绕过这个限制，就会出现并发问题</li>
+</ol>
+<p>如何处理并发问题：“锁”</p>
+<ol>
+<li>悲观锁：全程阻塞，整个过程保证同时只有一个线程。</li>
+<li>乐观锁：阻塞不符合条件的线程。</li>
+<li>id锁：保证同时只有一个线程访问这个id。</li>
+</ol>
+<h2 id="订单超卖"><a href="#订单超卖" class="headerlink" title="订单超卖"></a>订单超卖</h2><p>场景描述：一共只有 100 份，却卖出了 110 份，这就是超卖。</p>
+<p>造成原因：高并发，一份的空隙被 10 个用户绕了过去，同时进行了操作。</p>
+<p>解决办法：</p>
+<ol>
+<li>全程加锁，限制同时只能有一份被一个用户操作，但是<strong>效率太低</strong>。</li>
+<li>乐观锁，只要没有超出限制，就允许同时操作，保证了效率和业务正常。</li>
+</ol>
+
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+    
+      
+
+    <span class="post-categories">
+      <i class="icon-categories"></i>
+        <a href="/categories/daily/">每日总结</a>
+    </span>
+    
+
+    
+    
+
+    <span class="post-tags">
+      <i class="icon-tags"></i>
+        <a href="/tags/Linux/">Linux</a><a href="/tags/并发/">并发</a><a href="/tags/lock/">锁</a><a href="/tags/订单超卖/">订单超卖</a>
+    </span>
+    
+
+    </div>
+
+    
+  </div>
+</article>
+
+
+
+  <article>
+
+  
+    
+    <h3 class="article-title"><a href="/2024/03/27/Linux-1/"><span>Linux学习第一天</span></a></h3>
+    
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2024/03/27/Linux-1/" rel="bookmark">
+        <time class="entry-date published" datetime="2024-03-27T11:41:17.000Z">
+          2024-03-27
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+        <h2 id="开关机"><a href="#开关机" class="headerlink" title="开关机"></a>开关机</h2><p><code>shutdown -h &lt;time&gt;</code> </p>
+<p>h: halt 停止</p>
+<p>这里的 time 可以是数字（分钟），也可以是时间（时:分），还可以是 now （等时间说明？）</p>
+<p><code>shutdown -r &lt;time&gt;</code></p>
+<p>r: reboot 重启</p>
+<p>time 同上方命令</p>
+<p><code>reboot</code> ：直接重启</p>
+<p><code>halt</code>、<code>poweroff</code>：关闭系统，等同于 <code>shutdown -h now</code></p>
+<p><code>sync</code> ：将内存数据同步到硬盘，关机重启前应执行此命令保证数据不被丢失。</p>
+<h2 id="目录管理"><a href="#目录管理" class="headerlink" title="目录管理"></a>目录管理</h2><h3 id="目录操作"><a href="#目录操作" class="headerlink" title="目录操作"></a><strong>目录操作</strong></h3><p><code>mkdir -p &lt;file&gt;</code> </p>
+<p>p: parent 父级</p>
+<p>创建目录，可以选择添加 p 参数创建多级目录</p>
+<p><code>rmdir -p &lt;file&gt;</code></p>
+<p>删除目录，可以选择添加 p 参数删除多级目录（目录不为空无法删除）</p>
+<p><code>rm -rfi &lt;file / path&gt;</code></p>
+<p>r: recursive 递归</p>
+<p>f: force 强制</p>
+<p>i: interactive 交互（询问是否删除）</p>
+<blockquote>
+<p>linux 中命令参数可以合并在一起写，所以写成了 -rfi</p>
+</blockquote>
+<p>删除文件或目录</p>
+<p><code>pwd</code>：print working directory 打印当前目录</p>
+<h3 id="列出目录内容"><a href="#列出目录内容" class="headerlink" title="列出目录内容"></a><strong>列出目录内容</strong></h3><p><code>ls -al</code> 列举目录内容</p>
+<p>a: all 全部</p>
+<p>l: long 长格式（详细信息：权限、属主、分组、大小、创建时间、名称）</p>
+<p><code>ll</code> 列出目录内详细，等同于 <code>ls -l</code></p>
+<h2 id="文件管理"><a href="#文件管理" class="headerlink" title="文件管理"></a>文件管理</h2><h3 id="权限管理"><a href="#权限管理" class="headerlink" title="权限管理"></a><strong>权限管理</strong></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-rwxr-xr-x. 2 root root   24 3月   7 11:13 nacos.txt</span><br><span class="line">drwxr-xr-x. 3 root root   59 3月  18 13:44 nginx</span><br></pre></td></tr></table></figure>
+
+<p><code>- rwx rwx rwx</code> 可以分为 4 组</p>
+<p>第一组：文件类型，- 表示这是一个可执行文件，d 表示目录，l 表示链接（软 &#x2F; 硬）</p>
+<p>第二、三、四组：当前用户、所属用户、分组用户可操作的文件权限</p>
+<p>第一个root：创建用户</p>
+<p>第二个root：分组</p>
+<p>r：读，w：写，x：执行 execute</p>
+<p><code>chgrp &lt;group&gt; &lt;file&gt;</code> 修改文件分组</p>
+<p><code>chmod (rwx)(rwx)(rwx) &lt;file&gt;</code> 修改文件对应当前、属主、分组的可操作权限</p>
+<p>这里的 rwx 分别用对应数字的累加来声明</p>
+<p>r：4，w：2，x：1</p>
+<blockquote>
+<p>为什么 r 是 4 ？</p>
+<p>因为如果是 3，会出现组合重复，r: 3 等同 wx: 3</p>
+</blockquote>
+<p>如 <code>chmod 775 file</code> </p>
+<p>表示当前用户权限：r+w+x &#x3D; 7</p>
+<p>表示创建用户权限：r+w+x &#x3D; 7</p>
+<p>表示分组用户权限：r+w+0 &#x3D; 5</p>
+<h3 id="文件查看"><a href="#文件查看" class="headerlink" title="文件查看"></a><strong>文件查看</strong></h3><p><code>cat</code> 从上往下打印文件内容，<code>tac</code> 倒序打印，cat反过来</p>
+<p><code>less、more</code> 分页显示文件内容</p>
+<p>less 区别于 more，less 可以上下翻页 “PageUp”，“PagesDown” 按键和上下单行移动 “ArrowUp”，“ArrowDown” 按键。</p>
+<p>操作：</p>
+<ul>
+<li>空格翻页</li>
+<li>回车显示下一行</li>
+<li>输入 &#x2F;xxx，查询 xxx ，<strong>less 才能查</strong>，n 向上搜索，N 向下搜索</li>
+<li>q 退出分页查看</li>
+</ul>
+<p><code>head / tail -n &lt;line&gt; &lt;file&gt;</code> 分别显示头尾 n 行</p>
+<p><code>nl &lt;file&gt;</code> 输出文件内容，并标注行号</p>
+
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+    
+      
+
+    <span class="post-categories">
+      <i class="icon-categories"></i>
+        <a href="/categories/Linux/">Linux</a>
+    </span>
+    
+
+    
+    
+
+    <span class="post-tags">
+      <i class="icon-tags"></i>
+        <a href="/tags/Linux/">Linux</a>
+    </span>
+    
+
+    </div>
+
+    
+  </div>
+</article>
+
+
+
+  <article>
+
+  
+    
+    <h3 class="article-title"><a href="/2024/03/25/Git-1/"><span>Git 文件状态梳理</span></a></h3>
+    
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2024/03/25/Git-1/" rel="bookmark">
+        <time class="entry-date published" datetime="2024-03-25T13:54:47.000Z">
+          2024-03-25
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+        <h2 id="文件状态"><a href="#文件状态" class="headerlink" title="文件状态"></a>文件状态</h2><p><img src="/assets/image-20240325104013093.png" alt="Git文件的四种状态"></p>
+<p>下面以新增 README.md 文件为例</p>
+<h3 id="Untracked"><a href="#Untracked" class="headerlink" title="Untracked"></a><strong>Untracked</strong></h3><p>未被 Git 跟踪的文件状态</p>
+<ol>
+<li>新创建</li>
+<li>从其他地方移动过来（复制 &#x2F; 剪切等）</li>
+</ol>
+<p><img src="/assets/image-20240325104023093.png" alt="image-20240325104023093"></p>
+<h3 id="Staged"><a href="#Staged" class="headerlink" title="Staged"></a><strong>Staged</strong></h3><p>使用 <code>git add &lt;file&gt;</code> 命令将文件加入暂存区，转化为 <code>Staged</code> 状态</p>
+<p><img src="/assets/image-20240325104341887.png" alt="image-20240325104341887"></p>
+<p>使用 <code>git rm --cached &lt;file&gt;</code> 可以将文件移出缓存区，重新变为 <code>Untracked</code> 状态</p>
+<p><img src="/assets/image-20240325104726863.png" alt="image-20240325104726863"></p>
+<p><strong>文件当前内容</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">123</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Modified"><a href="#Modified" class="headerlink" title="Modified"></a><strong>Modified</strong></h3><p>对 <code>Staged</code> 已经存入暂存区的文件进行修改，转化为 <code>Modified</code> 状态</p>
+<p><strong>文件修改后</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">123</span><br><span class="line">restore 丢弃的内容</span><br></pre></td></tr></table></figure>
+
+<p><img src="/assets/image-20240325105331466.png" alt="image-20240325105331466"></p>
+<p>可以看到和 <code>Untracked</code> 状态一样，被 Git 标红了</p>
+<p>意味着此时暂存区内该文件的内容还是 <code>123</code>，需要重新使用 <code>git add &lt;file&gt;</code> 命令将本次修改保存到 Git 中（更新 Git 的 diff 内容）。</p>
+<p><strong>后续命令</strong></p>
+<ul>
+<li><code>git restore &lt;file&gt;</code>，丢弃本次修改，恢复到当前暂存区存取的内容（最后一次被修改之前的状态）</li>
+<li><code>git checkout &lt;file&gt;</code> 等价于 restore</li>
+</ul>
+<p><strong>文件 restore 后</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">123</span><br></pre></td></tr></table></figure>
+
+<p><strong>应用场景</strong></p>
+<p>操作涉及 工作区 和 暂存区 两个区域。</p>
+<p>当工作到某个重要节点，你需要在这个节点上进行扩展，但是你又不确定这个扩展是否可行</p>
+<p>这时候就可以 “stage” 这个节点，然后继续修改，如果不可行就通过 <code>git restore &lt;file&gt;</code> 回到这个节点，丢弃掉所有修改内容。</p>
+<blockquote>
+<p>当然如果这个节点是重要且确定的，你可以直接 <code>git add &lt;file&gt;</code> &#x3D;&gt; <code>git commit</code> 将其提交到本次仓库中</p>
+</blockquote>
+<p><strong>提问</strong></p>
+<ol>
+<li>如果我 “stage” 了这次新的修改，原先的节点还能找到吗 :x:</li>
+</ol>
+<h3 id="UnModified"><a href="#UnModified" class="headerlink" title="UnModified"></a>UnModified</h3><p>将 <code>Staged</code> 状态的文件（暂存区的文件）通过 <code>git commit</code> 提交到本次仓库中，转化为 <code>Unmodified</code> 状态。</p>
+<p>为了后续追踪文件内容，添加了一行 commit 标志</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">123</span><br><span class="line"></span><br><span class="line">第一次commit</span><br></pre></td></tr></table></figure>
+
+<p><img src="/assets/image-20240325114403701.png" alt="image-20240325114403701"></p>
+<p>commit 提交后，该文件就加入本地仓库了，并输出了本次 commit 的 branch（master）和 refs（9db5ee9）。</p>
+<p>接下来继续对文件进行修改（工作区）、保存（暂存区）、提交（本地仓库），完成一整个流程。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">123</span><br><span class="line"></span><br><span class="line">第一次commit</span><br><span class="line"></span><br><span class="line">修改内容</span><br></pre></td></tr></table></figure>
+
+<p><img src="/assets/image-20240325115211160.png" alt="image-20240325115211160"></p>
+<h3 id="状态流程"><a href="#状态流程" class="headerlink" title="状态流程"></a><strong>状态流程</strong></h3><p><strong>新加入的文件</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// 首次加入</span><br><span class="line">Untracked =(add)=&gt; Staged =(self update)=&gt; Modified =(commit)=&gt; UnModified</span><br><span class="line">// 追踪更改</span><br><span class="line">=(self update)=&gt; Modified =(add)=&gt; Staged =(commit)=&gt; UnModified</span><br></pre></td></tr></table></figure>
+
+<p><strong>已追踪的文件</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// 追踪更改</span><br><span class="line">=(self update)=&gt; Modified =(add)=&gt; Staged =(commit)=&gt; UnModified</span><br></pre></td></tr></table></figure>
+
+<p>注意：未被追踪的文件，无论怎么修改都不会被 Git 管理为 Modified 文件</p>
+<p><img src="/assets/image-20240326000827982.png" alt="image-20240326000827982"></p>
+
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+    
+      
+
+    <span class="post-categories">
+      <i class="icon-categories"></i>
+        <a href="/categories/Git/">Git</a>
+    </span>
+    
+
+    
+    
+
+    <span class="post-tags">
+      <i class="icon-tags"></i>
+        <a href="/tags/Git/">Git</a>
+    </span>
+    
+
+    </div>
+
+    
+  </div>
+</article>
+
+
+
+
+<nav class="pagination">
+  
+  <a href="/" class="pagination-prev">上一页</a>
+  
+  
+</nav>
+    </main>
+
+    <footer class="site-footer">
+  <p class="site-info">
+    Proudly powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and
+    Theme by <a href="https://github.com/CodeDaraW/Hacker" target="_blank">Hacker</a>
+    </br>
+    
+    &copy; 2024 Apong
+    
+  </p>
+</footer>
+    
+    
+  </div>
+</div>
+</body>
+</html>

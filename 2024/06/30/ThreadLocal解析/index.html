@@ -1,0 +1,197 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>ThreadLocal解析 | Apong&#39;s Blog | 当你快坚持不住的时候，困难也快坚持不住了</title>
+
+  
+  <meta name="author" content="Apong">
+  
+
+  
+  <meta name="description" content="解释 Java 中 ThreadLocal 的作用、用法、原理。">
+  
+
+  
+  <meta name="keywords" content="博客, 知识分享, 开源">
+  
+
+  <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <meta property="og:title" content="ThreadLocal解析"/>
+
+  <meta property="og:site_name" content="Apong&#39;s Blog"/>
+
+  
+  <meta property="og:image" content="/favicon.ico"/>
+  
+
+  <link href="/favicon.ico" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="Apong&#39;s Blog" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+<div class="blog">
+  <div class="content">
+
+    <header>
+  <div class="site-branding">
+    <h1 class="site-title">
+      <a href="/">Apong&#39;s Blog</a>
+    </h1>
+    <p class="site-description">当你快坚持不住的时候，困难也快坚持不住了</p>
+  </div>
+  <nav class="site-navigation">
+    <ul>
+      
+        <li><a href="/">首页</a></li>
+      
+        <li><a href="/archives/">归档</a></li>
+      
+        <li><a href="/tags/">标签</a></li>
+      
+        <li><a href="/categories/">分类</a></li>
+      
+        <li><a href="/categories/daily/">每日总结</a></li>
+      
+        <li><a target="_blank" rel="noopener" href="https://github.com/blueapong">Github</a></li>
+      
+    </ul>
+  </nav>
+</header>
+
+    <main class="site-main posts-loop">
+    <article>
+
+  
+    
+    <h3 class="article-title"><span>ThreadLocal解析</span></h3>
+    
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2024/06/30/ThreadLocal解析/" rel="bookmark">
+        <time class="entry-date published" datetime="2024-06-29T16:00:00.000Z">
+          2024-06-30
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+        <h1 id="ThreadLocal-——-线程变量"><a href="#ThreadLocal-——-线程变量" class="headerlink" title="ThreadLocal —— 线程变量"></a>ThreadLocal —— 线程变量</h1><h2 id="作用"><a href="#作用" class="headerlink" title="作用"></a>作用</h2><p>创建一个在不同线程之间读写相互隔离的变量。</p>
+<p>大白话：同一个变量，在不同线程的环境下，访问和修改它的值都互不影响，不同线程允许拥有不同的值。</p>
+<span id="more"></span>
+
+<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><p>声明为一个静态的类属性。</p>
+<p>以存储 User 信息为例：</p>
+<p>提供方法</p>
+<ul>
+<li>saveUser 设置 User 信息</li>
+<li>getUser 获取 User 信息</li>
+<li>removeUser 移除 User 信息</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">UserHolder</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> ThreadLocal&lt;UserDTO&gt; tl = <span class="keyword">new</span> <span class="title class_">ThreadLocal</span>&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">saveUser</span><span class="params">(UserDTO user)</span>&#123;</span><br><span class="line">        tl.set(user);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> UserDTO <span class="title function_">getUser</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> tl.get();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">removeUser</span><span class="params">()</span>&#123;</span><br><span class="line">        tl.remove();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>ThreadLocal 对象内部的数据是由 ThreadLocalMap <strong>维护</strong>的，</p>
+<p>而每个 Thread 又有各自的 ThreadLocalMap。</p>
+<p>因此“表面上”线程共享的类属性变量，实际上在每个 Thread 中读写的对象并不是同一个。</p>
+<p>假设这有两个线程 A，B 操作一个线程变量 tl。</p>
+<p>在 A 线程中 tl 的值是 1。</p>
+<p>如果 B 线程想要修改它的值，就需要先找到<strong>当前 Thread</strong> 的 ThreadLocalMap，然后修改 map 中 tl 这个 key 所匹配的 value。</p>
+<h3 id="什么叫做维护呢？"><a href="#什么叫做维护呢？" class="headerlink" title="什么叫做维护呢？"></a>什么叫做维护呢？</h3><p>这里以上述的 tl 表示 ThreadLocal 实例，并贴出该类的源码。</p>
+<h4 id="set"><a href="#set" class="headerlink" title="set"></a>set</h4><p>当 tl 进行 set 操作时，以自身实例作为 key，存储对象作为 value，存入了 ThreadLocalMap 中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">set</span><span class="params">(T value)</span> &#123;</span><br><span class="line">    <span class="type">Thread</span> <span class="variable">t</span> <span class="operator">=</span> Thread.currentThread();</span><br><span class="line">    <span class="type">ThreadLocalMap</span> <span class="variable">map</span> <span class="operator">=</span> getMap(t);</span><br><span class="line">    <span class="keyword">if</span> (map != <span class="literal">null</span>) &#123;</span><br><span class="line">        map.set(<span class="built_in">this</span>, value);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        createMap(t, value);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="get"><a href="#get" class="headerlink" title="get"></a>get</h4><p>同理进行 get 操作时，以自身实例作为 key，索引 ThreadLocalMap 中的值。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> T <span class="title function_">get</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">Thread</span> <span class="variable">t</span> <span class="operator">=</span> Thread.currentThread();</span><br><span class="line">    <span class="type">ThreadLocalMap</span> <span class="variable">map</span> <span class="operator">=</span> getMap(t);</span><br><span class="line">    <span class="keyword">if</span> (map != <span class="literal">null</span>) &#123;</span><br><span class="line">        ThreadLocalMap.<span class="type">Entry</span> <span class="variable">e</span> <span class="operator">=</span> map.getEntry(<span class="built_in">this</span>);</span><br><span class="line">        <span class="keyword">if</span> (e != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="meta">@SuppressWarnings(&quot;unchecked&quot;)</span></span><br><span class="line">            <span class="type">T</span> <span class="variable">result</span> <span class="operator">=</span> (T)e.value;</span><br><span class="line">            <span class="keyword">return</span> result;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> setInitialValue();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="remove"><a href="#remove" class="headerlink" title="remove"></a>remove</h4><p>remove 操作也是如此，以自身实例为 key，移除这一对键值对。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">remove</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">ThreadLocalMap</span> <span class="variable">m</span> <span class="operator">=</span> getMap(Thread.currentThread());</span><br><span class="line">    <span class="keyword">if</span> (m != <span class="literal">null</span>) &#123;</span><br><span class="line">        m.remove(<span class="built_in">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="本质"><a href="#本质" class="headerlink" title="本质"></a>本质</h3><p>并不是 ThreadLocal 为每个线程提供了不同的变量副本，而是其借助不同线程中的 ThreadLocalMap 存储了当前线程的变量副本。</p>
+<h2 id="内存泄漏"><a href="#内存泄漏" class="headerlink" title="内存泄漏"></a>内存泄漏</h2><p><strong>内存泄漏：</strong>指程序中已分配的内存未能成功释放，导致可用内存逐渐减少的现象。</p>
+<p>为什么线程变量通常声明为一个静态类属性，而不是局部变量呢？</p>
+<p>因为 <strong>垃圾回收</strong> 机制。</p>
+<p>如果将 ThreadLocal 实例声明为一个局部变量，在作用域结束时，会回收掉这个变量引用，导致 ThreadLocalMap 中存储了一个 key 为 null 的键值对，无法进行访问，也不能主动销毁。</p>
+<p>从而发生内存泄漏。</p>
+<p><strong>疑问:question:</strong></p>
+<p>虽然引用被回收了，但是内存空间不会被释放吧，key 不至于为 null 吧？因为 map 的 key 保存了这个实例？</p>
+<p><strong>答：</strong></p>
+<p> Map 的 keys 保留了这个实例对象，所以这个 key 并不是 null；</p>
+<p>只不过丢失了对这个 key 的引用，无法主动的查询对应的值，但是可以通过 map 的 keys，一一返回 value。</p>
+<p>所以上述解释 <em>“导致 ThreadLocalMap 中存储了一个 key 为 null 的键值对”</em> 改为：<em>“导致 ThreadLocalMap 中存储了一个“消失的” key 的键值对”</em></p>
+<p><strong>上述解释仍存疑:question:</strong></p>
+<p>弱引用？和垃圾回收的关系？</p>
+
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+    
+      
+
+    <span class="post-categories">
+      <i class="icon-categories"></i>
+        <a href="/categories/Java/">Java</a>, <a href="/categories/Java/concurrent/">多线程</a>
+    </span>
+    
+
+    
+    
+
+    <span class="post-tags">
+      <i class="icon-tags"></i>
+        <a href="/tags/Java/">Java</a><a href="/tags/concurrent/">多线程</a>
+    </span>
+    
+
+    </div>
+
+    
+  </div>
+</article>
+
+  
+
+
+
+
+
+
+
+
+
+    </main>
+
+    <footer class="site-footer">
+  <p class="site-info">
+    Proudly powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and
+    Theme by <a href="https://github.com/CodeDaraW/Hacker" target="_blank">Hacker</a>
+    </br>
+    
+    &copy; 2024 Apong
+    
+  </p>
+</footer>
+    
+    
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>240506 | Apong&#39;s Blog | 当你快坚持不住的时候，困难也快坚持不住了</title>
+
+  
+  <meta name="author" content="Apong">
+  
+
+  
+  <meta name="description" content="今天深刻研究了下组件化的思想：业务分离。">
+  
+
+  
+  <meta name="keywords" content="博客, 知识分享, 开源">
+  
+
+  <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <meta property="og:title" content="240506"/>
+
+  <meta property="og:site_name" content="Apong&#39;s Blog"/>
+
+  
+  <meta property="og:image" content="/favicon.ico"/>
+  
+
+  <link href="/favicon.ico" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="Apong&#39;s Blog" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+<div class="blog">
+  <div class="content">
+
+    <header>
+  <div class="site-branding">
+    <h1 class="site-title">
+      <a href="/">Apong&#39;s Blog</a>
+    </h1>
+    <p class="site-description">当你快坚持不住的时候，困难也快坚持不住了</p>
+  </div>
+  <nav class="site-navigation">
+    <ul>
+      
+        <li><a href="/">首页</a></li>
+      
+        <li><a href="/archives/">归档</a></li>
+      
+        <li><a href="/tags/">标签</a></li>
+      
+        <li><a href="/categories/">分类</a></li>
+      
+        <li><a href="/categories/daily/">每日总结</a></li>
+      
+        <li><a target="_blank" rel="noopener" href="https://github.com/blueapong">Github</a></li>
+      
+    </ul>
+  </nav>
+</header>
+
+    <main class="site-main posts-loop">
+    <article>
+
+  
+    
+    <h3 class="article-title"><span>240506</span></h3>
+    
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2024/05/06/240506/" rel="bookmark">
+        <time class="entry-date published" datetime="2024-05-05T16:22:42.000Z">
+          2024-05-06
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+        <h2 id="not选择器"><a href="#not选择器" class="headerlink" title=":not选择器"></a>:not选择器</h2><p>用于选择非xx的元素，如 <code>.btn:not(:nth-child(1))</code> ，在btn类中选择非第一个子元素的其他元素。</p>
+<h2 id="Object-fromEntries"><a href="#Object-fromEntries" class="headerlink" title="Object.fromEntries"></a>Object.fromEntries</h2><p>通过传入以 <code>[key, value]</code> 结构为元素的数组，构造出一个整合该数组所有key-value的对象字面量</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> entries = [[<span class="string">&#x27;a&#x27;</span>, <span class="number">1</span>], [<span class="string">&#x27;b&#x27;</span>, <span class="number">2</span>]]</span><br><span class="line"><span class="keyword">let</span> obj = <span class="title class_">Object</span>.<span class="title function_">fromEntries</span>(entries)</span><br><span class="line"><span class="comment">// obj: &#123;a:1, b:2&#125;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="Object-keys"><a href="#Object-keys" class="headerlink" title="Object.keys"></a>Object.keys</h2><p>传入一个对象，以数组的形式返回其所有的key</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> obj = &#123;<span class="attr">a</span>:<span class="number">1</span>, <span class="attr">b</span>:<span class="number">2</span>&#125;</span><br><span class="line"><span class="keyword">let</span> keys = <span class="title class_">Object</span>.<span class="title function_">keys</span>(obj)</span><br><span class="line"><span class="comment">// keys: [a, b]</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="vue中click事件函数不传值"><a href="#vue中click事件函数不传值" class="headerlink" title="vue中click事件函数不传值"></a>vue中click事件函数不传值</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&lt;template&gt;</span><br><span class="line">	&lt;button @click=&quot;handleClick&quot;&gt;&lt;/button&gt;</span><br><span class="line">	&lt;button @click=&quot;handleClick(123)&quot;&gt;&lt;/button&gt;</span><br><span class="line">&lt;/template&gt;</span><br><span class="line">&lt;script&gt;</span><br><span class="line">export default &#123;</span><br><span class="line">    methods: &#123;</span><br><span class="line">        handleClick(param) &#123;</span><br><span class="line">            console.log(param)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+<p>相比于react直接传参会立即执行，vue允许声明处理函数时携带参数，因此 <code>handleClick(123)</code> 会输出123</p>
+<p>但是，对于这类原生事件<strong>click</strong>，即使声明时没有携带参数，也会默认传入一个事件参数event。</p>
+<p>所以 <code>handleClick</code> 这个事件点击后会输出event，而不是undefined。</p>
+<h2 id="ApacheEcharts的init方法（在vue中）"><a href="#ApacheEcharts的init方法（在vue中）" class="headerlink" title="ApacheEcharts的init方法（在vue中）"></a>ApacheEcharts的init方法（在vue中）</h2><p>设想：由于图形渲染需要事件，可不可以在created时期，各个属性都创建完成的时候，执行 init 方法呢？</p>
+<p>答案：不可以！</p>
+<p>原因：因为 init 方法是通过获取dom树上的节点进行再处理的，而created时期并没有渲染完真实dom。</p>
+<h2 id="el-form-item单个绑定rules属性"><a href="#el-form-item单个绑定rules属性" class="headerlink" title="el-form-item单个绑定rules属性"></a>el-form-item单个绑定rules属性</h2><p>直接绑定 rules 属性会显示红色<code>*</code>表示这个数据项需要通过验证，但是并不会真实生效。</p>
+<p>需要额外指定 prop 属性，因为 rules 本身是通过 el-form 中声明的 model 数据然后找到对应 prop 属性来对这个值进行校验的。</p>
+<p>如果不指定 prop，无法捕捉到这个数据项的值，当然无法进行数据验证。</p>
+<h2 id="如何将module数据绑定到vue模板"><a href="#如何将module数据绑定到vue模板" class="headerlink" title="如何将module数据绑定到vue模板"></a>如何将module数据绑定到vue模板</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line">import * as productStatus from &#x27;@/constants/product&#x27;</span><br><span class="line"></span><br><span class="line">export default &#123;</span><br><span class="line">  computed: &#123;</span><br><span class="line">    productStatus() &#123;</span><br><span class="line">      return productStatus</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+<p>最好绑定只读数据，如果让其可修改，会造成数据干扰。</p>
+<h2 id="如何将函数绑定到vue模板中"><a href="#如何将函数绑定到vue模板中" class="headerlink" title="如何将函数绑定到vue模板中"></a>如何将函数绑定到vue模板中</h2><p>在methods体内再声明就可以了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line">import &#123; getFormatTime &#125; from &#x27;@/utils/timeFormatter&#x27;</span><br><span class="line"></span><br><span class="line">export default &#123;</span><br><span class="line">  methods: &#123;</span><br><span class="line">    getFormatTime,</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="如何使用lodash"><a href="#如何使用lodash" class="headerlink" title="如何使用lodash"></a>如何使用lodash</h2><ol>
+<li>安装依赖</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install lodash</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>引入lodash</li>
+</ol>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> _ <span class="keyword">from</span> <span class="string">&quot;lodash&quot;</span></span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>使用</li>
+</ol>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">_.<span class="title function_">sort</span>([<span class="number">1</span>,<span class="number">2</span>], <span class="number">3</span>) <span class="comment">// [1,2,3]</span></span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+    
+      
+
+    <span class="post-categories">
+      <i class="icon-categories"></i>
+        <a href="/categories/Vue/">Vue</a>
+    </span>
+    
+
+    
+    
+
+    <span class="post-tags">
+      <i class="icon-tags"></i>
+        <a href="/tags/Vue/">Vue</a><a href="/tags/JS/">JS</a>
+    </span>
+    
+
+    </div>
+
+    
+  </div>
+</article>
+
+  
+
+
+
+
+
+
+
+
+
+    </main>
+
+    <footer class="site-footer">
+  <p class="site-info">
+    Proudly powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and
+    Theme by <a href="https://github.com/CodeDaraW/Hacker" target="_blank">Hacker</a>
+    </br>
+    
+    &copy; 2024 Apong
+    
+  </p>
+</footer>
+    
+    
+  </div>
+</div>
+</body>
+</html>
