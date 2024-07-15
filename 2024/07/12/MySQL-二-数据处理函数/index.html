@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.png">
+  <link rel="mask-icon" href="/images/favicon.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blueapong.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="在数据库操作中，除了需要查询数据， 有时候还需要对数据进行一些简单的处理， 用于优化数据显示效果等。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL(二) 数据处理函数">
+<meta property="og:url" content="https://blueapong.github.io/2024/07/12/MySQL-%E4%BA%8C-%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E5%87%BD%E6%95%B0/index.html">
+<meta property="og:site_name" content="Apong&#39;s Blog">
+<meta property="og:description" content="在数据库操作中，除了需要查询数据， 有时候还需要对数据进行一些简单的处理， 用于优化数据显示效果等。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blueapong.github.io/assets/image-20240712221917658.png">
+<meta property="og:image" content="https://blueapong.github.io/assets/image-20240712222000512.png">
+<meta property="og:image" content="https://blueapong.github.io/assets/image-20240714234512305.png">
+<meta property="og:image" content="https://blueapong.github.io/assets/image-20240714235253338.png">
+<meta property="article:published_time" content="2024-07-12T13:32:58.000Z">
+<meta property="article:modified_time" content="2024-07-15T02:00:17.046Z">
+<meta property="article:author" content="Apong">
+<meta property="article:tag" content="MySQL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blueapong.github.io/assets/image-20240712221917658.png">
+
+<link rel="canonical" href="https://blueapong.github.io/2024/07/12/MySQL-%E4%BA%8C-%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E5%87%BD%E6%95%B0/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>MySQL(二) 数据处理函数 | Apong's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Apong's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">当你快坚持不住的时候，困难也快坚持不住了</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-首页">
+
+    <a href="/" rel="section"><i class="fas fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-时间轴">
+
+    <a href="/archives/" rel="section"><i class="fas fa-archive fa-fw"></i>时间轴</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fas fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fas fa-folder-open fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-每日总结">
+
+    <a href="/categories/daily/" rel="section"><i class="fa fa-comment fa-fw"></i>每日总结</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://blueapong.github.io/2024/07/12/MySQL-%E4%BA%8C-%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E5%87%BD%E6%95%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Apong">
+      <meta itemprop="description" content="个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Apong's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MySQL(二) 数据处理函数
+        </h1>
+
+        <div class="post-meta">
+        <!--置顶功能-->
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-07-12 21:32:58" itemprop="dateCreated datePublished" datetime="2024-07-12T21:32:58+08:00">2024-07-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在数据库操作中，除了需要查询数据，</p>
+<p>有时候还需要对数据进行一些简单的处理，</p>
+<p>用于优化数据显示效果等。</p>
+<span id="more"></span>
+
+<p><strong>select的其他用法</strong></p>
+<p>select 除了可以选择列名外，还可以选择常量。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="number">3</span>; # <span class="number">3</span></span><br><span class="line"><span class="keyword">select</span> <span class="string">&#x27;hello world&#x27;</span>; # hello world</span><br></pre></td></tr></table></figure>
+
+<h1 id="upper、lower"><a href="#upper、lower" class="headerlink" title="upper、lower"></a>upper、lower</h1><p>分别用于将字符串转为大写和小写</p>
+<blockquote>
+<p>ucase, lcase 分别也可以转大小写。</p>
+</blockquote>
+<p><strong>应用</strong></p>
+<p>当不知道查询内容的大小写时，可以统一转为大写&#x2F;小写来匹配查询。</p>
+<p>在 Oracle 数据库中区分大小写，Linux 的 MySQL 也区分</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp <span class="keyword">where</span> <span class="built_in">upper</span>(ename)<span class="operator">=</span><span class="string">&#x27;smith&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h1 id="substr"><a href="#substr" class="headerlink" title="substr"></a>substr</h1><p>用于截取字符串</p>
+<p><strong>用法</strong></p>
+<ol>
+<li>substr(‘被截取的字符串’, 起始下标, 截取长度)</li>
+<li>substr(‘被截取的字符串’, 起始下标)</li>
+</ol>
+<blockquote>
+<p>如果不写截取长度，就直接截取到尾部。</p>
+</blockquote>
+<p><strong>截取规则：</strong></p>
+<ol>
+<li><p>下标从 1 开始，-1 表示右侧第一个。</p>
+</li>
+<li><p>截取的方向永远往右边截取。</p>
+</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> substr(<span class="string">&#x27;abcd&#x27;</span>, <span class="number">-1</span>, <span class="number">2</span>); # d</span><br></pre></td></tr></table></figure>
+
+<p>上述 sql 只能得到 ‘d’，而不是 ‘cd’</p>
+<p><strong>应用</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp <span class="keyword">where</span> substr(ename, <span class="number">2</span>, <span class="number">1</span>) <span class="operator">=</span> <span class="string">&#x27;A&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>选择 ename 第二个字符是 A 的行。</p>
+<h1 id="length、char-length"><a href="#length、char-length" class="headerlink" title="length、char_length"></a>length、char_length</h1><p>length 用于统计字符串的字节数</p>
+<p>char_length 用于统计字符数</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> length(<span class="string">&#x27;你好&#x27;</span>); # <span class="number">6</span></span><br><span class="line"><span class="keyword">select</span> <span class="keyword">char_length</span>(<span class="string">&#x27;你好&#x27;</span>); # <span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="concat"><a href="#concat" class="headerlink" title="concat"></a>concat</h1><p>用于拼接字符串，可以传入任意个参数。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> concat(<span class="string">&#x27;hello &#x27;</span>, <span class="string">&#x27;world&#x27;</span>); # hello world</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>mysql8之前可以采用 || 进行拼接。</p>
+<p>‘hello ‘ || ‘world’ &#x3D;&gt; ‘hello world’</p>
+</blockquote>
+<h1 id="trim"><a href="#trim" class="headerlink" title="trim"></a>trim</h1><p>去除字符串前后空白字符。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="built_in">trim</span>(<span class="string">&#x27;  a  b  c  &#x27;</span>);</span><br><span class="line"># a  b  c</span><br></pre></td></tr></table></figure>
+
+<p><strong>扩展</strong></p>
+<p>leading</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="built_in">trim</span>(<span class="keyword">leading</span> <span class="string">&#x27;0&#x27;</span> <span class="keyword">from</span> <span class="string">&#x27;000111&#x27;</span>);</span><br><span class="line"># <span class="number">111</span></span><br></pre></td></tr></table></figure>
+
+<p>去除前面的 0 字符。</p>
+<p>trailing</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="built_in">trim</span>(<span class="keyword">trailing</span> <span class="string">&#x27;0&#x27;</span> <span class="keyword">from</span> <span class="string">&#x27;111000&#x27;</span>);</span><br><span class="line"># <span class="number">111</span></span><br></pre></td></tr></table></figure>
+
+<p>去除后面的 0 字符</p>
+<p>both</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="built_in">trim</span>(<span class="keyword">both</span> <span class="string">&#x27;x&#x27;</span> <span class="keyword">from</span> <span class="string">&#x27;xx111xx&#x27;</span>);</span><br><span class="line"># <span class="number">111</span></span><br></pre></td></tr></table></figure>
+
+<p>去除前后的 x 字符</p>
+<h1 id="rand"><a href="#rand" class="headerlink" title="rand()"></a>rand()</h1><p>生成 0 到 1 之间的随机浮点数。</p>
+<p>还有一种写法：rand(x)</p>
+<p>通过传入一个值，保留本次随机数的值。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> rand(<span class="number">1</span>); # <span class="number">0.918204912</span></span><br><span class="line"><span class="keyword">select</span> rand(<span class="number">1</span>); # <span class="number">0.918204912</span></span><br></pre></td></tr></table></figure>
+
+<p>这个 x 就相当于一个 key，每次获取同样的 x，得到的值都是一样的。</p>
+<blockquote>
+<p>这个 x 应该是“种子”吧，如果种子相同得到的结果自然是一样的。</p>
+</blockquote>
+<h1 id="round-x"><a href="#round-x" class="headerlink" title="round(x)"></a>round(x)</h1><p>四舍五入</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> round(<span class="number">3.5</span>); # <span class="number">4</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>指定保留的小数位</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> round(<span class="number">3.63</span>, <span class="number">1</span>); #<span class="number">3.6</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="truncate-x-y"><a href="#truncate-x-y" class="headerlink" title="truncate(x, y)"></a>truncate(x, y)</h1><p>只保留 y 个小数，剩下小数位舍弃</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">truncate</span>(<span class="number">3.6666</span>, <span class="number">1</span>); # <span class="number">3.6</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="ceil-x-、floor-x"><a href="#ceil-x-、floor-x" class="headerlink" title="ceil(x)、floor(x)"></a>ceil(x)、floor(x)</h1><p>ceil：向上取整</p>
+<p>floor：向下取整</p>
+<blockquote>
+<p>忽略四舍五入</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="built_in">ceil</span>(<span class="number">4.7</span>); # <span class="number">5</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="built_in">floor</span>(<span class="number">4.7</span>); # <span class="number">4</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="空处理"><a href="#空处理" class="headerlink" title="空处理"></a>空处理</h1><p>在 MySQL 和 Oracle 中，任何和 NULL 运算的结果都是 NULL；</p>
+<p><strong><code>ifnull(x, y)</code></strong></p>
+<p>如果 x 为 NULL，就用 y 代替</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> ename, sal, ((sal <span class="operator">+</span> ifnull(comm, <span class="number">0</span>)) <span class="operator">*</span> <span class="number">12</span>) <span class="keyword">as</span> year_sal <span class="keyword">from</span> emp;</span><br></pre></td></tr></table></figure>
+
+<p>当 comm 为空时（员工没有津贴时），统一用 0 代替，避免运算结果为 NULL。</p>
+<h1 id="获取当前-datetime"><a href="#获取当前-datetime" class="headerlink" title="获取当前 datetime"></a>获取当前 datetime</h1><p><code>now()</code></p>
+<p>获取当前时间（select 执行的时间）</p>
+<p><img src="/assets/image-20240712221917658.png" alt="image-20240712221917658"></p>
+<p><code>sysdate()</code></p>
+<p>获取该函数执行的时间</p>
+<p><img src="/assets/image-20240712222000512.png" alt="image-20240712222000512"></p>
+<blockquote>
+<p>底层应该是 now 直接被转化为当前时间，而 sysdate 按照程序执行顺序获取时间。</p>
+</blockquote>
+<h1 id="获取当前-date-time"><a href="#获取当前-date-time" class="headerlink" title="获取当前 date&#x2F;time"></a>获取当前 date&#x2F;time</h1><p><code>current_date()</code> 获取当前日期</p>
+<p><code>current_time()</code> 获取当前时间</p>
+<blockquote>
+<p>可以省略括号()</p>
+</blockquote>
+<h1 id="获取单独的年月日时分秒"><a href="#获取单独的年月日时分秒" class="headerlink" title="获取单独的年月日时分秒"></a>获取单独的年月日时分秒</h1><p><code>year(时间)</code></p>
+<p><code>month(时间)</code></p>
+<p><code>day(时间)</code></p>
+<p><code>hour(时间)</code></p>
+<p><code>minute(时间)</code></p>
+<p><code>second(时间)</code></p>
+<p>这里的时间可以是 now()，或者符合日期格式的字符串。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">year</span>(<span class="string">&#x27;2024-07-12 22:26:31&#x27;</span>);</span><br><span class="line"># <span class="number">2024</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="date-add"><a href="#date-add" class="headerlink" title="date_add"></a>date_add</h1><p>用于日期时间的运算</p>
+<p>语法格式：</p>
+<p><code>date_add(日期，interval expr 单位)</code></p>
+<p>例如：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> date_add(<span class="string">&#x27;2020-10-14&#x27;</span>, <span class="type">interval</span> <span class="number">3</span> <span class="keyword">day</span>);</span><br><span class="line"># <span class="number">2020</span><span class="number">-10</span><span class="number">-17</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>只提供“日期”，可以用“时分秒”等次级单位来增减间隔。</p>
+<p>但是如果只提供“时分秒”，就无法用上一级的单位“年月日”来增减间隔了。</p>
+<p>运算向下兼容。</p>
+</blockquote>
+<p><strong>参数介绍</strong></p>
+<p>日期：一个日期类型的数据或字符串</p>
+<p>interval：固定写法，关键字</p>
+<p>expr：指定一个具体的间隔量</p>
+<blockquote>
+<p>可以为负数，效果和 date_sub 一致，表示往后退。</p>
+</blockquote>
+<p>单位：</p>
+<ul>
+<li>年月日</li>
+<li>时分秒</li>
+<li>microsecond 微妙</li>
+<li>week 周</li>
+<li>quarter 一个季度（3个月）</li>
+</ul>
+<p><strong>复合单位</strong></p>
+<p>两个单位通过下划线组合在一起。</p>
+<p>例如：</p>
+<ul>
+<li>year_month</li>
+<li>day_hour</li>
+<li>day_minute</li>
+<li>day_second</li>
+</ul>
+<blockquote>
+<p>没有 month_day，不知道为什么。。</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> date_add(<span class="string">&#x27;2020-10-14&#x27;</span>, <span class="type">interval</span> <span class="string">&#x27;1,1&#x27;</span> year_month);</span><br><span class="line"># <span class="number">2021</span><span class="number">-11</span><span class="number">-14</span></span><br></pre></td></tr></table></figure>
+
+<p>注意：expr 需用引号包裹，表示一个表达式。</p>
+<h2 id="date-format"><a href="#date-format" class="headerlink" title="date_format"></a>date_format</h2><p>用于日期格式化</p>
+<p><strong>语法格式：</strong></p>
+<p><code>date_format(日期, 格式字符串)</code></p>
+<p>举例</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> date_format(now(), <span class="string">&#x27;%y-%m-%d %H:%i:%s&#x27;</span>);</span><br><span class="line"># <span class="number">24</span><span class="number">-07</span><span class="number">-14</span> <span class="number">23</span>:<span class="number">28</span>:<span class="number">11</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>参数介绍</strong></p>
+<p>日期：可以是日期类型数据或字符串</p>
+<p>格式字符串：由“%”+代表年月日时间的字符，和其他分隔字符组成。</p>
+<p><strong>日期字符：</strong></p>
+<ul>
+<li>Y &#x2F; y：Y：四位完整的年份，y：完整年份的后两位数。</li>
+<li>m：月份</li>
+<li>d：日</li>
+<li>H：小时</li>
+<li>i：分钟</li>
+<li>s：秒</li>
+</ul>
+<h2 id="str-to-date"><a href="#str-to-date" class="headerlink" title="str_to_date"></a>str_to_date</h2><p>将字符串转为日期</p>
+<p><strong>语法格式：</strong></p>
+<p><code>str_to_date(日期, 格式字符串)</code></p>
+<p>格式字符串与 <code>date_format</code> 一致。</p>
+<p><strong>例如：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_student(name, birth) <span class="keyword">values</span>(<span class="string">&#x27;lisi&#x27;</span>, str_to_date(<span class="string">&#x27;10/01/1999&#x27;</span>, <span class="string">&#x27;%m/%d/%Y&#x27;</span>));</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>或者直接输入遵循默认日期格式的字符串（%y-%m-%d %H:%i:%s）。</p>
+</blockquote>
+<h2 id="dayofweek-dayofmonth-dayofyear"><a href="#dayofweek-dayofmonth-dayofyear" class="headerlink" title="dayofweek, dayofmonth, dayofyear"></a>dayofweek, dayofmonth, dayofyear</h2><p>分别给出<strong>目标日期</strong>对应一个星期，一个月，一年中的<strong>哪一天</strong></p>
+<p><strong>语法格式：</strong></p>
+<p><code>dayofweek(日期)</code></p>
+<p>同，可以是日期类型数据或者字符串。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> dayofweek(now());</span><br><span class="line"><span class="keyword">select</span> dayofmonth(now());</span><br><span class="line"><span class="keyword">select</span> dayofyear(now());</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注：<strong>周日</strong>是一周的第一天</p>
+</blockquote>
+<h2 id="last-day"><a href="#last-day" class="headerlink" title="last_day"></a>last_day</h2><p>给出当前月份的最后一天的日期。</p>
+<p><strong>语法格式：</strong></p>
+<p><code>last_day(日期)</code></p>
+<p>同，可以是日期类型数据或者字符串。</p>
+<h2 id="datediff-timediff"><a href="#datediff-timediff" class="headerlink" title="datediff, timediff"></a>datediff, timediff</h2><p><strong>datediff：</strong>显示两个日期相差的天数。</p>
+<p><strong>timediff：</strong>求出两个日期相差的小时数，以时:分:秒的形式显示。</p>
+<p><strong>语法格式：</strong></p>
+<p><code>datediff(日期1, 日期2)</code></p>
+<p><code>timediff(日期1, 日期2)</code></p>
+<p><strong>例如：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> datediff(<span class="string">&#x27;2000-10-10 10:10:10&#x27;</span>, <span class="string">&#x27;2000-10-9 10:10:10&#x27;</span>);</span><br><span class="line"># <span class="number">1</span></span><br><span class="line"><span class="keyword">select</span> timediff(<span class="string">&#x27;2000-10-10 10:10:10&#x27;</span>, <span class="string">&#x27;2000-10-9 10:10:10&#x27;</span>);</span><br><span class="line"># <span class="number">24</span>:<span class="number">00</span>:<span class="number">00</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>结果是以日期1比日期2晚 xx 时间计算的，前者时间晚于后者，结果为正数，反之为负数。</p>
+</blockquote>
+<h2 id="if"><a href="#if" class="headerlink" title="if"></a>if</h2><p>类似 Java 中的三目运算符。</p>
+<p><strong>语法格式：</strong></p>
+<p><code>if(条件, x, y)</code></p>
+<p>条件符合返回 x，反之返回 y。</p>
+<p><strong>例如：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> if(<span class="number">1</span><span class="operator">&lt;</span><span class="number">2</span>, <span class="number">1</span>, <span class="number">2</span>); # <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>支持嵌套运算</strong></p>
+<p>当 job 为 SALESMAN 时薪水乘以 1.1 倍，为 MANAGER 时薪水乘以 2 倍，请给出结果。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> sal, job, if(job<span class="operator">=</span><span class="string">&#x27;SALESMAN&#x27;</span>, sal<span class="operator">*</span><span class="number">1.1</span>, if(job<span class="operator">=</span><span class="string">&#x27;MANAGER&#x27;</span>, sal<span class="operator">*</span><span class="number">2</span>, sal)) <span class="keyword">as</span> new_sal <span class="keyword">from</span> emp;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/assets/image-20240714234512305.png" alt="image-20240714234512305"></p>
+<h2 id="case…when…then…else…end"><a href="#case…when…then…else…end" class="headerlink" title="case…when…then…else…end"></a><strong>case…when…then…else…end</strong></h2><p>类似 Java 中的 switch</p>
+<p><strong>语法格式：</strong></p>
+<p><code>case 变量 when 匹配值 then 结果 else 结果 end</code></p>
+<p><strong>例如：</strong>（修改 if 嵌套）</p>
+<p>:x:错误写法</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">select sal, job, (case job</span><br><span class="line">when job=&#x27;SALESMAN&#x27; then sal*1.1</span><br><span class="line">when job=&#x27;MANAGER&#x27; then sal*2</span><br><span class="line">else sal end) as new_sal</span><br><span class="line">from emp;</span><br></pre></td></tr></table></figure>
+
+<p>:question: 为什么写成 job&#x3D;’xxx’ 反而是 manager 的薪水乘以 1.1，salesman 的薪水乘以 2 了。</p>
+<p>正确写法</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> sal, job, (<span class="keyword">case</span> job</span><br><span class="line"><span class="keyword">when</span> <span class="string">&#x27;SALESMAN&#x27;</span> <span class="keyword">then</span> sal<span class="operator">*</span><span class="number">1.1</span></span><br><span class="line"><span class="keyword">when</span> <span class="string">&#x27;MANAGER&#x27;</span> <span class="keyword">then</span> sal<span class="operator">*</span><span class="number">2</span></span><br><span class="line"><span class="keyword">else</span> sal <span class="keyword">end</span>) <span class="keyword">as</span> new_sal</span><br><span class="line"><span class="keyword">from</span> emp;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/assets/image-20240714235253338.png" alt="image-20240714235253338"></p>
+<p>结果和 if 嵌套写法一致。</p>
+<blockquote>
+<p>建议先写好模板，然后一个一个条件填入</p>
+</blockquote>
+<h2 id="cast"><a href="#cast" class="headerlink" title="cast"></a>cast</h2><p>用于类型转换</p>
+<p><strong>语法格式：</strong></p>
+<p><code>cast(值 as 数据类型)</code></p>
+<p><strong>数据类型：</strong></p>
+<ul>
+<li>date：日期</li>
+<li>time：时间</li>
+<li>datetime：日期时间</li>
+<li>signed：有符号的 int 类型</li>
+<li>char：char(字符长度)，字符。</li>
+<li>decimal：decimal(有效数字位，保留小数位)，浮点数。</li>
+</ul>
+<blockquote>
+<p>有效数字位包括小数位。</p>
+<p>转化为 decimal 时如果指定的实际值超过了有效数字位，</p>
+<p>会返回要求有效数字位的最大值。</p>
+<p>如：将 ‘123.456’ 转为 decimal(3, 1) &#x3D;&gt; 99.9</p>
+</blockquote>
+<p><strong>例如：</strong>将字符串转为浮点数</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="built_in">cast</span>(<span class="string">&#x27;000123.456&#x27;</span> <span class="keyword">as</span> <span class="type">decimal</span>(<span class="number">4</span>,<span class="number">1</span>));</span><br><span class="line"># <span class="number">123.5</span> 四舍五入</span><br></pre></td></tr></table></figure>
+
+<h2 id="md5"><a href="#md5" class="headerlink" title="md5"></a>md5</h2><p>单向加密算法，结果是一个固定长度 32 位的字符串。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/MySQL/" rel="tag"><i class="fa fa-tag"></i> MySQL</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/07/09/JMeter%E6%B5%8B%E8%AF%95%E5%A4%9A%E4%BA%BA%E5%B9%B6%E5%8F%91%E6%93%8D%E4%BD%9C/" rel="prev" title="JMeter 测试教程">
+      <i class="fa fa-chevron-left"></i> JMeter 测试教程
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/07/13/2024-7-13/" rel="next" title="每日总结 day1">
+      每日总结 day1 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#upper%E3%80%81lower"><span class="nav-number">1.</span> <span class="nav-text">upper、lower</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#substr"><span class="nav-number">2.</span> <span class="nav-text">substr</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#length%E3%80%81char-length"><span class="nav-number">3.</span> <span class="nav-text">length、char_length</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#concat"><span class="nav-number">4.</span> <span class="nav-text">concat</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#trim"><span class="nav-number">5.</span> <span class="nav-text">trim</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#rand"><span class="nav-number">6.</span> <span class="nav-text">rand()</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#round-x"><span class="nav-number">7.</span> <span class="nav-text">round(x)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#truncate-x-y"><span class="nav-number">8.</span> <span class="nav-text">truncate(x, y)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ceil-x-%E3%80%81floor-x"><span class="nav-number">9.</span> <span class="nav-text">ceil(x)、floor(x)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%A9%BA%E5%A4%84%E7%90%86"><span class="nav-number">10.</span> <span class="nav-text">空处理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E5%BD%93%E5%89%8D-datetime"><span class="nav-number">11.</span> <span class="nav-text">获取当前 datetime</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E5%BD%93%E5%89%8D-date-time"><span class="nav-number">12.</span> <span class="nav-text">获取当前 date&#x2F;time</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E5%8D%95%E7%8B%AC%E7%9A%84%E5%B9%B4%E6%9C%88%E6%97%A5%E6%97%B6%E5%88%86%E7%A7%92"><span class="nav-number">13.</span> <span class="nav-text">获取单独的年月日时分秒</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#date-add"><span class="nav-number">14.</span> <span class="nav-text">date_add</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#date-format"><span class="nav-number">14.1.</span> <span class="nav-text">date_format</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#str-to-date"><span class="nav-number">14.2.</span> <span class="nav-text">str_to_date</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dayofweek-dayofmonth-dayofyear"><span class="nav-number">14.3.</span> <span class="nav-text">dayofweek, dayofmonth, dayofyear</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#last-day"><span class="nav-number">14.4.</span> <span class="nav-text">last_day</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#datediff-timediff"><span class="nav-number">14.5.</span> <span class="nav-text">datediff, timediff</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#if"><span class="nav-number">14.6.</span> <span class="nav-text">if</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#case%E2%80%A6when%E2%80%A6then%E2%80%A6else%E2%80%A6end"><span class="nav-number">14.7.</span> <span class="nav-text">case…when…then…else…end</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cast"><span class="nav-number">14.8.</span> <span class="nav-text">cast</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#md5"><span class="nav-number">14.9.</span> <span class="nav-text">md5</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Apong</p>
+  <div class="site-description" itemprop="description">个人博客</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">35</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/BlueApong" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;BlueApong" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Apong</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

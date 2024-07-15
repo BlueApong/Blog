@@ -58,24 +58,568 @@
       </tags>
   </entry>
   <entry>
-    <title>伙伴匹配系统第二天</title>
-    <url>/2024/05/09/240509/</url>
-    <content><![CDATA[<h1 id="两道算法题"><a href="#两道算法题" class="headerlink" title="两道算法题"></a>两道算法题</h1><h3 id="交叉点"><a href="#交叉点" class="headerlink" title="交叉点"></a>交叉点</h3><h1 id="项目"><a href="#项目" class="headerlink" title="项目"></a>项目</h1><h3 id="MyBatis-连表查询映射"><a href="#MyBatis-连表查询映射" class="headerlink" title="MyBatis 连表查询映射"></a>MyBatis 连表查询映射</h3><p>别名，</p>
-<h3 id="拼接-Wrapper-条件SQL"><a href="#拼接-Wrapper-条件SQL" class="headerlink" title="拼接 Wrapper 条件SQL"></a>拼接 Wrapper 条件SQL</h3><p>ew.customSqlSegment</p>
-<h3 id="复杂查询检验SQL"><a href="#复杂查询检验SQL" class="headerlink" title="复杂查询检验SQL"></a>复杂查询检验SQL</h3><ol>
-<li>传参：teamId, userId, maxNum</li>
-<li>team中是否已存在</li>
-<li>队伍是否已满员</li>
-<li>插入用户</li>
+    <title>每日总结 day2</title>
+    <url>/2024/07/14/2024-7-14/</url>
+    <content><![CDATA[<h2 id="算法题"><a href="#算法题" class="headerlink" title="算法题"></a>算法题</h2><p>经过三道题，近乎两小时的洗礼。</p>
+<p>我似乎明白了双指针的精髓。</p>
+<p>双指针，双指针，双：一定会出现两者的相互关系。</p>
+<p>而借助两者关系就能让两者相互“运动”，从而可以尽量把 O(n^2^) 的时间缩短至 O(n)。</p>
+<h3 id="盛最多水的容器"><a href="#盛最多水的容器" class="headerlink" title="盛最多水的容器"></a>盛最多水的容器</h3><p>给定一个 heights 数组，索引代表 x 轴上的点，每一个值代表这个点的高度（y）。</p>
+<p>尝试找到两个点之间构成的容器（矩形），能形成的最大面积。</p>
+<p><strong>关键点：木桶效应，容量是由最短的边决定的。</strong></p>
+<p><strong>解题思路：</strong></p>
+<ol>
+<li>面积由 x, y 两者决定，因此首先定义双指针指向左右边界，使得 x 最大。</li>
+<li>其次就到了遍历求解过程了：如何让 x 缩减的同时，y 能尽量增大。<ol>
+<li>假设选定了两条边分为位于 a, b 点，距离为 t，且 a &lt; b；</li>
+<li>如果移动 b，最大面积绝对不会超过 a * t，所以关键在于最短边；</li>
+<li>只要每次移动短的那一边，就能尽可能让结果增大，以此减少遍历次数。</li>
+</ol>
+</li>
+<li>同时由于容器两边肯定要不能重合或反着计算对称的结果，应确保 a &lt; b；</li>
+</ol>
+<p><strong>再优化</strong></p>
+<p>再遍历次数无法减少的情况下，可以对计算次数进行简化。</p>
+<p>记录最短边，只要移动过后的值还 &lt;&#x3D; 最短边，就一直移动无需计算。</p>
+<h3 id="三数之和"><a href="#三数之和" class="headerlink" title="三数之和"></a><strong>三数之和</strong></h3><p>给定一个 nums 数组，要求找出位置互不相同的三个数，使其满足 i + j + k &#x3D; 0。</p>
+<p><strong>解题思路：</strong> </p>
+<p>首先为了避免三个在三三遍历时出现一个尾，一个头重复使用的情况，应对数组进行排序，然后有序遍历。</p>
+<p>找出两者关系，三个数，两者关系？？？</p>
+<p><strong>i + j + k &#x3D; 0 可以转化为 j + k &#x3D; -i</strong></p>
+<p>将 i, j, k 分别看做三个数，普通思路是直接三层遍历 O(n^3^)，</p>
+<p>但是当第一层遍历时，i 的值在某一个刻是<strong>确定的</strong>。</p>
+<p>因此第 2 和 3 层遍历是有关系的。</p>
+<p>要想保证 i 不变，需要一层增加，一层减少。</p>
+<p>由于数组时有序且递增的，</p>
+<p>只需要在第二层递增遍历时，同时让第三层递减遍历即可，这样就减少了一层时间复杂度。</p>
+<h2 id="Java-八股"><a href="#Java-八股" class="headerlink" title="Java 八股"></a>Java 八股</h2><h3 id="Java的特点"><a href="#Java的特点" class="headerlink" title="Java的特点"></a>Java的特点</h3><p>面向对象、平台无关、多线程、可靠性、安全、高效。</p>
+<h3 id="Java：“编译与解释并存”"><a href="#Java：“编译与解释并存”" class="headerlink" title="Java：“编译与解释并存”"></a>Java：“编译与解释并存”</h3><p>java代码 -&gt; 字节码 -&gt; 机器码</p>
+<h3 id="基本类型和包装类型的区别"><a href="#基本类型和包装类型的区别" class="headerlink" title="基本类型和包装类型的区别"></a>基本类型和包装类型的区别</h3><ol>
+<li>用途</li>
+<li>存储方式</li>
+<li>占用空间</li>
+<li>默认值</li>
+<li>比较方式</li>
+</ol>
+<h3 id="包装类型的缓存机制"><a href="#包装类型的缓存机制" class="headerlink" title="包装类型的缓存机制"></a>包装类型的缓存机制</h3><p>new 和 自动装箱</p>
+<h3 id="包装类的装箱和拆箱的本质"><a href="#包装类的装箱和拆箱的本质" class="headerlink" title="包装类的装箱和拆箱的本质"></a>包装类的装箱和拆箱的本质</h3><p>valueOf  intValue</p>
+<h3 id="如何解决浮点数运算精度丢失问题"><a href="#如何解决浮点数运算精度丢失问题" class="headerlink" title="如何解决浮点数运算精度丢失问题"></a>如何解决浮点数运算精度丢失问题</h3><p>BigDecimal 字符数组</p>
+<h3 id="超过-long-长度的整型该如何表示"><a href="#超过-long-长度的整型该如何表示" class="headerlink" title="超过 long 长度的整型该如何表示"></a>超过 long 长度的整型该如何表示</h3><p>BigInteger</p>
+<h3 id="成员变量和局部变量的区别"><a href="#成员变量和局部变量的区别" class="headerlink" title="成员变量和局部变量的区别"></a>成员变量和局部变量的区别</h3><p>语法形式：访问修饰符，static</p>
+<p>存储方式：堆，栈</p>
+<p>生存时间：实例创建，局部作用域</p>
+<p>默认值</p>
+<blockquote>
+<p>为什么成员变量有默认值</p>
+</blockquote>
+<h3 id="字符型常量和字符串常量的区别？"><a href="#字符型常量和字符串常量的区别？" class="headerlink" title="字符型常量和字符串常量的区别？"></a>字符型常量和字符串常量的区别？</h3><p>表示形式：</p>
+<p>含义：</p>
+<p>内存大小：</p>
+<h3 id="重写父类方法的要求"><a href="#重写父类方法的要求" class="headerlink" title="重写父类方法的要求"></a>重写父类方法的要求</h3><p>返回值类型，抛出异常，访问修饰符（向上转型）</p>
+<h3 id="可变长参数-Java5"><a href="#可变长参数-Java5" class="headerlink" title="可变长参数 Java5"></a>可变长参数 Java5</h3><p>声明位置？</p>
+<p>遇上方法重载？优先级低</p>
+<h3 id="面向过程性能比面向对象高？"><a href="#面向过程性能比面向对象高？" class="headerlink" title="面向过程性能比面向对象高？"></a>面向过程性能比面向对象高？</h3><p>c &#x2F; C++, Java?</p>
+<h3 id="面向对象三大特征"><a href="#面向对象三大特征" class="headerlink" title="面向对象三大特征"></a>面向对象三大特征</h3><p>封装</p>
+<p>集成</p>
+<p>多态</p>
+<h3 id="浅拷贝、深拷贝、引用拷贝"><a href="#浅拷贝、深拷贝、引用拷贝" class="headerlink" title="浅拷贝、深拷贝、引用拷贝"></a>浅拷贝、深拷贝、引用拷贝</h3><p>一层</p>
+<p>完全</p>
+<p>地址</p>
+<h3 id="与equals方法的区别"><a href="#与equals方法的区别" class="headerlink" title="&#x3D;&#x3D;与equals方法的区别"></a>&#x3D;&#x3D;与equals方法的区别</h3><p>Object默认的equals</p>
+<h3 id="为什么重写equals必须重写hashcode方法？"><a href="#为什么重写equals必须重写hashcode方法？" class="headerlink" title="为什么重写equals必须重写hashcode方法？"></a>为什么重写equals必须重写hashcode方法？</h3><p>因为相等的对象hashcode必须一致，否则hashmap会出现相同的key值的情况</p>
+]]></content>
+      <categories>
+        <category>每日总结</category>
+      </categories>
+      <tags>
+        <tag>MySQL</tag>
+        <tag>算法</tag>
+        <tag>八股</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>每日总结 day1</title>
+    <url>/2024/07/13/2024-7-13/</url>
+    <content><![CDATA[<p>在此立个 Flag：遵循我的每日安排！并且坚持 21 天！</p>
+<blockquote>
+<p>期间中断不能超过 1 天，避免意外情况。</p>
+</blockquote>
+<p>失败惩罚：一个星期不许进行任何娱乐活动！</p>
+<hr>
+<h2 id="算法题"><a href="#算法题" class="headerlink" title="算法题"></a>算法题</h2><p>:happy: 今天悟出来的做题经验：</p>
+<ol>
+<li>先根据题意，写出最简单的、最能想得到的思路。</li>
+<li>然后把思路转变为代码，并且额外留意区间的临界点。</li>
+</ol>
+<blockquote>
+<p>临界点：除一般情况外，代码逻辑并不能正确执行的某个状态。</p>
+</blockquote>
+<ol start="3">
+<li>再根据题目标签（涉及的数据结构）和题目要求，一步一步的优化代码。</li>
+</ol>
+<h3 id="链表指定区间反转"><a href="#链表指定区间反转" class="headerlink" title="链表指定区间反转"></a><strong>链表指定区间反转</strong></h3><p>给出一个区间的起始位置和结束位置，要求反转这个区间的节点，然后重新和整个链表连接上。</p>
+<p><strong>解题思路：</strong>找到这个区间的前置节点（起始位置的前一个）和后置节点（同理），然后遍历反转这段区间的节点，再分别用前置和后置节点连上。</p>
+<p><strong>临界点：</strong>链表为空、区间长度为1。</p>
+<p><strong>难点：</strong>起始点可能在头部，需要一个假的头节点作为前置节点来连接整个链表。</p>
+<blockquote>
+<p>也可以把这个作为一个“临界点”处理。if m &#x3D;&#x3D; 1</p>
+</blockquote>
+<h3 id="合并两个有序链表"><a href="#合并两个有序链表" class="headerlink" title="合并两个有序链表"></a><strong>合并两个有序链表</strong></h3><p>输入两个递增的链表，单个链表的长度为n，合并这两个链表并使新链表中的节点仍然是递增排序的。</p>
+<p><strong>解题思路：</strong>创建一个新的头节点用来构建新链表，分别<strong>同时</strong>遍历两个链表，循环取出值更小的那一个，直到其中一个链表为空，尾部直接全部接上另一个链表。</p>
+<p><strong>临界点</strong>：任意一个链表为空。</p>
+<p><strong>难点：</strong>代码条件关系的判断。</p>
+<h3 id="字母异位词分组"><a href="#字母异位词分组" class="headerlink" title="字母异位词分组"></a><strong>字母异位词分组</strong></h3><p>给一个字符串数组，要求将属于同一类<strong>字母异位词</strong>的字符串组成一个新的数组。</p>
+<blockquote>
+<p>字母异位词：如果将一个字符串中的所有字母任意排列可以得到另一个字符串，即互为字母异位词。</p>
+</blockquote>
+<p><strong>解题思路：</strong>既然每个异位词包含的所有字母都是相同的，那么将字母重新按照字典序排序得到的结果就一定是一样的。此时只需要创建一个以字典序为 key，异位词数组为 value 的哈希表，遍历完整个数组就能得到按异位词分组的数组了。</p>
+<blockquote>
+<p>“bat”, “bta”, “atb” &#x3D;&gt; “abt”</p>
+</blockquote>
+<p><strong>难点：</strong>发现一组字母异位词（题干）的共同点（分组依据）。</p>
+<h3 id="最长连续序列"><a href="#最长连续序列" class="headerlink" title="最长连续序列"></a>最长连续序列</h3><p>给定一个未排序的整数数组 <code>nums</code> ，找出数字连续的最长序列（不要求序列元素在原数组中连续）的长度。</p>
+<p><strong>解题思路：</strong>遍历数组，以元素 x 为起始值，尝试匹配 x+1, x+2, … , x+y 符合连续序列的值是否存在，记录最大的连续长度。</p>
+<p><strong>难点：</strong>降低时间复杂度</p>
+<ul>
+<li>暴力匹配：第一层遍历元素 x，第二层匹配 1-y 连续值，第三层再次遍历是否存在，总时间 O(n^3^)</li>
+<li>哈希索引：先遍历一遍构建哈希索引，将第三层的判断缩减为 O(n)，总时间 O(n^2^)</li>
+<li>剔除子区间：在尝试匹配连续序列前，应先检验 x-1 是否存在，如果存在那么从 x-1 开始的序列长度一定大于本元素起始的序列，所以直接跳过匹配，综合计算总时间 O(n)。</li>
+</ul>
+<h2 id="面试题"><a href="#面试题" class="headerlink" title="面试题"></a>面试题</h2><p>思路：</p>
+<ol>
+<li>先找到提问关注点，针对性回答。</li>
+</ol>
+<blockquote>
+<p> 类似举例的问题可以相对粗略的回答，指明是原理就应该详细回答。</p>
+</blockquote>
+<ol start="2">
+<li>不应该直接扯到深层知识，可以留给面试官提问的空间。</li>
 </ol>
 ]]></content>
       <categories>
-        <category>项目</category>
-        <category>伙伴匹配系统</category>
+        <category>每日总结</category>
       </categories>
       <tags>
-        <tag>Java</tag>
-        <tag>MyBatis</tag>
+        <tag>算法</tag>
+        <tag>刷题</tag>
+        <tag>哈希表</tag>
+        <tag>面经</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>MySQL(二) 数据处理函数</title>
+    <url>/2024/07/12/MySQL-%E4%BA%8C-%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E5%87%BD%E6%95%B0/</url>
+    <content><![CDATA[<p>在数据库操作中，除了需要查询数据，</p>
+<p>有时候还需要对数据进行一些简单的处理，</p>
+<p>用于优化数据显示效果等。</p>
+<span id="more"></span>
+
+<p><strong>select的其他用法</strong></p>
+<p>select 除了可以选择列名外，还可以选择常量。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="number">3</span>; # <span class="number">3</span></span><br><span class="line"><span class="keyword">select</span> <span class="string">&#x27;hello world&#x27;</span>; # hello world</span><br></pre></td></tr></table></figure>
+
+<h1 id="upper、lower"><a href="#upper、lower" class="headerlink" title="upper、lower"></a>upper、lower</h1><p>分别用于将字符串转为大写和小写</p>
+<blockquote>
+<p>ucase, lcase 分别也可以转大小写。</p>
+</blockquote>
+<p><strong>应用</strong></p>
+<p>当不知道查询内容的大小写时，可以统一转为大写&#x2F;小写来匹配查询。</p>
+<p>在 Oracle 数据库中区分大小写，Linux 的 MySQL 也区分</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp <span class="keyword">where</span> <span class="built_in">upper</span>(ename)<span class="operator">=</span><span class="string">&#x27;smith&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h1 id="substr"><a href="#substr" class="headerlink" title="substr"></a>substr</h1><p>用于截取字符串</p>
+<p><strong>用法</strong></p>
+<ol>
+<li>substr(‘被截取的字符串’, 起始下标, 截取长度)</li>
+<li>substr(‘被截取的字符串’, 起始下标)</li>
+</ol>
+<blockquote>
+<p>如果不写截取长度，就直接截取到尾部。</p>
+</blockquote>
+<p><strong>截取规则：</strong></p>
+<ol>
+<li><p>下标从 1 开始，-1 表示右侧第一个。</p>
+</li>
+<li><p>截取的方向永远往右边截取。</p>
+</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> substr(<span class="string">&#x27;abcd&#x27;</span>, <span class="number">-1</span>, <span class="number">2</span>); # d</span><br></pre></td></tr></table></figure>
+
+<p>上述 sql 只能得到 ‘d’，而不是 ‘cd’</p>
+<p><strong>应用</strong></p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp <span class="keyword">where</span> substr(ename, <span class="number">2</span>, <span class="number">1</span>) <span class="operator">=</span> <span class="string">&#x27;A&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>选择 ename 第二个字符是 A 的行。</p>
+<h1 id="length、char-length"><a href="#length、char-length" class="headerlink" title="length、char_length"></a>length、char_length</h1><p>length 用于统计字符串的字节数</p>
+<p>char_length 用于统计字符数</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> length(<span class="string">&#x27;你好&#x27;</span>); # <span class="number">6</span></span><br><span class="line"><span class="keyword">select</span> <span class="keyword">char_length</span>(<span class="string">&#x27;你好&#x27;</span>); # <span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="concat"><a href="#concat" class="headerlink" title="concat"></a>concat</h1><p>用于拼接字符串，可以传入任意个参数。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> concat(<span class="string">&#x27;hello &#x27;</span>, <span class="string">&#x27;world&#x27;</span>); # hello world</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>mysql8之前可以采用 || 进行拼接。</p>
+<p>‘hello ‘ || ‘world’ &#x3D;&gt; ‘hello world’</p>
+</blockquote>
+<h1 id="trim"><a href="#trim" class="headerlink" title="trim"></a>trim</h1><p>去除字符串前后空白字符。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="built_in">trim</span>(<span class="string">&#x27;  a  b  c  &#x27;</span>);</span><br><span class="line"># a  b  c</span><br></pre></td></tr></table></figure>
+
+<p><strong>扩展</strong></p>
+<p>leading</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="built_in">trim</span>(<span class="keyword">leading</span> <span class="string">&#x27;0&#x27;</span> <span class="keyword">from</span> <span class="string">&#x27;000111&#x27;</span>);</span><br><span class="line"># <span class="number">111</span></span><br></pre></td></tr></table></figure>
+
+<p>去除前面的 0 字符。</p>
+<p>trailing</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="built_in">trim</span>(<span class="keyword">trailing</span> <span class="string">&#x27;0&#x27;</span> <span class="keyword">from</span> <span class="string">&#x27;111000&#x27;</span>);</span><br><span class="line"># <span class="number">111</span></span><br></pre></td></tr></table></figure>
+
+<p>去除后面的 0 字符</p>
+<p>both</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="built_in">trim</span>(<span class="keyword">both</span> <span class="string">&#x27;x&#x27;</span> <span class="keyword">from</span> <span class="string">&#x27;xx111xx&#x27;</span>);</span><br><span class="line"># <span class="number">111</span></span><br></pre></td></tr></table></figure>
+
+<p>去除前后的 x 字符</p>
+<h1 id="rand"><a href="#rand" class="headerlink" title="rand()"></a>rand()</h1><p>生成 0 到 1 之间的随机浮点数。</p>
+<p>还有一种写法：rand(x)</p>
+<p>通过传入一个值，保留本次随机数的值。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> rand(<span class="number">1</span>); # <span class="number">0.918204912</span></span><br><span class="line"><span class="keyword">select</span> rand(<span class="number">1</span>); # <span class="number">0.918204912</span></span><br></pre></td></tr></table></figure>
+
+<p>这个 x 就相当于一个 key，每次获取同样的 x，得到的值都是一样的。</p>
+<blockquote>
+<p>这个 x 应该是“种子”吧，如果种子相同得到的结果自然是一样的。</p>
+</blockquote>
+<h1 id="round-x"><a href="#round-x" class="headerlink" title="round(x)"></a>round(x)</h1><p>四舍五入</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> round(<span class="number">3.5</span>); # <span class="number">4</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>指定保留的小数位</strong></p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> round(<span class="number">3.63</span>, <span class="number">1</span>); #<span class="number">3.6</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="truncate-x-y"><a href="#truncate-x-y" class="headerlink" title="truncate(x, y)"></a>truncate(x, y)</h1><p>只保留 y 个小数，剩下小数位舍弃</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">truncate</span>(<span class="number">3.6666</span>, <span class="number">1</span>); # <span class="number">3.6</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="ceil-x-、floor-x"><a href="#ceil-x-、floor-x" class="headerlink" title="ceil(x)、floor(x)"></a>ceil(x)、floor(x)</h1><p>ceil：向上取整</p>
+<p>floor：向下取整</p>
+<blockquote>
+<p>忽略四舍五入</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="built_in">ceil</span>(<span class="number">4.7</span>); # <span class="number">5</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="built_in">floor</span>(<span class="number">4.7</span>); # <span class="number">4</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="空处理"><a href="#空处理" class="headerlink" title="空处理"></a>空处理</h1><p>在 MySQL 和 Oracle 中，任何和 NULL 运算的结果都是 NULL；</p>
+<p><strong><code>ifnull(x, y)</code></strong></p>
+<p>如果 x 为 NULL，就用 y 代替</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> ename, sal, ((sal <span class="operator">+</span> ifnull(comm, <span class="number">0</span>)) <span class="operator">*</span> <span class="number">12</span>) <span class="keyword">as</span> year_sal <span class="keyword">from</span> emp;</span><br></pre></td></tr></table></figure>
+
+<p>当 comm 为空时（员工没有津贴时），统一用 0 代替，避免运算结果为 NULL。</p>
+<h1 id="获取当前-datetime"><a href="#获取当前-datetime" class="headerlink" title="获取当前 datetime"></a>获取当前 datetime</h1><p><code>now()</code></p>
+<p>获取当前时间（select 执行的时间）</p>
+<p><img src="/assets/image-20240712221917658.png" alt="image-20240712221917658"></p>
+<p><code>sysdate()</code></p>
+<p>获取该函数执行的时间</p>
+<p><img src="/assets/image-20240712222000512.png" alt="image-20240712222000512"></p>
+<blockquote>
+<p>底层应该是 now 直接被转化为当前时间，而 sysdate 按照程序执行顺序获取时间。</p>
+</blockquote>
+<h1 id="获取当前-date-time"><a href="#获取当前-date-time" class="headerlink" title="获取当前 date&#x2F;time"></a>获取当前 date&#x2F;time</h1><p><code>current_date()</code> 获取当前日期</p>
+<p><code>current_time()</code> 获取当前时间</p>
+<blockquote>
+<p>可以省略括号()</p>
+</blockquote>
+<h1 id="获取单独的年月日时分秒"><a href="#获取单独的年月日时分秒" class="headerlink" title="获取单独的年月日时分秒"></a>获取单独的年月日时分秒</h1><p><code>year(时间)</code></p>
+<p><code>month(时间)</code></p>
+<p><code>day(时间)</code></p>
+<p><code>hour(时间)</code></p>
+<p><code>minute(时间)</code></p>
+<p><code>second(时间)</code></p>
+<p>这里的时间可以是 now()，或者符合日期格式的字符串。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">year</span>(<span class="string">&#x27;2024-07-12 22:26:31&#x27;</span>);</span><br><span class="line"># <span class="number">2024</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="date-add"><a href="#date-add" class="headerlink" title="date_add"></a>date_add</h1><p>用于日期时间的运算</p>
+<p>语法格式：</p>
+<p><code>date_add(日期，interval expr 单位)</code></p>
+<p>例如：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> date_add(<span class="string">&#x27;2020-10-14&#x27;</span>, <span class="type">interval</span> <span class="number">3</span> <span class="keyword">day</span>);</span><br><span class="line"># <span class="number">2020</span><span class="number">-10</span><span class="number">-17</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>只提供“日期”，可以用“时分秒”等次级单位来增减间隔。</p>
+<p>但是如果只提供“时分秒”，就无法用上一级的单位“年月日”来增减间隔了。</p>
+<p>运算向下兼容。</p>
+</blockquote>
+<p><strong>参数介绍</strong></p>
+<p>日期：一个日期类型的数据或字符串</p>
+<p>interval：固定写法，关键字</p>
+<p>expr：指定一个具体的间隔量</p>
+<blockquote>
+<p>可以为负数，效果和 date_sub 一致，表示往后退。</p>
+</blockquote>
+<p>单位：</p>
+<ul>
+<li>年月日</li>
+<li>时分秒</li>
+<li>microsecond 微妙</li>
+<li>week 周</li>
+<li>quarter 一个季度（3个月）</li>
+</ul>
+<p><strong>复合单位</strong></p>
+<p>两个单位通过下划线组合在一起。</p>
+<p>例如：</p>
+<ul>
+<li>year_month</li>
+<li>day_hour</li>
+<li>day_minute</li>
+<li>day_second</li>
+</ul>
+<blockquote>
+<p>没有 month_day，不知道为什么。。</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> date_add(<span class="string">&#x27;2020-10-14&#x27;</span>, <span class="type">interval</span> <span class="string">&#x27;1,1&#x27;</span> year_month);</span><br><span class="line"># <span class="number">2021</span><span class="number">-11</span><span class="number">-14</span></span><br></pre></td></tr></table></figure>
+
+<p>注意：expr 需用引号包裹，表示一个表达式。</p>
+<h2 id="date-format"><a href="#date-format" class="headerlink" title="date_format"></a>date_format</h2><p>用于日期格式化</p>
+<p><strong>语法格式：</strong></p>
+<p><code>date_format(日期, 格式字符串)</code></p>
+<p>举例</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> date_format(now(), <span class="string">&#x27;%y-%m-%d %H:%i:%s&#x27;</span>);</span><br><span class="line"># <span class="number">24</span><span class="number">-07</span><span class="number">-14</span> <span class="number">23</span>:<span class="number">28</span>:<span class="number">11</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>参数介绍</strong></p>
+<p>日期：可以是日期类型数据或字符串</p>
+<p>格式字符串：由“%”+代表年月日时间的字符，和其他分隔字符组成。</p>
+<p><strong>日期字符：</strong></p>
+<ul>
+<li>Y &#x2F; y：Y：四位完整的年份，y：完整年份的后两位数。</li>
+<li>m：月份</li>
+<li>d：日</li>
+<li>H：小时</li>
+<li>i：分钟</li>
+<li>s：秒</li>
+</ul>
+<h2 id="str-to-date"><a href="#str-to-date" class="headerlink" title="str_to_date"></a>str_to_date</h2><p>将字符串转为日期</p>
+<p><strong>语法格式：</strong></p>
+<p><code>str_to_date(日期, 格式字符串)</code></p>
+<p>格式字符串与 <code>date_format</code> 一致。</p>
+<p><strong>例如：</strong></p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t_student(name, birth) <span class="keyword">values</span>(<span class="string">&#x27;lisi&#x27;</span>, str_to_date(<span class="string">&#x27;10/01/1999&#x27;</span>, <span class="string">&#x27;%m/%d/%Y&#x27;</span>));</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>或者直接输入遵循默认日期格式的字符串（%y-%m-%d %H:%i:%s）。</p>
+</blockquote>
+<h2 id="dayofweek-dayofmonth-dayofyear"><a href="#dayofweek-dayofmonth-dayofyear" class="headerlink" title="dayofweek, dayofmonth, dayofyear"></a>dayofweek, dayofmonth, dayofyear</h2><p>分别给出<strong>目标日期</strong>对应一个星期，一个月，一年中的<strong>哪一天</strong></p>
+<p><strong>语法格式：</strong></p>
+<p><code>dayofweek(日期)</code></p>
+<p>同，可以是日期类型数据或者字符串。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> dayofweek(now());</span><br><span class="line"><span class="keyword">select</span> dayofmonth(now());</span><br><span class="line"><span class="keyword">select</span> dayofyear(now());</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注：<strong>周日</strong>是一周的第一天</p>
+</blockquote>
+<h2 id="last-day"><a href="#last-day" class="headerlink" title="last_day"></a>last_day</h2><p>给出当前月份的最后一天的日期。</p>
+<p><strong>语法格式：</strong></p>
+<p><code>last_day(日期)</code></p>
+<p>同，可以是日期类型数据或者字符串。</p>
+<h2 id="datediff-timediff"><a href="#datediff-timediff" class="headerlink" title="datediff, timediff"></a>datediff, timediff</h2><p><strong>datediff：</strong>显示两个日期相差的天数。</p>
+<p><strong>timediff：</strong>求出两个日期相差的小时数，以时:分:秒的形式显示。</p>
+<p><strong>语法格式：</strong></p>
+<p><code>datediff(日期1, 日期2)</code></p>
+<p><code>timediff(日期1, 日期2)</code></p>
+<p><strong>例如：</strong></p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> datediff(<span class="string">&#x27;2000-10-10 10:10:10&#x27;</span>, <span class="string">&#x27;2000-10-9 10:10:10&#x27;</span>);</span><br><span class="line"># <span class="number">1</span></span><br><span class="line"><span class="keyword">select</span> timediff(<span class="string">&#x27;2000-10-10 10:10:10&#x27;</span>, <span class="string">&#x27;2000-10-9 10:10:10&#x27;</span>);</span><br><span class="line"># <span class="number">24</span>:<span class="number">00</span>:<span class="number">00</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>结果是以日期1比日期2晚 xx 时间计算的，前者时间晚于后者，结果为正数，反之为负数。</p>
+</blockquote>
+<h2 id="if"><a href="#if" class="headerlink" title="if"></a>if</h2><p>类似 Java 中的三目运算符。</p>
+<p><strong>语法格式：</strong></p>
+<p><code>if(条件, x, y)</code></p>
+<p>条件符合返回 x，反之返回 y。</p>
+<p><strong>例如：</strong></p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> if(<span class="number">1</span><span class="operator">&lt;</span><span class="number">2</span>, <span class="number">1</span>, <span class="number">2</span>); # <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>支持嵌套运算</strong></p>
+<p>当 job 为 SALESMAN 时薪水乘以 1.1 倍，为 MANAGER 时薪水乘以 2 倍，请给出结果。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> sal, job, if(job<span class="operator">=</span><span class="string">&#x27;SALESMAN&#x27;</span>, sal<span class="operator">*</span><span class="number">1.1</span>, if(job<span class="operator">=</span><span class="string">&#x27;MANAGER&#x27;</span>, sal<span class="operator">*</span><span class="number">2</span>, sal)) <span class="keyword">as</span> new_sal <span class="keyword">from</span> emp;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/assets/image-20240714234512305.png" alt="image-20240714234512305"></p>
+<h2 id="case…when…then…else…end"><a href="#case…when…then…else…end" class="headerlink" title="case…when…then…else…end"></a><strong>case…when…then…else…end</strong></h2><p>类似 Java 中的 switch</p>
+<p><strong>语法格式：</strong></p>
+<p><code>case 变量 when 匹配值 then 结果 else 结果 end</code></p>
+<p><strong>例如：</strong>（修改 if 嵌套）</p>
+<p>:x:错误写法</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">select sal, job, (case job</span><br><span class="line">when job=&#x27;SALESMAN&#x27; then sal*1.1</span><br><span class="line">when job=&#x27;MANAGER&#x27; then sal*2</span><br><span class="line">else sal end) as new_sal</span><br><span class="line">from emp;</span><br></pre></td></tr></table></figure>
+
+<p>:question: 为什么写成 job&#x3D;’xxx’ 反而是 manager 的薪水乘以 1.1，salesman 的薪水乘以 2 了。</p>
+<p>正确写法</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> sal, job, (<span class="keyword">case</span> job</span><br><span class="line"><span class="keyword">when</span> <span class="string">&#x27;SALESMAN&#x27;</span> <span class="keyword">then</span> sal<span class="operator">*</span><span class="number">1.1</span></span><br><span class="line"><span class="keyword">when</span> <span class="string">&#x27;MANAGER&#x27;</span> <span class="keyword">then</span> sal<span class="operator">*</span><span class="number">2</span></span><br><span class="line"><span class="keyword">else</span> sal <span class="keyword">end</span>) <span class="keyword">as</span> new_sal</span><br><span class="line"><span class="keyword">from</span> emp;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/assets/image-20240714235253338.png" alt="image-20240714235253338"></p>
+<p>结果和 if 嵌套写法一致。</p>
+<blockquote>
+<p>建议先写好模板，然后一个一个条件填入</p>
+</blockquote>
+<h2 id="cast"><a href="#cast" class="headerlink" title="cast"></a>cast</h2><p>用于类型转换</p>
+<p><strong>语法格式：</strong></p>
+<p><code>cast(值 as 数据类型)</code></p>
+<p><strong>数据类型：</strong></p>
+<ul>
+<li>date：日期</li>
+<li>time：时间</li>
+<li>datetime：日期时间</li>
+<li>signed：有符号的 int 类型</li>
+<li>char：char(字符长度)，字符。</li>
+<li>decimal：decimal(有效数字位，保留小数位)，浮点数。</li>
+</ul>
+<blockquote>
+<p>有效数字位包括小数位。</p>
+<p>转化为 decimal 时如果指定的实际值超过了有效数字位，</p>
+<p>会返回要求有效数字位的最大值。</p>
+<p>如：将 ‘123.456’ 转为 decimal(3, 1) &#x3D;&gt; 99.9</p>
+</blockquote>
+<p><strong>例如：</strong>将字符串转为浮点数</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="built_in">cast</span>(<span class="string">&#x27;000123.456&#x27;</span> <span class="keyword">as</span> <span class="type">decimal</span>(<span class="number">4</span>,<span class="number">1</span>));</span><br><span class="line"># <span class="number">123.5</span> 四舍五入</span><br></pre></td></tr></table></figure>
+
+<h2 id="md5"><a href="#md5" class="headerlink" title="md5"></a>md5</h2><p>单向加密算法，结果是一个固定长度 32 位的字符串。</p>
+]]></content>
+      <categories>
+        <category>MySQL</category>
+      </categories>
+      <tags>
+        <tag>MySQL</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>JMeter 测试教程</title>
+    <url>/2024/07/09/JMeter%E6%B5%8B%E8%AF%95%E5%A4%9A%E4%BA%BA%E5%B9%B6%E5%8F%91%E6%93%8D%E4%BD%9C/</url>
+    <content><![CDATA[<p>一个好的项目不仅需要完整的业务功能，</p>
+<p>更应该保证处理响应的效率！</p>
+<p>在业务中经常需要检验并发的可靠性，特别是多人同时操作对业务的影响。</p>
+<p>这时候就可以借助 JMeter 进行测试。</p>
+<p>本文提供两种方式：串行测试、全局属性</p>
+<span id="more"></span>
+
+<h1 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h1><p>首先介绍下 JMeter 的基本使用。</p>
+<p>一个完整的测试分为创建线程组，创建取样器（请求），定义响应结果断言。</p>
+<p><strong>创建线程组</strong>目的是设置并发量。</p>
+<h2 id="创建线程组"><a href="#创建线程组" class="headerlink" title="创建线程组"></a>创建线程组</h2><p><img src="https://gcore.jsdelivr.net/gh/BlueApong/images@main/img/202407112345944.png" alt="image-20240709130805462"></p>
+<p><strong>线程组大致分为三类：</strong></p>
+<ol>
+<li>启动线程组，最开始执行的线程</li>
+<li>销毁线程组，最后才执行的线程</li>
+<li>普通线程组，除启动和销毁外被放在中间执行的线程</li>
+</ol>
+<p>（以上待考证，因为是我猜的）</p>
+<p>一般来说随便选一个线程组都可以，如果同时只需要用到一个线程组的话</p>
+<p><strong>参数介绍</strong></p>
+<p><img src="https://gcore.jsdelivr.net/gh/BlueApong/images@main/img/202407112346988.png" alt="image-20240711234655935"></p>
+<p>Name：线程组的名称</p>
+<p>Action to be token after…：当某个线程失败后的执行策略</p>
+<p>Number of Threads：总线程数</p>
+<p>Ramp-up period：执行完全部线程的时间（秒）</p>
+<p>Loop Count：该线程组的循环次数</p>
+<p>Same user on…：每个线程是否采用同一个数据（当你读取文件时有用）</p>
+<p>常用的就是设置线程数和总时间，比如设置 threads: 1000 period: 10，就是 10 秒内跑完 1000 个线程，平均每秒 100 个并发。</p>
+<p><strong>注意：</strong>实际情况下线程数是不断递增的，因为启动需要时间。 </p>
+<h2 id="创建取样器"><a href="#创建取样器" class="headerlink" title="创建取样器"></a>创建取样器</h2><p>以创建 HTTP 请求为例</p>
+<p>右键线程组弹出菜单，点击 Add -&gt; Sampler -&gt; HTTP Request</p>
+<p><img src="https://gcore.jsdelivr.net/gh/BlueApong/images@main/img/202407112355332.png" alt="image-20240709134542130"></p>
+<p><strong>参数介绍</strong></p>
+<p><img src="https://gcore.jsdelivr.net/gh/BlueApong/images@main/img/202407112357005.png" alt="image-20240711235738958"></p>
+<p>分别通过 protocal, server name(domain), port, path 设置请求的 URL 路径。</p>
+<p>再通过 HTTP Request 选择请求的方式，下面的 Parameters, Body Data … 可携带请求参数&#x2F;请求体。</p>
+<h2 id="定义响应结果断言"><a href="#定义响应结果断言" class="headerlink" title="定义响应结果断言"></a>定义响应结果断言</h2><p>以 JSON 断言为例，</p>
+<p>在此之前需声明响应头信息的 Content-Type 为 JSON</p>
+<h3 id="添加响应头配置"><a href="#添加响应头配置" class="headerlink" title="添加响应头配置"></a>添加响应头配置</h3><p>右键取样器，点击 Add -&gt; Config Element -&gt; HTTP Header Manager</p>
+<p><img src="https://gcore.jsdelivr.net/gh/BlueApong/images@main/img/202407121103271.png" alt="image-20240712110317215"></p>
+<p>然后就是根据 Name-Value 的规则添加信息头了。</p>
+<p>再右键取样器创建断言，点击 Add -&gt; Assertions -&gt; JSON Assertion</p>
+<p><img src="https://gcore.jsdelivr.net/gh/BlueApong/images@main/img/202407120002114.png" alt="image-20240712000225048"></p>
+<p><strong>参数介绍</strong></p>
+<p><img src="https://gcore.jsdelivr.net/gh/BlueApong/images@main/img/202407120004509.png" alt="image-20240712000427473"></p>
+<p>Assert JSON Path exists：表示响应结果 JSON 对象中包含 xx 属性。</p>
+<p>Additionally assert value：同时断言这个属性的值。</p>
+<p>Match as regular expression：以正则表达式的语法匹配。</p>
+<p>Expected Value：期望的属性值。</p>
+<h2 id="添加结果分析报告"><a href="#添加结果分析报告" class="headerlink" title="添加结果分析报告"></a>添加结果分析报告</h2><p><img src="https://gcore.jsdelivr.net/gh/BlueApong/images@main/img/202407121122750.png" alt="image-20240712112237695"></p>
+<p>根据上述定义的断言，可以确定结果是否正确，并能够通过 Listener 监听器显示测试的结果。</p>
+<h3 id="聚合报告"><a href="#聚合报告" class="headerlink" title="聚合报告"></a>聚合报告</h3><p>将所有的结果进行分析。</p>
+<p>包含样本数，平均响应时间，中位数、90%以下、95%以下、99%以下、最小、最大响应时间，错误率，吞吐量等数据。</p>
+<p><img src="https://gcore.jsdelivr.net/gh/BlueApong/images@main/img/202407121125863.png" alt="image-20240712112552811"></p>
+<h3 id="结果树"><a href="#结果树" class="headerlink" title="结果树"></a>结果树</h3><p>展示每一条请求的具体内容</p>
+<p>包括请求头，请求体，响应内容等。</p>
+<p><img src="https://gcore.jsdelivr.net/gh/BlueApong/images@main/img/202407121127209.png" alt="image-20240712112700165"></p>
+<h2 id="开启测试"><a href="#开启测试" class="headerlink" title="开启测试"></a>开启测试</h2><p>右键线程组，点击 Start 即可开始测试。</p>
+<p><img src="https://gcore.jsdelivr.net/gh/BlueApong/images@main/img/202407121129403.png" alt="image-20240712112938357"></p>
+<blockquote>
+<p>如果点击界面上方的开始按钮，会开始全部的线程组。</p>
+</blockquote>
+<h1 id="业务测试"><a href="#业务测试" class="headerlink" title="业务测试"></a>业务测试</h1><p>下文以实际多种测试为例，讲解如何进行常用的业务的测试。</p>
+<h2 id="登录测试"><a href="#登录测试" class="headerlink" title="登录测试"></a>登录测试</h2><h3 id="创建线程组-1"><a href="#创建线程组-1" class="headerlink" title="创建线程组"></a>创建线程组</h3><p><img src="https://gcore.jsdelivr.net/gh/BlueApong/images@main/img/202407121109288.png" alt="image-20240712110917225"></p>
+<p>图中的 Same User… 需要取消勾选，确保每个线程都取不同行的数据</p>
+<h3 id="添加-CSV-数据配置"><a href="#添加-CSV-数据配置" class="headerlink" title="添加 CSV 数据配置"></a>添加 CSV 数据配置</h3><p>通过配置数据文件，可以在线程组内通过变量的方式读取文件内的数据。</p>
+<p>比如用于 token，session，用户登录账号密码信息 的输入。</p>
+<p><img src="https://gcore.jsdelivr.net/gh/BlueApong/images@main/img/202407121112827.png" alt="image-20240712111226038"></p>
+<p><strong>参数介绍</strong></p>
+<p>Filename：文件路径，也可以是其他文件，只要正确指定分隔符就行。</p>
+<p>Variable Names：在 CSV 文件中，通过“,”分隔的列名。</p>
+<blockquote>
+<p>也可以没有列名，这个变量名只是用来指定根据“分隔符”划分的每一列的名称。</p>
+</blockquote>
+<p>Ignore first line…：是否忽略文件的第一行</p>
+<p>Delimiter：数据之间的分隔符</p>
+<p>Recycle on EOF：是否循环读取文件数据</p>
+<p>Sharing mode：数据共享模式</p>
+<p><strong>注意：</strong>只有取消勾选 Same User… 才会应用这些变量的时候选取不同行的数据</p>
+<p><strong>应用变量</strong></p>
+<p>通过 ${variables} 的方式，可以在线程组的任意一处应用</p>
+<h3 id="创建取样器-1"><a href="#创建取样器-1" class="headerlink" title="创建取样器"></a>创建取样器</h3><p><img src="https://gcore.jsdelivr.net/gh/BlueApong/images@main/img/202407121118584.png" alt="image-20240712111802527"></p>
+<p>以上是错误示范：并不满足 JSON 格式。</p>
+<p><img src="https://gcore.jsdelivr.net/gh/BlueApong/images@main/img/202407121137971.png"></p>
+<p>属性和值必须用双引号包裹</p>
+<blockquote>
+<p>变量即使为双引号包括，也会正常解析，解析结果其实就相当于一个字面量，</p>
+<p>如果和其他字符在一起如：123_${userAccount}</p>
+<p>结果会拼接在一起：123_xxxxxxx</p>
+</blockquote>
+<p>填写好测试的 api 地址，和请求体内容。</p>
+<h3 id="定义响应头信息，结果断言。"><a href="#定义响应头信息，结果断言。" class="headerlink" title="定义响应头信息，结果断言。"></a>定义响应头信息，结果断言。</h3><p><img src="https://gcore.jsdelivr.net/gh/BlueApong/images@main/img/202407121120755.png" alt="image-20240712112031704"></p>
+<p>保证响应结果能以 JSON 形式解析。</p>
+<p><img src="https://gcore.jsdelivr.net/gh/BlueApong/images@main/img/202407121127637.png" alt="image-20240712112755591"></p>
+<p>定义结果内容断言：必须要有 code 属性，且值为 0。</p>
+<p>添加监听报告省略…</p>
+<p>右键线程组点击 Start，即可开始测试。</p>
+<p><img src="https://gcore.jsdelivr.net/gh/BlueApong/images@main/img/202407121135198.png" alt="image-20240712113544130"></p>
+<h2 id="多人并发测试"><a href="#多人并发测试" class="headerlink" title="多人并发测试"></a>多人并发测试</h2><p>由于多人并发测试，需要用到用户信息，测试并不好办。</p>
+<p>所以需要先登录拿到用户信息，再进行接下来的测试。</p>
+<h3 id="串行测试（推荐）"><a href="#串行测试（推荐）" class="headerlink" title="串行测试（推荐）"></a>串行测试（推荐）</h3><p>在一个线程组内，创建两个取样器，并勾选 keep-alive 保证 cookie 不会丢失。</p>
+<p>第二个取样器就可以基于第一个的用户信息发出请求了</p>
+<p><img src="https://gcore.jsdelivr.net/gh/BlueApong/images@main/img/202407121606444.png" alt="image-20240712160616341"></p>
+<p>此处就利用登录的 session 信息，进行个人信息的再一步请求。</p>
+<h3 id="全局属性"><a href="#全局属性" class="headerlink" title="全局属性"></a>全局属性</h3><p>也可以分开两个线程组，先通过“登录”的取样器发出请求，并添加一系列处理程序来将 session 存储到全局属性中，</p>
+<p>再需要用户信息的测试中，再通过获取全局属性的方式来获取到 session，进行请求。</p>
+<p>以 Session 为例，</p>
+<p>由于 session 的设置包含在响应头里，就需要通过先提取响应头。</p>
+<p><strong>添加 正则后置处理器，提取 session 变量</strong></p>
+<p><img src="https://gcore.jsdelivr.net/gh/BlueApong/images@main/img/202407121611146.png" alt="image-20240712161134096"></p>
+<p>“session” 表示提取出来的变量的名称。</p>
+<p><strong>注意：</strong>捕获组从 1 开始，Match No. 表示捕获匹配的哪一句。</p>
+<p><strong>添加 BeanShell 处理程序，设置全局属性</strong></p>
+<p><img src="https://gcore.jsdelivr.net/gh/BlueApong/images@main/img/202407121613845.png" alt="image-20240712161346797"></p>
+<p>Parameters 表示从 CSV 数据配置传来的变量名，</p>
+<blockquote>
+<p> 大概因为 session 同处于后置处理器环节，所以直接写就可以了。</p>
+</blockquote>
+<p>通过 <code>$&#123;__setProperty()&#125;</code> 设置全局属性。</p>
+<p>将 session 和 userAccount 绑定，存储所有用户的 session 值。</p>
+<p><strong>添加 HTTP Cookie 管理器</strong></p>
+<p><img src="https://gcore.jsdelivr.net/gh/BlueApong/images@main/img/202407121617412.png" alt="image-20240712161709362"></p>
+<p>通过 <code>$(__property(variable_name))</code> 获取全局属性值。</p>
+<p>接下来就可以进行测试了，请求会自动携带 cookie 中的 sessionID</p>
+]]></content>
+      <categories>
+        <category>测试</category>
+        <category>JMeter</category>
+      </categories>
+      <tags>
+        <tag>JMeter</tag>
+        <tag>测试</tag>
+        <tag>多人并发</tag>
       </tags>
   </entry>
   <entry>
