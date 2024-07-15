@@ -58,6 +58,142 @@
       </tags>
   </entry>
   <entry>
+    <title>MySQL(三) 分组函数</title>
+    <url>/2024/07/15/MySQL-%E4%B8%89-%E5%88%86%E7%BB%84%E5%87%BD%E6%95%B0/</url>
+    <content><![CDATA[<p>区别于“数据处理函数”：</p>
+<p><strong>分组函数是多行函数</strong>，多行数据产生一个结果 (如果没有 group by)</p>
+<blockquote>
+<p>没加 group by 即一整张表就是一组。</p>
+</blockquote>
+<p><strong>数据处理函数是单行函数</strong>，一行数据一个结果。</p>
+<span id="more"></span>
+
+<h2 id="分组函数"><a href="#分组函数" class="headerlink" title="分组函数"></a>分组函数</h2><p>分组函数共有：max, min, avg, count, sum。</p>
+<p><strong>常见问题</strong></p>
+<p>Q: <strong><code>count(*)</code> 和<code>count(字段)</code> 的区别？&#96;</strong></p>
+<p>A: 前者是统计所有字段不全为 NULL 的数量，即整张表的行数；后者是统计该字段不为空的个数。</p>
+<p>Q: <strong>分组函数不能使用在 where 条件中</strong></p>
+<p>A: 因为分组函数是根据查询结果计算的，如果加在 where 中就会不断改变，无法计算。</p>
+<p><strong>注：</strong>多行函数是自动忽略 NULL 的，因为是从所有行中统计出结果。</p>
+<h3 id="group-by"><a href="#group-by" class="headerlink" title="group by"></a>group by</h3><p>将查询结果按照某个字段分组，或者多个字段联合分组，在 where 后执行。</p>
+<p><strong>经过分组后 sql 语句，只能 select 分组函数和分组字段</strong></p>
+<p>因为分组后，其他数据“糅合”在一起了，无法正常显示。</p>
+<h3 id="having"><a href="#having" class="headerlink" title="having"></a>having</h3><p>在分组后，对分组数据进行筛选。</p>
+<blockquote>
+<p>分组数据：分组函数产生的数据，或分组字段。</p>
+<p>建议只有涉及到分组数据的筛选采用 having，其他用 where 提前过滤掉，保证查询效率。</p>
+</blockquote>
+<p><strong>区别举例：</strong>查询部门为 job 的平均薪资数据</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"># 低效用法</span><br><span class="line"><span class="keyword">select</span> job,<span class="built_in">avg</span>(sal) <span class="keyword">from</span> emp <span class="keyword">group</span> <span class="keyword">by</span> job <span class="keyword">having</span> job<span class="operator">=</span><span class="string">&#x27;SALESMAN&#x27;</span>;</span><br><span class="line"># 高效用法</span><br><span class="line"><span class="keyword">select</span> job,<span class="built_in">avg</span>(sal) <span class="keyword">from</span> emp <span class="keyword">where</span> job<span class="operator">=</span><span class="string">&#x27;SALESMAN&#x27;</span> <span class="keyword">group</span> <span class="keyword">by</span> job;</span><br></pre></td></tr></table></figure>
+
+<h3 id="组内排序"><a href="#组内排序" class="headerlink" title="组内排序"></a>组内排序</h3><h4 id="substring-index"><a href="#substring-index" class="headerlink" title="substring_index"></a>substring_index</h4><p>按分隔符分割。</p>
+<p><strong>语法格式：</strong></p>
+<p><code>substring_index(字符串, 分隔符, 子串数量)</code></p>
+<h4 id="group-concat"><a href="#group-concat" class="headerlink" title="group_concat"></a>group_concat</h4><p>将分组后的同组数据进行拼接。</p>
+<p><strong>语法格式：</strong></p>
+<p><code>group_concat(字段 [order by ...])</code> 可选是否排序</p>
+<p><strong>注意：</strong>和 group by 后的 select 语句相反，这里不应该出现分组函数和分组字段，因为同组的数据结果相同。</p>
+<blockquote>
+<p>但是 MySQL 是允许的。</p>
+</blockquote>
+<p><strong>联合使用举例：</strong>找出每个工作岗位的工资排名在前两名的员工姓名。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"># 先按工资对组内数据排序拼接，再按“，”分割出前两位</span><br><span class="line"><span class="keyword">select</span> job,</span><br><span class="line">substring_index(</span><br><span class="line">    group_concat(job <span class="keyword">order</span> <span class="keyword">by</span> sal), </span><br><span class="line">    &quot;,&quot;,<span class="number">2</span>) <span class="keyword">as</span> top2 </span><br><span class="line"><span class="keyword">from</span> emp </span><br><span class="line"><span class="keyword">group</span> <span class="keyword">by</span> job;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/../assets/image-20240715225035606.png" alt="image-20240715225035606"></p>
+<h2 id="语句执行顺序"><a href="#语句执行顺序" class="headerlink" title="语句执行顺序"></a>语句执行顺序</h2><p>一个相对完整的 sql 语句的执行顺序如下：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> ... 		# <span class="number">5</span></span><br><span class="line"><span class="keyword">from</span> ...		# <span class="number">1</span></span><br><span class="line"><span class="keyword">where</span> ...		# <span class="number">2</span></span><br><span class="line"><span class="keyword">group</span> <span class="keyword">by</span> ...	# <span class="number">3</span></span><br><span class="line"><span class="keyword">having</span> ...		# <span class="number">4</span></span><br><span class="line"><span class="keyword">order</span> <span class="keyword">by</span> ...	# <span class="number">6</span></span><br></pre></td></tr></table></figure>
+
+<p>可以参考这个顺序对 sql 语句进行优化。</p>
+]]></content>
+      <categories>
+        <category>MySQL</category>
+      </categories>
+      <tags>
+        <tag>MySQL</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>每日杂记 day3</title>
+    <url>/2024/07/15/2024-7-15/</url>
+    <content><![CDATA[<h2 id="八股"><a href="#八股" class="headerlink" title="八股"></a>八股</h2><h3 id="为什么-JDK-要同时提供-equals-和-hashcode-两个方法？"><a href="#为什么-JDK-要同时提供-equals-和-hashcode-两个方法？" class="headerlink" title="为什么 JDK 要同时提供 equals 和 hashcode 两个方法？"></a>为什么 JDK 要同时提供 equals 和 hashcode 两个方法？</h3><p>hashmap, hashset 的插入流程。</p>
+<p>hashcode 可能会冲突，equals 检查是否一致。</p>
+<h3 id="String、StringBuffer、StringBuilder-的区别"><a href="#String、StringBuffer、StringBuilder-的区别" class="headerlink" title="String、StringBuffer、StringBuilder 的区别"></a>String、StringBuffer、StringBuilder 的区别</h3><p>String 不可变，每次操作生成新对象。</p>
+<p>StringBuffer、StringBuilder 每次都是对对象本身进行操作；区别是前者是线程安全的，后者不安全仅提升 10% - 15% 的性能。</p>
+<h3 id="String-不可变的原因"><a href="#String-不可变的原因" class="headerlink" title="String 不可变的原因"></a>String 不可变的原因</h3><p>内部是由字符数组维护的。</p>
+<ol>
+<li>被 final 和 private 修饰不可指向其他对象，也不能被外部访问，String 类也没有提供修改这个字符串的方法。</li>
+<li>String 类被 final 修饰，不可被继承避免了子类破坏结构。</li>
+</ol>
+<h3 id="字符串拼接用-“-”-还是-StringBuilder？"><a href="#字符串拼接用-“-”-还是-StringBuilder？" class="headerlink" title="字符串拼接用 “+” 还是 StringBuilder？"></a>字符串拼接用 “+” 还是 StringBuilder？</h3><p>直接使用 “+” 的方式，其实底层创建了  StringBuilder 进行优化。</p>
+<p>但是如果循环进行拼接应显式创建一个 StringBuilder 来复用，否则会造成多次创建。</p>
+<h3 id="字符串常量池"><a href="#字符串常量池" class="headerlink" title="字符串常量池"></a>字符串常量池</h3><p>是 JVM 为了提升性能和减少内存消耗针对字符串专门开辟的一块区域。</p>
+<p>当创建一个字符串对象时，会先检查常量池内是否存在，如果没有就创建 2 个字符串对象，一个给当前引用，另一个的引用保存到字符串常量池中。</p>
+<p><code>String.valueOf</code> 会先从常量池中找，没有再 <code>new String()</code></p>
+<p>而 <code>new String()</code> 是直接创建 1 个新的，只有常量池中没有才会给常量池也创建一个。</p>
+<p>所以这个常量池是专门为字符串常量建立的缓存。</p>
+<h3 id="String-intern"><a href="#String-intern" class="headerlink" title="String#intern"></a>String#intern</h3><p>类似 <code>new String()</code> 会创建 1 &#x2F; 2 个对象，其中一个保存到常量池，并且返回常量池的引用，<strong>确保这个引用是唯一的</strong></p>
+<h3 id="String-类型的变量和常量做-“-”-运算时发生了什么。"><a href="#String-类型的变量和常量做-“-”-运算时发生了什么。" class="headerlink" title="String 类型的变量和常量做 “+” 运算时发生了什么。"></a>String 类型的变量和常量做 “+” 运算时发生了什么。</h3><p><strong>“常量折叠”</strong>：对于在编译时期就可以确定的值，会提前进行计算。</p>
+<p>而引用的值是无法直接确定的，因此会创建一个新的对象，后续进行计算。</p>
+<p><strong>发生常量折叠的情况：</strong></p>
+<ul>
+<li>基本数据类型( <code>byte</code>、<code>boolean</code>、<code>short</code>、<code>char</code>、<code>int</code>、<code>float</code>、<code>long</code>、<code>double</code>)、字符串的<strong>常量</strong></li>
+</ul>
+<blockquote>
+<p>无法测试区分常量相加和变量相加创建的变量地址是否一致，因为无法直接比较基本类型的地址。</p>
+</blockquote>
+<ul>
+<li>final 修饰的基本数据类型和字符串的<strong>变量</strong>。</li>
+<li>字符串通过 “+”拼接得到的字符串、基本数据类型之间算数运算（加减乘除）、基本数据类型的位运算（&lt;&lt;、&gt;&gt;、&gt;&gt;&gt; ）</li>
+</ul>
+<p>简言之，通过 final 修饰或者其他确定的直接运算，就会被折叠。</p>
+<h3 id="Exception-和-Error-有什么区别"><a href="#Exception-和-Error-有什么区别" class="headerlink" title="Exception 和 Error 有什么区别"></a>Exception 和 Error 有什么区别</h3><p>Exception 表示程序本身能处理的异常，可以捕获。</p>
+<p>Error 程序无法处理，JVM 一般会选择直接终止。</p>
+<p>如：虚拟机错误（Virtual MachineError）</p>
+<h3 id="finally-和-try-中同时存在-return-会怎么样？"><a href="#finally-和-try-中同时存在-return-会怎么样？" class="headerlink" title="finally 和 try 中同时存在 return 会怎么样？"></a>finally 和 try 中同时存在 return 会怎么样？</h3><p>最后 return 的值会变成 finally 的。</p>
+<p>因为执行到 try 的 return 时会将返回值暂存到一个本地变量，如果 finally 也有 return 会覆盖掉之前的值。</p>
+<h3 id="try-with-resources-Java7"><a href="#try-with-resources-Java7" class="headerlink" title="try-with-resources Java7"></a>try-with-resources Java7</h3><p>用于实现了 <code>AutoCloseable</code> 或者 <code>Closeable</code> 的对象。</p>
+<p>在作用域结束后会自动关闭声明的资源。</p>
+<blockquote>
+<p>通过 ；可以声明多个资源</p>
+</blockquote>
+<h3 id="异常使用有哪些需要注意的地方？"><a href="#异常使用有哪些需要注意的地方？" class="headerlink" title="异常使用有哪些需要注意的地方？"></a>异常使用有哪些需要注意的地方？</h3><p>不要把异常定义为静态变量，因为这样会导致异常栈信息错乱。每次手动抛出异常，我们都需要手动 new 一个异常对象抛出。</p>
+<h2 id="算法题"><a href="#算法题" class="headerlink" title="算法题"></a>算法题</h2><h3 id="两数之和"><a href="#两数之和" class="headerlink" title="两数之和"></a><strong>两数之和</strong></h3><p>从一个数组中找到和为 target 的两个数的位置，时间 O(n)。</p>
+<p><strong>普通思路：</strong>两两遍历 O(n^2^)</p>
+<p><strong>优化：</strong>如果第一层遍历确定了一个数，那么第二层仅是为了找 target - x 是否存在，因此可以借助哈希表优化索引时间为 O(1)，key：元素值，value：索引位置。</p>
+<p><strong>数组内存在重复值问题：</strong>一边遍历一边建立哈希表，即使当前元素的值重复了也不会匹配同一个元素；</p>
+<blockquote>
+<p>如果提前建立哈希表，数组内重复的值无法作为唯一 key，当 target 需要由类似 3+3&#x3D;6 组成时，就会找不到索引。</p>
+</blockquote>
+<h3 id="接雨水"><a href="#接雨水" class="headerlink" title="接雨水"></a><strong>接雨水</strong></h3><p>给出一个数组 height，其中 n 个元素代表 n 个高度为 height[n]，底部为 1 的柱子，试求出所有柱子构成的“容器”能够储存的雨水量总和。</p>
+<p>类似 “盛最多水的容器” 一题，能够承载雨水量由最短高度决定。</p>
+<p><strong>解法：</strong>一个柱子能够装的水等于两条“边”的最短边 - 本身高度，遍历每根柱子，依次求出左右两边的最长边，求出所有柱子的储水量相加即为结果。</p>
+<blockquote>
+<p>求 左右 最长边时包括自身，确保不会比自身还短，导致“漏掉”。</p>
+</blockquote>
+<p><strong>普通思路：</strong>遍历数组，求每个柱子的左右 max 然后计算，统计所有柱子储水量之和 O(n^2^)。</p>
+<p><strong>优化（动态规划）：</strong> 和哈希表类似，可以提前算出每个点的左右 max，这样就避免了每次计算的重复寻找 max，使得计算过程为 O(1)，最终时间 O(n)，空间 O(n)。</p>
+<p><strong>再优化（双指针）：</strong>从左右边界开始，由于每个柱子都可能作为边界，只要 height[l] &lt; height[r] 那么就一定有 left_max &lt; right_max 的情况发生，所以此时直接用 left_max - 自身高度 得到此刻的储水量，将空间缩减为了 O(1)。</p>
+<blockquote>
+<p>相当于抽象了整体，选出只需要“处理”一个方向的情况进行计算，不需要管另一边了。</p>
+<p>当动态规划中的数据只需要用到 1 次时，可以考虑转化为双指针。</p>
+</blockquote>
+<h3 id="什么是动态规划？"><a href="#什么是动态规划？" class="headerlink" title="什么是动态规划？"></a>什么是动态规划？</h3><p>在动态中规划逻辑路线，根据状态变化能够做出新的决策；</p>
+<h2 id="MySQL-分组"><a href="#MySQL-分组" class="headerlink" title="MySQL 分组"></a>MySQL 分组</h2><p>一个完整的分组流程。</p>
+<p>选择表 emp；</p>
+<p>分组 job；</p>
+<p>筛选 having avg(sal) &gt; 2000；</p>
+<p>展示 job,avg(sal)</p>
+]]></content>
+      <categories>
+        <category>每日总结</category>
+      </categories>
+      <tags>
+        <tag>MySQL</tag>
+        <tag>算法</tag>
+        <tag>八股</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>每日总结 day2</title>
     <url>/2024/07/14/2024-7-14/</url>
     <content><![CDATA[<h2 id="算法题"><a href="#算法题" class="headerlink" title="算法题"></a>算法题</h2><p>经过三道题，近乎两小时的洗礼。</p>
