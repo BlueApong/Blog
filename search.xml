@@ -58,6 +58,1153 @@
       </tags>
   </entry>
   <entry>
+    <title>MySQL-索引</title>
+    <url>/2024/08/02/MySQL-%E7%B4%A2%E5%BC%95/</url>
+    <content><![CDATA[<p>介绍</p>
+<p>类似书的目录一样对数据进行分类，加快数据查找速度。</p>
+<p>分类</p>
+<ul>
+<li>按数据结构分类</li>
+<li>按物理存储分类</li>
+<li>按字段特性分类</li>
+<li>按字段个数分类</li>
+</ul>
+<p>数据结构分类</p>
+<p><img src="/../assets/%E7%B4%A2%E5%BC%95%E5%88%86%E7%B1%BB.drawio.png" alt="img"></p>
+<p>InnoDB选择索引的方式</p>
+<ul>
+<li>有主键</li>
+<li>无主键，全有效列</li>
+<li>都没有，隐式自增id</li>
+</ul>
+<p>B+树</p>
+<p>多叉树，叶子结点存放数据，非叶子结点存放索引</p>
+<p>每个结点按主键顺序存放，非叶子结点，则用来划分区域</p>
+<p><img src="/../assets/btree.drawio.png" alt="主键索引 B+Tree"></p>
+<p>存储千万级的数据最多需要 3-4 次磁盘IO ？？？</p>
+<p><strong>对于二级索引</strong></p>
+<p>叶子结点只存储主键值。</p>
+<p>使用二级索引查询后，需要再查一次主键的 B+树，称作【回表】</p>
+<p>如果只查询二级索引树存储的值，如主键，就能直接返回结果——【覆盖索引】</p>
+<p>对比B+树、B树、二叉树、哈希的区别</p>
+<ol>
+<li>B树非叶子结点也要存数据，而是是单链表；空间消耗大，无法查询范围。</li>
+<li>二叉树只能存两个子结点，高度相比多叉树会高出很多。</li>
+<li>hash无法做范围查询</li>
+</ol>
+<p>物理存储分类</p>
+<p>主键和二级索引的叶子结点存储结构不同</p>
+<p>字段特性分类</p>
+<p>主键索引：即以主键为索引</p>
+<p>唯一索引：以唯一 UNIQUE 字段为索引，允许空值</p>
+<p>普通索引：以普通的字段为索引</p>
+<p>前缀索引：以字符类型的字段的前几个字符建立索引，可以减少索引占用的存储空间。</p>
+<p>字段个数分类</p>
+<p>单列索引</p>
+<p>联合索引（多列、复合索引）</p>
+<p>需要遵循最左匹配原则，where从左边开始匹配，顺序打乱索引会失效。</p>
+<p>进行到范围查询时，之后的字段会失效。</p>
+<p>key_len 记录使用了多少个</p>
+<p><code>&gt;, &gt;=, BETWEEN...AND..., like j%</code></p>
+<p>索引下推</p>
+<p>Extra: <code>using index condition</code></p>
+<p>索引区分度</p>
+<p><img src="/../assets/%E5%8C%BA%E5%88%86%E5%BA%A6.png" alt="区分度计算公式"></p>
+<p>性别就很小，不适合放在前面</p>
+<p>查询优化器：全表扫描</p>
+<p>什么时候需要、不需要索引？</p>
+<p>缺点：</p>
+<ol>
+<li>空间消耗</li>
+<li>维护耗时</li>
+</ol>
+<p>适用场景：</p>
+<ol>
+<li>唯一性限制</li>
+<li>经常条件查询的</li>
+<li>经常 group by 和 order by 的，无需二次排序。</li>
+</ol>
+<p>不适用场景：</p>
+<ol>
+<li><p>适用场景反例</p>
+</li>
+<li><p>经常需要修改的字段</p>
+</li>
+</ol>
+<p>优化方式：</p>
+<ol>
+<li><p>前缀索引优化</p>
+</li>
+<li><p>覆盖索引优化</p>
+</li>
+<li><p>自增索引，减少树结构的维护时间</p>
+<p>页分裂问题</p>
+</li>
+<li><p>非 NULL</p>
+</li>
+<li><p>防止索引失效</p>
+<ol>
+<li>左边、左右模糊匹配</li>
+<li>对索引列进行计算</li>
+<li>联合索引违背最左原则</li>
+<li>OR两边有一边不是索引列</li>
+</ol>
+<p>可以通过 explain 的 key查看实际用的索引、key_len 查看生效的索引长度、type查看扫描类型</p>
+</li>
+</ol>
+<p>EXPLAIN type 介绍</p>
+<ol>
+<li>All 全表扫描</li>
+<li>Index 全索引扫描，只返回索引列</li>
+<li>Range 索引范围扫描</li>
+<li>ref 非唯一索引扫描</li>
+<li>eq_ref 唯一索引扫描，通常发生在基于唯一索引的连表查询（相等的）</li>
+<li>const 结果只有一条的唯一主键或唯一索引扫描</li>
+</ol>
+<p>extra</p>
+<ul>
+<li>using filesort</li>
+<li>using temporary</li>
+<li>using index 覆盖索引</li>
+</ul>
+]]></content>
+  </entry>
+  <entry>
+    <title>TCP详解</title>
+    <url>/2024/08/01/TCP%E8%AF%A6%E8%A7%A3/</url>
+    <content><![CDATA[<p>OSI七层模型</p>
+<p>应用层</p>
+<p>表示层</p>
+<p>会话层</p>
+<p>传输层</p>
+<p>网络层</p>
+<p>数据链路层</p>
+<p>物理层</p>
+<p>tcp，udp位于传输层</p>
+<p>tcp&#x2F;ip 标识：源IP、端口号，目的IP、端口号，协议号</p>
+<p><strong>端口范围</strong></p>
+<p>0-1023 知名端口号</p>
+<p>1024-65535 动态分配的端口号</p>
+<p><strong>常见知名端口号</strong></p>
+<p>ssh: 22</p>
+<p>ftp: 21</p>
+<p>http: 80</p>
+<p>telnet: 23</p>
+<p>https: 443</p>
+<blockquote>
+<p>在 linux 中使用 cat &#x2F;etc&#x2F;services 查看已记录端口号</p>
+</blockquote>
+<h2 id="UDP协议"><a href="#UDP协议" class="headerlink" title="UDP协议"></a>UDP协议</h2><p>结构图</p>
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/00d1821abded524b2e9429691b0cc153.png" alt="在这里插入图片描述"></p>
+<p><strong>特点：</strong></p>
+<ul>
+<li>无连接</li>
+<li>不可靠：没有确认和重传机制</li>
+<li>面向数据报：只能一次性发送全部报文</li>
+</ul>
+<p><strong>缓冲区：</strong></p>
+<p>存在接收缓冲区，没有发送缓存区</p>
+<p>因为 UDP 不保证可靠性，即使报文丢失，也不需要重发。</p>
+<p>而 TCP 必须要有，当报文丢失，需要重新发送。</p>
+<p>虽然具有接收缓冲区，但是无法保证接收的顺序，当缓冲区满了的时候再到达的报文会被丢弃。</p>
+<p>UDP 是全双工协议，最多传送 64 k【计算方式？？】，如果超过需要手动分包。</p>
+<p>基于 UDP 的应用层协议：</p>
+<p>NFS：网络文件协议</p>
+<p>TFTP：简单文件传输协议</p>
+<p>DHCP：动态主机配置协议</p>
+<p>BOOTP：无盘设备启动协议</p>
+<p>DNS：域名解析协议</p>
+<h2 id="TCP协议"><a href="#TCP协议" class="headerlink" title="TCP协议"></a>TCP协议</h2><p><img src="https://i-blog.csdnimg.cn/blog_migrate/26bb30f0808ad9fd94ba350157f278e7.png" alt="在这里插入图片描述"></p>
+<p><strong>源端口号&#x2F;目的端口号：</strong>表示数据从哪个进程来，要到那个进程去</p>
+<p><strong>32位序号：</strong>TCP将要传输的每段数据组进行了编号，序号是本报文段发送的数据组的第一个字节的编号，可以保证传输信息的有效性。</p>
+<p>比如：一个报文段的序号为300，此报文段数据部分共有100字节，则下一个报文段的序号为401。</p>
+<p><strong>32位确认序号：</strong>每一个ACK一个确认号：表示下一个期待收到的字节序号，且该序号之前的所有数据已经正确无误的收到。</p>
+<p>确认号只有当ACK标志为1时才有效。比如建立连接时，<strong>SYN报文</strong>的ACK标志位为0。</p>
+<p><strong>4位首部长度(数据偏移)：</strong> 表示该TCP头部有多少个32位bit(有多少个4字节)，可以将TCP报头和有效载荷分离。</p>
+<p>TCP报文首部固定为20个字节即偏移量 5，最大能扩充到 15*4 &#x3D; 60个字节。</p>
+<p><strong>6位标志位：</strong></p>
+<ul>
+<li>URG：标志<strong>紧急指针</strong>是否有效。</li>
+<li>ACK：标识<strong>确认号</strong>是否有效。</li>
+<li>PSH：提示<strong>接收端</strong>应用程序立即将<strong>接收缓冲区</strong>的数据拿走。</li>
+<li>RST：它是为了<strong>处理异常连接</strong>的， 告诉连接不一致的一方，我们的连接还没有建立好， 要求对方重新建立连接。我们把携带RST标识的称为<strong>复位报文段</strong>。</li>
+<li>SYN: 请求<strong>建立连接</strong>; 我们把携带SYN标识的称为<strong>同步报文段</strong>。</li>
+<li>FIN：通知对方, 本端要<strong>关闭连接</strong>了, 我们称携带FIN标识的为<strong>结束报文段</strong>。</li>
+</ul>
+<p><strong>16位的紧急指针：</strong>指定<strong>优先被处理</strong>的报文段，这时就可以设置紧急指针，指向该报文段【序号？？】即可，然后将紧急标志设置为1。<br><strong>16位窗口大小：</strong>用于控制<strong>发送方</strong>发送的流量。接收方将自己接收<strong>缓冲器剩余空间</strong>的大小告诉发送方叫做16位窗口大小。</p>
+<p>发送发可以根据窗口大小来适配发送的速度和大小，窗口大小最大是2的16次方，表示最多能表示发送64KB，但也可以根据选项中的某些位置扩展，最大扩展1G。<br><strong>16位校验和：</strong>发送端填充，<strong>CRC校验</strong>。如果接收端校验不通过， 则认为数据有问题</p>
+<p>(此处的检验和不光包含TCP首部也包含TCP数据部分？？？)。</p>
+<h3 id="确认应答机制"><a href="#确认应答机制" class="headerlink" title="确认应答机制"></a>确认应答机制</h3><p>发送端向接收端发送消息后，如果接收端成功收到了信息，会返回 ACK 和下一个报文段的确认号。</p>
+<blockquote>
+<p>如，主机A给主机B发送了1-1000的数据，ACK应答，携带了1001序列号。告诉主机A，我已经接受到了1-1000数据，下一次你从1001开始发送数据。</p>
+</blockquote>
+<h3 id="超时重传"><a href="#超时重传" class="headerlink" title="超时重传"></a>超时重传</h3><p>当接收端没有接受到消息，或者发出的 ACK 消息丢失了，发送端就会在特定的时间间隔内重发信息。</p>
+<p>因此接收端会产生重复信息，需要根据【16位序列号？？？？】去重。</p>
+<p><strong>如何确定超时的时间？</strong></p>
+<p>太短会导致频繁发送重复的包，太长会影响重传效率，因此 TCP 为了保证高性能，会动态计算这个时间。</p>
+<p>如 linux，以 500 ms 为单位进行控制，以整数倍递增，倍数以指数型递增。</p>
+<p>当首次重发后，仍然超时就会等待 2*500ms、4*500ms…</p>
+<h3 id="连接管理机制"><a href="#连接管理机制" class="headerlink" title="连接管理机制"></a>连接管理机制</h3><p><strong>三次握手</strong>：确保两端都有发送和接收的能力，两次握手只能确认一端能够发送，另一端能够回应，但无法确认另一端发送后，这一端也能正常回应。</p>
+<p><img src="/../assets/image-20240801223020726.png" alt="image-20240801223020726"></p>
+<p><strong>四次挥手</strong></p>
+<p><img src="/../assets/851c5465701a9220100681120c61609e.png" alt="img"></p>
+<p>收到 FIN 的时候无法立即关闭，需要等待 2 TTL（发收都完成），因此需要先返回确认 ACK，表示收到。</p>
+<p>然后处理完成后，再发送 FIN 给客户端（第三次挥手），最后客户端回应，连接正确断开。</p>
+<p><strong>TIME_WAIT 状态</strong></p>
+<p>当我们实现一个TCP服务器时，我们把这个服务器运行起来。</p>
+<p>然后将服务器关闭掉，再次重新启动服务器会发现一个问题：</p>
+<p>就是不能马上再次绑定这个端口号和ip，需要等一会才可以重新绑定，其实等的这一会就是<strong>TIME_WAIT</strong> 状态。</p>
+<p>TCP协议规定主动关闭连接的一方要处于TIME_WAIT状态，等待<strong>两个MSL</strong>的时间后才能回到CLOSED状态。<br>当我们使用Ctrl-C终止了server，server是主动关闭连接的一方在TIME_WAIT期间仍然<strong>不能再次监听同样的server端口。</strong></p>
+<p><strong>MSL</strong></p>
+<p>MSL在RFC1122中规定为<strong>两分钟</strong>(120s)，但是各操作系统的实现不同。</p>
+<p>在Centos7上默认配置的值是60s可以通过cat &#x2F;proc&#x2F;sys&#x2F;net&#x2F;ipv4&#x2F;tcp_fin_timeout查看MSL的值。</p>
+<p><strong>为什么TIME_WAIT时间一定是2MSL：</strong></p>
+<p>保证两端都发送和接收都已完成。</p>
+<p>首先，TIME_WAIT是为了防止最后一个ACK丢失，如果没有TIME_WAIT，那么主动断开连接的一方就已经关闭连接，但是另一方还没有断开连接，它收不到确认ACK会认为自己上次发送的FIN报文丢失会重发该报文，但是另一方已经断开连接了，这就会造成连接不一致的问题，所以TIME_WAIT是必须的。</p>
+<p><strong>MSL是TCP报文在发送缓冲区的最大生存时间</strong>，如果TIME_WAIT持续存在2MSL的话就能保证在两个传输方向上的尚未被接收或迟到的报文段都已经消失。</p>
+<p>(否则如果服务器立刻重启，可能会收到来自上一个进程的<strong>迟到的</strong>数据，但是这种数据很可能是错误的)。</p>
+<p>同时也是在理论上保证最后一个报文可靠到达。</p>
+<p>(假设最后一个ACK丢失, 那么服务器会再重发一个FIN，这时虽然客户端的进程不在了，但是TCP连接还在，仍然可以重发LAST_ACK，这就会导致问题) ？？？？</p>
+<p><strong>解决TIME_WAIT状态引起的bind失败的方法：</strong></p>
+<p>在server的TCP连接没有完全断开之前不允许重新绑定，也就是TIME_WAIT时间没有过，但是这样不允许立即绑定在某些情况下是不合理的：</p>
+<p>比如：服务器需要处理<strong>大量的</strong>、<strong>短暂的</strong>客户端的连接<br>(每个连接的生存时间可能很短，但是每秒都有很大数量的客户 端来请求)<br>这个时候如果由服务器端主动关闭连接(比如某些客户端不活跃，就需要被服务器端主动清理掉)，</p>
+<p>这样服务器端就会有大量的端口产生大量TIME_WAIT状态，无法立刻重用，需要等待。<br>每个连接都会占用一个通信五元组(源ip, 源端口, 目的ip, 目的端口, 协议)。其中服务器的ip和端口和协议是固定的，如果新来的客户端连接的ip和端口号和TIME_WAIT占用的<strong>连接重复</strong>就造成等待。<br><strong>解决方法：</strong>使用setsockopt()设置socket描述符的选项SO_REUSEADDR为1，表示允许创建端口号相同但IP地址不同的多个socket描述符。</p>
+<p><strong>CLOSE_WAIT 状态</strong></p>
+<p>在两次挥手过后，如果服务器还没有第三次挥手，此时就是 CLOSE_WAIT 状态。</p>
+<h3 id="滑动窗口"><a href="#滑动窗口" class="headerlink" title="滑动窗口"></a>滑动窗口</h3><p>确认应答策略要求每一个发送的数据段都要给一个ACK，收到后再发送下一个数据段。</p>
+<p>相当于 2L 的时间发送一段数据，性能较差，尤其是数据往返的时间较长的时候。</p>
+<p>滑动窗口可以同时发送多条消息，将多个段的等待时间重叠在一起。</p>
+<p>想当于 1L 的时间发送多条数据，大大的提高了吞吐率。</p>
+<p><img src="/../assets/177935b496ee7d7f11ed9c9a9e894dcf.png" alt="在这里插入图片描述"></p>
+<p><strong>窗口大小</strong>：指的是无需等待确认应答而可以继续发送数据的最大值。</p>
+<p>上图的窗口大小就是4000个字节(四个数据段段)。</p>
+<blockquote>
+<p>和 TCP 协议头的窗口大小是一个东西吗？？控制发送流量</p>
+</blockquote>
+<p>发送前四个段的时候，不需要等待任何ACK直接发送即可。</p>
+<p>当收到第一个ACK后滑动窗口向后移动，继续发送第五个段的数据，然后依次类推。</p>
+<p>操作系统内核通过<strong>发送缓冲区</strong>来记录当前还有哪些数据没有应答。</p>
+<p>只有确认应答过的数据，才能从缓冲区删掉，窗口越大，则网络的吞吐率就越高。</p>
+<p>滑动窗口左边代表已经发送过并且确认，可以从发送缓冲区中删除了，</p>
+<p>滑动窗口里边代表发送出去但是没有确认。</p>
+<p>滑动窗口右边代表还没有发送的数据。</p>
+<p><img src="/../assets/df5e0a10e3053d58d6db9e339defdda3.png" alt="在这里插入图片描述"></p>
+<p>如果在这种情况中出现了丢包现象，应该如何重发呢？</p>
+<p><strong>ACK丢失：</strong>数据到达接收方，但是 ACK 报文丢失：可以根据后边的ACK确认。</p>
+<blockquote>
+<p>因为接收方也是一段一段同步接收的，所以如果丢失了前面的 ACK，后面的可以帮忙确定。</p>
+</blockquote>
+<p>假设发送方发送1-1000的数据，接收方收到返回确认ACK，但是返回的ACK丢失了，</p>
+<p>另一边发送1001-2000收到的确认ACK 2001，就可以认为1-1000数据接收成功 。</p>
+<p><strong>数据段丢失：</strong> 当某一段报文段丢失之后，发送端会<strong>持续</strong>收到 1001 这样的ACK，就像是在提醒发送端 “我想要的是 1001” 一样。</p>
+<p>如果发送端主机连续<strong>三次</strong>收到了同样一个”1001” 这样的应答，就会将对应的数据 1001 - 2000 重新发送；</p>
+<p>并且这个时候接收端收到了 1001 之后， 再次返回的ACK就是7001了。</p>
+<p>因为2001 - 7000接收端其实之前就已经收到了，被放到了接收端操作系统内核的接收缓冲区中。</p>
+<p>这种机制被称为 “<strong>高速重发控制</strong>”(也叫 “<strong>快重传</strong>“)。</p>
+<p><img src="/../assets/400205f0f6d346180974888623079274.png" alt="在这里插入图片描述"></p>
+<p><strong>快重传</strong>要求接收方在收到一个失序的报文段后就立即发出重复确认</p>
+<blockquote>
+<p> （为的是使发送方及早知道有报文段没有到达对方）而不要等到自己发送数据时捎带确认。</p>
+</blockquote>
+<p>快重传算法规定：发送方只要一连收到<strong>三个重复确认</strong>就应当立即重传对方尚未收到的报文段，而<strong>不必继续等待设置的重传计时器</strong>时间到期。</p>
+<p>由于不需要等待设置的重传计时器到期，能尽早重传未被确认的报文段，能提高整个网络的吞吐量。</p>
+<h3 id="流量控制"><a href="#流量控制" class="headerlink" title="流量控制"></a><strong>流量控制</strong></h3><p>接收端处理数据的速度是有限的，如果发送端发的太快，导致接收端的<strong>缓冲区被装满</strong>；</p>
+<p>这个时候如果发送端继续发送，就会造成<strong>丢包</strong>，然后引起丢包重传等等一系列连锁反应。</p>
+<p>因此TCP支持根据接收端的处理能力，来决定发送端的发送速度，这个机制就叫做流量控制(Flow Control)。-&gt; 窗口字段</p>
+<p>接收端将自己可以接收的缓冲区大小放入TCP首部中的”窗口大小”字段，通过ACK确认报文通知发送端<br>窗口大小字段越大，说明网络的吞吐量越高</p>
+<p>接收端一旦发现自己的缓冲区快满了，就会将窗口大小设置成一个更小的值通知给发送端;<br>发送端接受到这个窗口之后，就会减慢自己的发送速度;</p>
+<p>如果接收端缓冲区满了， 就会将窗口置为0。</p>
+<p>这时发送方不再发送数据，但是需要定期发送一个<strong>窗口探测数据段</strong>，使接收端把窗口大小告诉发送端。<br>除了窗口大小，TCP首部的 40 字节选项中还包含了一个窗口扩大因子M，实际窗口大小是 窗口字段的值左移M位。</p>
+<p>接收端窗口如果更新，会向发送端发送一个更新通知，如果这个更新通知在中途丢失了，会导致无法继续通信，所以发送端要定时发送窗口探测包。</p>
+<blockquote>
+<p>这个窗口探测数据段的数据是无意义的，目的是得到返回的窗口大小。</p>
+</blockquote>
+<h3 id="拥塞控制"><a href="#拥塞控制" class="headerlink" title="拥塞控制"></a><strong>拥塞控制</strong></h3><p>虽然 TCP 有了滑动窗口能够同时发送大量的数据，但是如果在刚开始阶段就发送大量的数据，仍然可能引发问题。</p>
+<p>因为网络上有很多的计算机，可能当前的网络状态就已经比较拥堵，在不清楚当前网络状态下，贸然发送大量的数据是很有可能引起雪上加霜的，造成网络更加堵塞。</p>
+<p>TCP引入<strong>慢启动机制</strong>，先发少量的数据探探路，摸清当前的网络拥堵状态，再决定按照多大的速度传输数据。</p>
+<p><img src="/../assets/bd3f071631a537919e41921a104fc8bc.png" alt="在这里插入图片描述"></p>
+<p>图中的 cwnd 表示拥塞窗口大小，开始时大小为1，根据应答情况进行递增或重置。</p>
+<p>每次发送数据包的时候，将拥塞窗口和接收端主机反馈的窗口大小做比较，<strong>取较小的值</strong>作为实际发送的窗口。</p>
+<p>像上面这样的拥塞窗口增长速度，是指数级别的。</p>
+<p>“慢启动”只是指初使时慢，但是增长速度非常快。</p>
+<p>为了控制增长的速率，引入一个叫做<strong>慢启动的阈值</strong>。</p>
+<p>当拥塞窗口超过这个阈值的时候，不再按照指数方式增长， 而是按照线性方式增长。</p>
+<p><img src="/../assets/41d1659ebe0b087e7fbb4912ae2c6929.png" alt="在这里插入图片描述"></p>
+<p>当TCP开始启动的时候，慢启动阈值等于窗口最大值？？</p>
+<blockquote>
+<p>哪个阶段的窗口最大值，第二次握手获得的窗口大小？？</p>
+</blockquote>
+<p>在每次<strong>超时重发</strong>后，慢启动阈值会变成原来的一半同时拥塞窗口置回 1<br>区别于超时重传：是少量的丢包。</p>
+<p>大量的丢包，我们就认为网络拥塞。当TCP通信开始后，网络吞吐量会逐渐上升。</p>
+<p>随着网络发生拥堵，吞吐量会立刻下降。</p>
+<p>拥塞控制归根结底是TCP协议想尽可能快的把数据传输给对方，但是又要避免给网络造成太大压力的折中方案。</p>
+<p><img src="/../assets/0eea54ca2d2109be4248007f60e564cd.png" alt="在这里插入图片描述"></p>
+<h4 id="拥塞控制与流量控制的区别："><a href="#拥塞控制与流量控制的区别：" class="headerlink" title="拥塞控制与流量控制的区别："></a><strong>拥塞控制与流量控制的区别：</strong></h4><p><strong>拥塞控制</strong>是防止过多的数据突然注入到网络中，考虑到了网络中的路由器或链路过载，是一个<strong>全局性</strong>的过程。 <strong>流量控制</strong>是基于<strong>缓冲区</strong>的，某个时间点的通信量控制，主要就是控制发送端发送数据的速率，以便接收端来得及接收。</p>
+<h4 id="拥塞控制的标志："><a href="#拥塞控制的标志：" class="headerlink" title="拥塞控制的标志："></a><strong>拥塞控制的标志：</strong></h4><ul>
+<li>重传计时器超时</li>
+<li>接收到三个重复确认</li>
+</ul>
+<p>拥塞避免并非完全能够避免拥塞，只是尽量使网络不容易出现拥塞。</p>
+<p>拥塞避免的思路是让拥塞窗口 cwnd 缓慢地增大。</p>
+<p>无论是在慢开始阶段还是在拥塞避免阶段，只要发送方判断网络出现拥塞</p>
+<p>（其根据就是没有收到确认，虽然没有收到确认可能是其他原因的分组丢失，但是因为无法判定，所以都当做拥塞来处理）</p>
+<p>这时就把慢开始门限设置为出现拥塞时的门限的一半。然后把拥塞窗口设置为1，执行慢开始算法。</p>
+<p><img src="/../assets/cf57209e259ba0966c38cd1a6949463b.png" alt="在这里插入图片描述"></p>
+<p><strong>线性-加法增大：</strong>执行拥塞避免算法后，拥塞窗口线性缓慢增大，防止网络过早出现拥塞<br><strong>超时-乘法减小：</strong>无论是慢开始阶段还是拥塞避免，只要出现了网络拥塞（超时），那就把慢开始门限值ssthresh减半</p>
+<h4 id="快恢复（与快重传配合使用）"><a href="#快恢复（与快重传配合使用）" class="headerlink" title="快恢复（与快重传配合使用）"></a><strong>快恢复（与快重传配合使用）</strong></h4><p>采用快恢复算法时，慢启动只在TCP开始连接建立时和网络出现超时时才使用。</p>
+<p>当发送方连续收到三个重复确认时，就执行“乘法减小”算法，但是只把 ssthresh 门限减半，并把 cwnd 设置为 ssthresh 的大小。</p>
+<p>因为考虑到如果网络出现拥塞的话就不会收到好几个重复的确认，所以发送方现在认为<strong>网络可能没有出现拥塞。</strong></p>
+<h3 id="延迟应答"><a href="#延迟应答" class="headerlink" title="延迟应答"></a><strong>延迟应答</strong></h3><p>如果接收数据的主机立刻返回ACK应答，这时候返回的窗口可能比较小。</p>
+<blockquote>
+<p>可能会根据本次接收的数据大小来控制窗口。</p>
+</blockquote>
+<p>假设接收端缓冲区为1M 一次收到了 500 K 的数据。如果立刻应答，返回的窗口就是500K。</p>
+<p> 但实际上可能处理端处理的速度很快，10ms之内就把500K数据从缓冲区消费掉了，在这种情况下，接收端处理还远没有达到自己的极限，即使窗口再放大一些也能处理过来。</p>
+<p>如果接收端稍微等一会再应答，比如等待200ms再应答，那么这个时候返回的窗口大小就是1M。</p>
+<p>因为窗口越大，网络吞吐量就越大，传输效率就越高。</p>
+<p>所以我们的目标是在保证网络不拥塞的情况下尽量提高传输效率。</p>
+<p><strong>延迟策略：</strong></p>
+<ul>
+<li>数量限制: 每隔N个包就应答一次</li>
+<li>时间限制: 超过延迟时间就应答一次</li>
+</ul>
+<blockquote>
+<p>具体的数量和超时时间, 依操作系统不同也有差异; 一般N取2, 超时时间取200ms</p>
+</blockquote>
+<h3 id="捎带应答"><a href="#捎带应答" class="headerlink" title="捎带应答"></a><strong>捎带应答</strong></h3><p>在延迟应答的基础上，存在很多情况下，客户端服务器在应用层也是”一发一收” 的。 </p>
+<p>意味着客户端给服务器说了”How are you”， 服务器也会给客户端回一个”Fine, thank you”。那么这个时候ACK就可以搭顺风车，和服务器回应的 “Fine, thank you” 一起回给客户端</p>
+<p>就是发送 ACK 的同时顺便带上这边要发送的数据（3次握手）</p>
+<h3 id="面向字节流"><a href="#面向字节流" class="headerlink" title="面向字节流"></a><strong>面向字节流</strong></h3><p>当我们创建一个TCP的socket，会同时在内核中创建一个<strong>发送缓冲区</strong>和一个<strong>接收缓冲区</strong>。</p>
+<p>调用 <strong>write</strong> 时，内核将数据会先写入发送缓冲区中，</p>
+<p>如果发送的字节数太长，会被拆分成多个TCP的数据包发出，</p>
+<p>如果发送的字节数太短，就会先在缓冲区里等待， 等到缓冲区长度达到设置长度，然后等到其他合适的时机发送出去。<br>调用 <strong>read</strong> 接收数据的时候， 数据也是从网卡驱动程序到达内核的接收缓冲区。</p>
+<p>然后应用程序可以调用read从接收缓冲区拿数据。</p>
+<p>TCP的一个连接，既有发送缓冲区, 也有接收缓冲区，那么对于这一个连接，既可以读数据，也可以写数据。所以是<strong>全双工</strong>的。</p>
+<p><strong>并且由于缓冲区的存在，TCP程序的读和写不需要一一匹配。</strong></p>
+<p>例如: </p>
+<p>写100个字节数据时, 可以调用一次write写100个字节, 也可以调用100次write, 每次写一个字节; </p>
+<p>读100个字节数据时, 也完全不需要考虑写的时候是怎么写的, 既可以一次read 100个字节, 也可以一次 read一个字节, 重复100次</p>
+<h3 id="粘包问题"><a href="#粘包问题" class="headerlink" title="粘包问题"></a><strong>粘包问题</strong></h3><p>粘包问题中的 “包”是指的<strong>应用层的</strong>数据包。</p>
+<p>在TCP的协议头中，没有如同<strong>UDP</strong>一样的 “<strong>报文长度</strong>“这样的字段，只有一个序号这样的字段。</p>
+<p>站在传输层的角度， TCP是一个一个报文过来的，按照序号排好序放在缓冲区中，但是站在应用层的角度，它看到的只是一串连续的字节数据。</p>
+<p>但是不知道从哪个部分开始到哪个部分结束是一个<strong>完整的</strong>应用层数据包，这就是粘包问题。</p>
+<p><strong>如何避免粘包问题呢?</strong> </p>
+<p>明确两个包之间的边界。</p>
+<ul>
+<li>对于<strong>定长</strong>的包，保证每次都按<strong>固定大小</strong>读取即可。</li>
+</ul>
+<blockquote>
+<p>例如一个Request结构, 是固定大小的, 那么就从缓冲区从头开始按sizeof(Request)依次读取即可</p>
+</blockquote>
+<ul>
+<li>对于<strong>变长</strong>的包，可以在包头的位置，<strong>约定一个包总长度的字段</strong>，从而就知道了包的结束位置。</li>
+<li>对于<strong>变长</strong>的包，还可以在包和包之间使用明确的<strong>分隔符</strong></li>
+</ul>
+<p>(应用层协议是程序员自己来定义的, 只要保证分隔符不和正文冲突即可)。</p>
+<p><strong>对比UDP协议</strong></p>
+<p>UDP是一个一个把数据交付给应用层，有明确的数据边界。</p>
+<p>站在应用层的角度， 使用UDP的时候要么收到完整的UDP报文要么不收，不会出现”半个”的情况。</p>
+<h3 id="TCP连接异常情况"><a href="#TCP连接异常情况" class="headerlink" title="TCP连接异常情况"></a><strong>TCP连接异常情况</strong></h3><ol>
+<li><p><strong>进程终止：</strong>进程终止会释放文件描述符，仍然可以发送 FIN，和正常关闭没有什么区别。<strong>机器重启和进程终止一样。</strong></p>
+</li>
+<li><p><strong>机器掉电&#x2F;网线断开：</strong>接收端认为连接还在，一旦接收端有写入操作，接收端发现连接已经不在了，就会进行 reset。</p>
+</li>
+</ol>
+<p>即使没有写入操作，TCP自己也内置了一个<strong>保活定时器</strong>，会定期询问对方是否还在。<br>如果对方不在，也会把连接释放。<br>应用层的某些协议, 也有一些这样的检测机制.例如HTTP长连接中, 也会定期检测对方的状态.</p>
+<p>比如 QQ 断线之后, 也会定期尝试重新连接。</p>
+]]></content>
+      <categories>
+        <category>计算机网络</category>
+        <category>TCP</category>
+      </categories>
+      <tags>
+        <tag>TCP</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>leetcode top100详解</title>
+    <url>/2024/07/27/leetcode-top100/</url>
+    <content><![CDATA[<h2 id="98-验证二叉搜索树"><a href="#98-验证二叉搜索树" class="headerlink" title="98. 验证二叉搜索树"></a>98. 验证二叉搜索树</h2><p><img src="/../assets/image-20240727163719314.png" alt="image-20240727163719314"></p>
+<p><strong>解法一：</strong>递归</p>
+<p>验证搜索树可以转换为每一颗子树的 小 &lt; 本身 &lt; 大 的思想。<br>根节点由于没有限制，只要满足 -inf - +inf 即可以，<br>然后随着左右子树的递归遍历，分别改变上界和下界。<br>如左子树必须满足 (-inf, root.val)，右子树：(root.val, +inf)。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">isValidBST</span><span class="params">(TreeNode root)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> isValidBST(root, Long.MIN_VALUE, Long.MAX_VALUE);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">isValidBST</span><span class="params">(TreeNode root, <span class="type">long</span> left, <span class="type">long</span> right)</span>&#123;</span><br><span class="line">       <span class="keyword">if</span>(root == <span class="literal">null</span>) <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">       <span class="keyword">if</span>(root.val &gt;= right || root.val &lt;= left) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">       <span class="keyword">return</span> isValidBST(root.left, left, root.val) &amp;&amp; isValidBST(root.right, root.val, right);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>解法二：中序遍历</strong></p>
+<p>由于二叉搜索树的中序遍历得到的一定是有序的数组。</p>
+<p>只要判断中序遍历过程中，是否有序即可。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">isValidBST</span><span class="params">(TreeNode root)</span> &#123;</span><br><span class="line">        <span class="comment">// 最小值为初始比较值</span></span><br><span class="line">        <span class="type">long</span> <span class="variable">min</span> <span class="operator">=</span> Long.MIN_VALUE;</span><br><span class="line">        <span class="comment">// 构建栈，模仿递归</span></span><br><span class="line">        Deque&lt;TreeNode&gt; stack = <span class="keyword">new</span> <span class="title class_">ArrayDeque</span>&lt;&gt;();</span><br><span class="line">        <span class="comment">// 以根节点开始</span></span><br><span class="line">        <span class="keyword">while</span>(!stack.isEmpty() || root != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="comment">// 开始递归</span></span><br><span class="line">            <span class="keyword">while</span>(root != <span class="literal">null</span>)&#123;</span><br><span class="line">                stack.push(root);</span><br><span class="line">                root = root.left;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 中序遍历：取出当前“根节点”</span></span><br><span class="line">            root = stack.pop();</span><br><span class="line">            <span class="keyword">if</span>(root.val &lt;= min) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">            <span class="comment">// 迭代最小值</span></span><br><span class="line">            min = root.val;</span><br><span class="line">            <span class="comment">// 访问右子树</span></span><br><span class="line">            root = root.right;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>模仿递归的一个关键因素是保证状态始终在 root 上变化。</p>
+</blockquote>
+<h2 id="230-二叉搜索树中第K小的元素"><a href="#230-二叉搜索树中第K小的元素" class="headerlink" title="230. 二叉搜索树中第K小的元素"></a>230. 二叉搜索树中第K小的元素</h2><p>最简单的思路就是：中序遍历，然后返回第 k-1 个元素。</p>
+<p>迭代实现，不需要访问所有元素。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">kthSmallest</span><span class="params">(TreeNode root, <span class="type">int</span> k)</span> &#123;</span><br><span class="line">        Deque&lt;TreeNode&gt; stack = <span class="keyword">new</span> <span class="title class_">ArrayDeque</span>&lt;TreeNode&gt;();</span><br><span class="line">        <span class="keyword">while</span> (root != <span class="literal">null</span> || !stack.isEmpty()) &#123;</span><br><span class="line">            <span class="keyword">while</span> (root != <span class="literal">null</span>) &#123;</span><br><span class="line">                stack.push(root);</span><br><span class="line">                root = root.left;</span><br><span class="line">            &#125;</span><br><span class="line">            root = stack.pop();</span><br><span class="line">            --k;</span><br><span class="line">            <span class="keyword">if</span> (k == <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            root = root.right;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> root.val;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>记录子树的结点数</strong></p>
+<p><strong>之所以需要中序遍历前 k 个元素，是因为不知道第 k 个元素是在树的什么位置。</strong></p>
+<p>也就是不知道子树的结点数量，需要一层一层遍历，然后计数。</p>
+<p>所以可以先记录每颗子树的结点数。</p>
+<p>那么第 k 小元素的位置一定满足如下条件：</p>
+<p>以 node 作为根结点，开始搜索：</p>
+<p>如果 node 的左子树的结点数 <strong>left &lt; k−1**，则第 k 小的元素一定在 node 的**右子树**中，令 node 等于其的右子结点，将左子树的结点数算在内，然后令 **k 等于 k−left−1**，并继续搜索；<br>如果 node 的左子树的结点数 **left &#x3D;&#x3D; k−1**，则**第 k 小的元素即为 node** ，结束搜索并返回 node 即可；<br>如果 node 的左子树的结点数 **left &gt; k−1</strong>，则第 k 小的元素一定在 node 的<strong>左子树</strong>中，令 node 等于其左子结点，并继续搜索。<br>为了提高效率，选择将每个子树的结点数存在哈希表中。</p>
+<p><strong>递归思想：一颗子树的左右结点数，分别是左右两颗子树的总结点数，只要不断往下遍历就能找到。</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line">    List&lt;Integer&gt; list = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">kthSmallest</span><span class="params">(TreeNode root, <span class="type">int</span> k)</span> &#123;</span><br><span class="line">        <span class="type">MyBst</span> <span class="variable">myBst</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MyBst</span>(root);</span><br><span class="line">        <span class="keyword">return</span> myBst.kthSmallest(k);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyBst</span> &#123;</span><br><span class="line">    TreeNode root;</span><br><span class="line">    Map&lt;TreeNode, Integer&gt; nodeNum;</span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">MyBst</span><span class="params">(TreeNode root)</span>&#123;</span><br><span class="line">        <span class="built_in">this</span>.root = root;</span><br><span class="line">        <span class="built_in">this</span>.nodeNum = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">        countNodeNum(root);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 根据子树的结点数分支遍历返回第 k 个结点</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">kthSmallest</span><span class="params">(<span class="type">int</span> k)</span> &#123;</span><br><span class="line">        <span class="type">TreeNode</span> <span class="variable">node</span> <span class="operator">=</span> root;</span><br><span class="line">        <span class="keyword">while</span>(node != <span class="literal">null</span>)&#123;</span><br><span class="line">            <span class="comment">// 当左右子树为空时，需返回0</span></span><br><span class="line">            <span class="type">int</span> <span class="variable">left</span> <span class="operator">=</span> nodeNum.getOrDefault(node.left, <span class="number">0</span>);</span><br><span class="line">            <span class="keyword">if</span>(left &lt; k-<span class="number">1</span>) &#123;</span><br><span class="line">                <span class="comment">// 不够数，减去左边和根看右边</span></span><br><span class="line">                node = node.right;</span><br><span class="line">                k -= left+<span class="number">1</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (left == k-<span class="number">1</span>)&#123;</span><br><span class="line">                <span class="comment">// 刚好，退出循环</span></span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// 超了，在左边</span></span><br><span class="line">                node = node.left;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> node != <span class="literal">null</span> ? node.val : -<span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 递归统计所有结点作为子树的结点数</span></span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> <span class="title function_">countNodeNum</span><span class="params">(TreeNode node)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span>(node == <span class="literal">null</span>) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        nodeNum.put(node, <span class="number">1</span>+countNodeNum(node.left)+countNodeNum(node.right));</span><br><span class="line">        <span class="keyword">return</span> nodeNum.get(node);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="199-二叉树的右视图"><a href="#199-二叉树的右视图" class="headerlink" title="199. 二叉树的右视图"></a>199. 二叉树的右视图</h2><p><img src="/../assets/image-20240729151611620.png" alt="image-20240729151611620"></p>
+<p>右视图就是从每一层的右边看过去的第一个节点。</p>
+<p>由于不知道树的具体结构，所以可以全部遍历然后取【每一层的】右边第一个。</p>
+<p>可以用深度优先遍历，每次优先访问最右边的，然后用一个哈希表记录每一层访问到的第一个元素，其它元素直接舍弃。</p>
+<p><strong>DPS</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> List&lt;Integer&gt; <span class="title function_">rightSideView</span><span class="params">(TreeNode root)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span>(root == <span class="literal">null</span>) <span class="keyword">return</span> Collections.emptyList();</span><br><span class="line">        <span class="comment">// 总是向右走，每层遇到的第一个就是右视图</span></span><br><span class="line">        Map&lt;Integer, Integer&gt; map = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">        <span class="type">int</span> <span class="variable">max_depth</span> <span class="operator">=</span> -<span class="number">1</span>;</span><br><span class="line">        Deque&lt;TreeNode&gt; nodeStack = <span class="keyword">new</span> <span class="title class_">LinkedList</span>&lt;&gt;();</span><br><span class="line">        Deque&lt;Integer&gt; depthStack = <span class="keyword">new</span> <span class="title class_">LinkedList</span>&lt;&gt;();</span><br><span class="line">        <span class="comment">// dps遍历</span></span><br><span class="line">        nodeStack.push(root);</span><br><span class="line">        depthStack.push(<span class="number">0</span>);</span><br><span class="line">        <span class="keyword">while</span>(!nodeStack.isEmpty()) &#123;</span><br><span class="line">            <span class="type">TreeNode</span> <span class="variable">node</span> <span class="operator">=</span> nodeStack.pop();</span><br><span class="line">            <span class="type">int</span> <span class="variable">depth</span> <span class="operator">=</span> depthStack.pop();</span><br><span class="line">            <span class="comment">// 维护二叉树的最大深度</span></span><br><span class="line">            max_depth = Math.max(max_depth, depth);</span><br><span class="line">            <span class="comment">// 只插入此深度的第一个节点</span></span><br><span class="line">            <span class="keyword">if</span>(!map.containsKey(max_depth)) map.put(max_depth, node.val);</span><br><span class="line">            <span class="comment">// 放入可访问的其它节点</span></span><br><span class="line">            <span class="keyword">if</span>(node.left != <span class="literal">null</span>) &#123;</span><br><span class="line">                nodeStack.push(node.left);</span><br><span class="line">                depthStack.push(depth+<span class="number">1</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span>(node.right != <span class="literal">null</span>) &#123;</span><br><span class="line">                nodeStack.push(node.right);</span><br><span class="line">                depthStack.push(depth+<span class="number">1</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        ArrayList&lt;Integer&gt; ans = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">        <span class="comment">// 按深度取出所有节点</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>; i&lt;=max_depth; i++)</span><br><span class="line">            ans.add(map.get(i));</span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>或者用广度优先搜索，每一层的最后一个就是右边第一个。</p>
+<p><strong>BFS</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> List&lt;Integer&gt; <span class="title function_">rightSideView</span><span class="params">(TreeNode root)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span>(root == <span class="literal">null</span>) <span class="keyword">return</span> Collections.emptyList();</span><br><span class="line">        ArrayList&lt;Integer&gt; ans = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">        <span class="comment">// 每层遇到的右边第一个就是右视图</span></span><br><span class="line">        Queue&lt;TreeNode&gt; q = <span class="keyword">new</span> <span class="title class_">LinkedList</span>&lt;&gt;();</span><br><span class="line">        q.offer(root);</span><br><span class="line">        <span class="keyword">while</span>(!q.isEmpty())&#123;</span><br><span class="line">            <span class="comment">// 根据每一层的个数，隔离每一层</span></span><br><span class="line">            <span class="type">int</span> <span class="variable">layerNum</span> <span class="operator">=</span> q.size();</span><br><span class="line">            <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>; i&lt;layerNum; i++)&#123;</span><br><span class="line">                <span class="type">TreeNode</span> <span class="variable">node</span> <span class="operator">=</span> q.poll();</span><br><span class="line">                <span class="comment">// 添加各层最后一个</span></span><br><span class="line">                <span class="keyword">if</span>(i == layerNum-<span class="number">1</span>) ans.add(node.val);</span><br><span class="line">                <span class="keyword">if</span>(node.left != <span class="literal">null</span>) q.offer(node.left);</span><br><span class="line">                <span class="keyword">if</span>(node.right != <span class="literal">null</span>) q.offer(node.right);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="114-二叉树展开为链表"><a href="#114-二叉树展开为链表" class="headerlink" title="114. 二叉树展开为链表"></a>114. 二叉树展开为链表</h2><p><img src="/../assets/image-20240729160936745.png" alt="image-20240729160936745"></p>
+<p>常规思路可以先按照先序遍历存储一条链表，然后从 root 开始逐一复制节点。</p>
+<p>或者直接“拼接”。</p>
+<p>只要按照先序遍历的顺序，找到左子树最后一个节点，然后拼接上右子树，</p>
+<p>再把左子树整个移到右边去，如此循环处理每一个右节点，最后就变成直直的一条链表了。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">flatten</span><span class="params">(TreeNode root)</span> &#123;</span><br><span class="line">        <span class="keyword">while</span>(root != <span class="literal">null</span>)&#123;</span><br><span class="line">            <span class="comment">// 根据左边是否有节点，决定是否需要拼接</span></span><br><span class="line">            <span class="keyword">if</span>(root.left != <span class="literal">null</span>)&#123;</span><br><span class="line">                <span class="comment">// 先找到左子树最右边的节点</span></span><br><span class="line">                <span class="type">TreeNode</span> <span class="variable">last_right</span> <span class="operator">=</span> root.left;</span><br><span class="line">                <span class="keyword">while</span>(last_right.right != <span class="literal">null</span>) &#123;</span><br><span class="line">                    last_right = last_right.right;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 把当前右子树插到左子树最右边</span></span><br><span class="line">                last_right.right = root.right;</span><br><span class="line">                <span class="comment">// 把左子树整个移到当前节点右边</span></span><br><span class="line">                root.right = root.left;</span><br><span class="line">                root.left = <span class="literal">null</span>;</span><br><span class="line">                <span class="comment">// 拼接下一个节点的左右子树</span></span><br><span class="line">                root = root.right;</span><br><span class="line">            &#125; <span class="keyword">else</span>&#123;</span><br><span class="line">                <span class="comment">// 左边是空的，直接拼接下一个节点</span></span><br><span class="line">                root = root.right;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">    1</span><br><span class="line">   / \</span><br><span class="line">  2   5</span><br><span class="line"> / \   \</span><br><span class="line">3   4   6</span><br><span class="line"></span><br><span class="line">//将 1 的左子树插入到右子树的地方</span><br><span class="line">    1</span><br><span class="line">     \</span><br><span class="line">      2         5</span><br><span class="line">     / \         \</span><br><span class="line">    3   4         6        </span><br><span class="line">//将原来的右子树接到左子树的最右边节点</span><br><span class="line">    1</span><br><span class="line">     \</span><br><span class="line">      2          </span><br><span class="line">     / \          </span><br><span class="line">    3   4  </span><br><span class="line">         \</span><br><span class="line">          5</span><br><span class="line">           \</span><br><span class="line">            6</span><br><span class="line">            </span><br><span class="line"> //将 2 的左子树插入到右子树的地方</span><br><span class="line">    1</span><br><span class="line">     \</span><br><span class="line">      2          </span><br><span class="line">       \          </span><br><span class="line">        3       4  </span><br><span class="line">                 \</span><br><span class="line">                  5</span><br><span class="line">                   \</span><br><span class="line">                    6   </span><br><span class="line">        </span><br><span class="line"> //将原来的右子树接到左子树的最右边节点</span><br><span class="line">    1</span><br><span class="line">     \</span><br><span class="line">      2          </span><br><span class="line">       \          </span><br><span class="line">        3      </span><br><span class="line">         \</span><br><span class="line">          4  </span><br><span class="line">           \</span><br><span class="line">            5</span><br><span class="line">             \</span><br><span class="line">              6         </span><br><span class="line">  </span><br><span class="line">  ......</span><br></pre></td></tr></table></figure>
+
+<h2 id="300-最长递增子序列"><a href="#300-最长递增子序列" class="headerlink" title="300. 最长递增子序列"></a>300. 最长递增子序列</h2><p><img src="/../assets/image-20240730132945810.png" alt="image-20240730132945810"></p>
+<p><strong>动态规划</strong></p>
+<p>定义状态：dp[i] 的值就代表以 nums[i] 结尾的最长子序列长度</p>
+<p>转移方程：遍历之前的 dp[j]，当 nums[j] &lt; nums[i] 时表示可以接在后面，保留拼接后的最大值 dp[i] &#x3D; max(dp[i], dp[j]+1)</p>
+<p>初始状态：每个数元素本身至少就是一个长度为 1 的序列。</p>
+<p>返回值：记录 dp[i] 的最大值。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">lengthOfLIS</span><span class="params">(<span class="type">int</span>[] nums)</span> &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">n</span> <span class="operator">=</span> nums.length;</span><br><span class="line">        <span class="keyword">if</span>(n == <span class="number">0</span>) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        <span class="type">int</span>[] dp = <span class="keyword">new</span> <span class="title class_">int</span>[n];</span><br><span class="line">        <span class="comment">// 每个数字本身都是一个序列</span></span><br><span class="line">        Arrays.fill(dp, <span class="number">1</span>);</span><br><span class="line">        <span class="type">int</span> <span class="variable">res</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>; i&lt;n; i++)&#123;</span><br><span class="line">            <span class="comment">// 找到能继续连起来的最大的子序列</span></span><br><span class="line">            <span class="keyword">for</span>(<span class="type">int</span> j=<span class="number">0</span>; j&lt;i; j++)&#123;</span><br><span class="line">                <span class="keyword">if</span>(nums[j] &lt; nums[i]) dp[i] = Math.max(dp[i], dp[j]+<span class="number">1</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            res = Math.max(res, dp[i]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>动态规划 + 二分法</strong></p>
+<p>普通的动态规划需要找到能接到上的最长的子序列，所以是 dp[i] &#x3D; max(dp[i], dp[j]+1)。</p>
+<p>那如果维护一个 tails 数组，不断取出子序列 nums[1,k] 尾部元素更新 tails 数组，只保留更小的尾部，那么 tails 数组的长度就是最终答案。</p>
+<p>优化的精髓在于：本身是一个有序序列，能够通过二分法更新 nums[1,k] 的尾部最小值，保证每次迭代都是基于之前子序列的最大可能有序序列。</p>
+<blockquote>
+<p>这个更新尾部最小值，很好的“拿出了”一长串递增序列中的无关元素。</p>
+</blockquote>
+<p>如：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nums: 1 5 3</span><br><span class="line">取出 1</span><br><span class="line">tails: 1</span><br><span class="line">取出 5（能接上）</span><br><span class="line">tails: 1,5</span><br><span class="line">取出 3（替掉5，重新接上）</span><br><span class="line">tails: 1,3</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">lengthOfLIS</span><span class="params">(<span class="type">int</span>[] nums)</span> &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">n</span> <span class="operator">=</span> nums.length;</span><br><span class="line">        <span class="comment">// 始终维护每个子序列的尾部最小，并按升序排列</span></span><br><span class="line">        <span class="type">int</span>[] tails = <span class="keyword">new</span> <span class="title class_">int</span>[n];</span><br><span class="line">        <span class="type">int</span> <span class="variable">res</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> num: nums)&#123;</span><br><span class="line">            <span class="type">int</span> i=<span class="number">0</span>, j=res;</span><br><span class="line">            <span class="comment">// 二分法替换掉第一个尾部更大的（按顺序接上）</span></span><br><span class="line">            <span class="keyword">while</span>(i &lt; j)&#123;</span><br><span class="line">                <span class="type">int</span> <span class="variable">m</span> <span class="operator">=</span> (i+j)/<span class="number">2</span>;</span><br><span class="line">                <span class="keyword">if</span>(tails[m] &lt; num) i = m+<span class="number">1</span>;</span><br><span class="line">                <span class="keyword">else</span> j = m;</span><br><span class="line">            &#125;</span><br><span class="line">            tails[i] = num;</span><br><span class="line">            <span class="comment">// 接在了最长的后面</span></span><br><span class="line">            <span class="keyword">if</span>(res == j) res++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="105-从前序和中序遍历序列构造二叉树"><a href="#105-从前序和中序遍历序列构造二叉树" class="headerlink" title="105. 从前序和中序遍历序列构造二叉树"></a>105. 从前序和中序遍历序列构造二叉树</h2><p>通过后序和中序、前序和中序都能构造二叉树。</p>
+<p>因为可以确定根的位置，然后从中序遍历中，将根的两边分为左右子树。</p>
+<p>再不断递归划分左右子树，然后回溯就构建成功了。</p>
+<p>前序遍历结构：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[ 根节点, [左子树的前序遍历结果], [右子树的前序遍历结果] ]</span><br></pre></td></tr></table></figure>
+
+<p>中序遍历结构：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[ [左子树的中序遍历结果], 根节点, [右子树的中序遍历结果] ]</span><br></pre></td></tr></table></figure>
+
+<p><strong>递归：</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line">    <span class="comment">// 减少索引结点位置时间</span></span><br><span class="line">    HashMap&lt;Integer, Integer&gt; map = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">    <span class="keyword">public</span> TreeNode <span class="title function_">buildTree</span><span class="params">(<span class="type">int</span>[] preorder, <span class="type">int</span>[] inorder)</span> &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">n</span> <span class="operator">=</span> inorder.length;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>; i&lt;inorder.length; i++)&#123;</span><br><span class="line">            map.put(inorder[i], i);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> splitBuildTree(preorder, inorder, <span class="number">0</span>, n-<span class="number">1</span>, <span class="number">0</span>, n-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> TreeNode <span class="title function_">splitBuildTree</span><span class="params">(<span class="type">int</span>[] pre, <span class="type">int</span>[] in, <span class="type">int</span> lp, <span class="type">int</span> rp, <span class="type">int</span> li, <span class="type">int</span> ri)</span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(lp &gt; rp) <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        <span class="comment">// 只要从先序遍历中知道根节点，就可以在中序中分割出左右子树</span></span><br><span class="line">        <span class="comment">// 如此递归，直到建成最小的子树，然后返回根节点</span></span><br><span class="line">        <span class="type">int</span> <span class="variable">pre_root</span> <span class="operator">=</span> lp;</span><br><span class="line">        <span class="type">int</span> <span class="variable">in_root</span> <span class="operator">=</span> map.get(pre[lp]);</span><br><span class="line">        <span class="type">TreeNode</span> <span class="variable">root</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TreeNode</span>(pre[lp]);</span><br><span class="line">        <span class="type">int</span> <span class="variable">leftNum</span> <span class="operator">=</span> in_root-li;</span><br><span class="line">        <span class="comment">// 从 左边界+1 开始的 leftNum 个，就是左子树</span></span><br><span class="line">        root.left = splitBuildTree(pre, in, lp+<span class="number">1</span>, lp+leftNum, li, in_root-<span class="number">1</span>);</span><br><span class="line">        <span class="comment">// 从 左子树</span></span><br><span class="line">        root.right = splitBuildTree(pre, in, lp+<span class="number">1</span>+leftNum, rp, in_root+<span class="number">1</span>, ri);</span><br><span class="line">        <span class="keyword">return</span> root;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="437-路径总和-Ⅲ"><a href="#437-路径总和-Ⅲ" class="headerlink" title="437. 路径总和 Ⅲ"></a>437. 路径总和 Ⅲ</h2><p><img src="/../assets/image-20240801171805324.png" alt="image-20240801171805324"></p>
+<p>最简单的思路就是<strong>穷举法</strong>，以每一个结点为根，遍历所有可能的路径，如果满足就计数+1</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">pathSum</span><span class="params">(TreeNode root, <span class="type">long</span> targetSum)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (root == <span class="literal">null</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        <span class="type">int</span> <span class="variable">ans</span> <span class="operator">=</span> rootSum(root, targetSum);</span><br><span class="line">        <span class="comment">// 以每个结点为起点，穷举所有路径</span></span><br><span class="line">        ans += pathSum(root.left, targetSum);</span><br><span class="line">        ans += pathSum(root.right, targetSum);</span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 穷举法</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">rootSum</span><span class="params">(TreeNode root, <span class="type">long</span> targetSum)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (root == <span class="literal">null</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        <span class="type">int</span> <span class="variable">ret</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">        <span class="comment">// 判断当前节点是否满足</span></span><br><span class="line">        <span class="keyword">if</span> (root.val == targetSum) &#123;</span><br><span class="line">            ++ret;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 继续累减下去，看是否有满足的结点数（相比于累加，可以少维护一个变量）</span></span><br><span class="line">        ret += rootSum(root.left, targetSum - root.val);</span><br><span class="line">        ret += rootSum(root.right, targetSum - root.val);</span><br><span class="line">        <span class="keyword">return</span> ret;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>前缀和</strong></p>
+<p>通过 map 记录从根节点开始到每个结点的和，只要在前面结点中能够找到一个结点 pre[i] 到当前结点 pre[j] 的路径和为 targetSum，问题就解决了。</p>
+<p>省去了第二层遍历，因为所有的路径都被“记住”了</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line">    <span class="comment">// 存储所有路径总和的次数</span></span><br><span class="line">    Map&lt;Long, Integer&gt; prefix = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">pathSum</span><span class="params">(TreeNode root, <span class="type">long</span> targetSum)</span> &#123;</span><br><span class="line">        <span class="comment">// 用于计算相等时的路径</span></span><br><span class="line">        prefix.put(<span class="number">0L</span>, <span class="number">1</span>);</span><br><span class="line">        <span class="keyword">return</span> dfs(root, <span class="number">0L</span>, targetSum);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">dfs</span><span class="params">(TreeNode root, <span class="type">long</span> cur, <span class="type">long</span> targetSum)</span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(root == <span class="literal">null</span>) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        <span class="type">int</span> <span class="variable">ret</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">        cur += root.val;</span><br><span class="line">        <span class="comment">// 是否存在一段路径和为 targetSum = cur - (cur-targetSum)</span></span><br><span class="line">        <span class="comment">// 相当于：既然无法直接索引某个点去求差得到 targetSum，就直接去查这个点</span></span><br><span class="line">        ret = prefix.getOrDefault(cur-targetSum, <span class="number">0</span>);</span><br><span class="line">        <span class="comment">// 加入这条路径</span></span><br><span class="line">        prefix.put(cur, prefix.getOrDefault(cur, <span class="number">0</span>)+<span class="number">1</span>);</span><br><span class="line">        <span class="comment">// 继续访问其他路径</span></span><br><span class="line">        ret += dfs(root.left, cur, targetSum);</span><br><span class="line">        ret += dfs(root.right, cur, targetSum);</span><br><span class="line">        <span class="comment">// 回溯，删除这条路径</span></span><br><span class="line">        prefix.put(cur, prefix.getOrDefault(cur, <span class="number">0</span>)-<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">return</span> ret;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="236-二叉树的最近公共祖先"><a href="#236-二叉树的最近公共祖先" class="headerlink" title="236. 二叉树的最近公共祖先"></a>236. 二叉树的最近公共祖先</h2><p><img src="/../assets/image-20240801183056893.png" alt="image-20240801183056893"></p>
+<p><strong>哈希回溯定位</strong></p>
+<p>可以先遍历整个树，通过哈希表存储所有结点的父节点，这样就可以得到 p,q 的“继承”路线。</p>
+<p>然后先回溯 p 的路线，并记录所有已访问的结点。</p>
+<p>再回溯 q 的路线，同时匹配是否已访问，因为是自底向上，第一个存在的就是最近公共祖先。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line">    HashMap&lt;TreeNode, TreeNode&gt; parent = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">    HashSet&lt;TreeNode&gt; visited = <span class="keyword">new</span> <span class="title class_">HashSet</span>&lt;&gt;();</span><br><span class="line">    <span class="keyword">public</span> TreeNode <span class="title function_">lowestCommonAncestor</span><span class="params">(TreeNode root, TreeNode p, TreeNode q)</span> &#123;</span><br><span class="line">        <span class="comment">// 自底向上回溯一遍</span></span><br><span class="line">        dfs(root);</span><br><span class="line">        <span class="keyword">while</span>(p != <span class="literal">null</span>)&#123;</span><br><span class="line">            visited.add(p);</span><br><span class="line">            p = parent.get(p);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 当 q 回溯时，遇到第一个已访问的结点就是最近公共祖先</span></span><br><span class="line">        <span class="keyword">while</span>(q != <span class="literal">null</span>)&#123;</span><br><span class="line">            <span class="keyword">if</span>(visited.contains(q))&#123;</span><br><span class="line">                <span class="keyword">return</span> q;</span><br><span class="line">            &#125;</span><br><span class="line">            q = parent.get(q);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">dfs</span><span class="params">(TreeNode root)</span>&#123;</span><br><span class="line">        <span class="comment">// 排除空结点</span></span><br><span class="line">        <span class="keyword">if</span>(root.left != <span class="literal">null</span>)&#123;</span><br><span class="line">            parent.put(root.left, root);</span><br><span class="line">            dfs(root.left);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(root.right != <span class="literal">null</span>)&#123;</span><br><span class="line">            parent.put(root.right, root);</span><br><span class="line">            dfs(root.right);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>标记回溯</strong></p>
+<p>最近公共祖先存在两种类型</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">分散在两边</span><br><span class="line">  0</span><br><span class="line"> / \</span><br><span class="line">p   q</span><br><span class="line">一方作为另一方的父结点</span><br><span class="line">  p</span><br><span class="line"> / \</span><br><span class="line">q</span><br></pre></td></tr></table></figure>
+
+<p>第一种情况，可以用两个标记变量表示</p>
+<p>left: 表示左边存在一个 p &#x2F; q</p>
+<p>right: 表示右边存在一个 q &#x2F; p</p>
+<blockquote>
+<p>p 在左或在右都一样，第一种情况另一个一定在另一边。</p>
+</blockquote>
+<p>所以当满足 <code>left &amp;&amp; right</code> 此根节点就是 p，q 的祖先。</p>
+<p>第二种情况类似，只需要额外判断自身是不是 p &#x2F; q。</p>
+<p>满足条件：<code>(x == p || x == q) &amp;&amp; (left || right)</code> 即本身存在一个和左右存在一个。</p>
+<p>再配合上递归回溯的特性，第一个满足的就是最近的祖先。</p>
+<blockquote>
+<p>是否会存在这个 true 使得祖先不满足最近的特点？</p>
+<p>不会，因为如果已经在一个子树确定了结果，另一个子树是不可能为 true 的，也就是祖先不会上升。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line">    TreeNode ans;</span><br><span class="line">    <span class="keyword">public</span> TreeNode <span class="title function_">lowestCommonAncestor</span><span class="params">(TreeNode root, TreeNode p, TreeNode q)</span> &#123;</span><br><span class="line">        dfs(root, p, q);</span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">dfs</span><span class="params">(TreeNode root, TreeNode p, TreeNode q)</span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(root == <span class="literal">null</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">int</span> <span class="variable">val</span> <span class="operator">=</span> root.val;</span><br><span class="line">        <span class="type">boolean</span> <span class="variable">left</span> <span class="operator">=</span> dfs(root.left, p, q);</span><br><span class="line">        <span class="type">boolean</span> <span class="variable">right</span> <span class="operator">=</span> dfs(root.right, p, q);</span><br><span class="line">        <span class="keyword">if</span>((left &amp;&amp; right) || ((root == p || root == q) &amp;&amp; (left || right)))&#123;</span><br><span class="line">            ans = root;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 只要一方满足就行</span></span><br><span class="line">        <span class="keyword">return</span> left || right || (root == p || root == q);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>算法</category>
+        <category>leetcode</category>
+      </categories>
+      <tags>
+        <tag>算法</tag>
+        <tag>leetcode</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>每日杂记 day9</title>
+    <url>/2024/07/24/2024-7-24/</url>
+    <content><![CDATA[<h2 id="树的名词"><a href="#树的名词" class="headerlink" title="树的名词"></a>树的名词</h2><h2 id="二叉树"><a href="#二叉树" class="headerlink" title="二叉树"></a>二叉树</h2><h2 id="红黑树"><a href="#红黑树" class="headerlink" title="红黑树"></a>红黑树</h2><h2 id="布隆过滤器"><a href="#布隆过滤器" class="headerlink" title="布隆过滤器"></a>布隆过滤器</h2><h2 id="随机链表的复制"><a href="#随机链表的复制" class="headerlink" title="随机链表的复制"></a>随机链表的复制</h2><p><img src="/../assets/image-20240724171244188.png" alt="image-20240724171244188"></p>
+<p>复制链表，可以通过建立一个头节点，一个一个节点新建然后再串起来。</p>
+<p>但是 random 怎么串？它引用的节点可能此时还没创建（如图 11 -&gt; 1）</p>
+<p><strong>怎么在还没创建的情况下，获得拷贝后链表的 random 映射关系？</strong></p>
+<p>借助【旧链表】的 random 关系来找到【新的节点】，然后连接。</p>
+<p>也就是说，我在通过 random 索引到【旧链表】的某个节点时，能够获得这个节点对应的拷贝后的节点。</p>
+<p>所以，可以先一次遍历通过【哈希表】在创建新节点的同时，记录【新:旧】节点的这样一个关系。</p>
+<p>然后再从头遍历，通过旧节点映射到新节点，分别连接 next 和 random，直至结束。</p>
+<p><strong>解题代码：</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">// Definition for a Node.</span></span><br><span class="line"><span class="comment">class Node &#123;</span></span><br><span class="line"><span class="comment">    int val;</span></span><br><span class="line"><span class="comment">    Node next;</span></span><br><span class="line"><span class="comment">    Node random;</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">    public Node(int val) &#123;</span></span><br><span class="line"><span class="comment">        this.val = val;</span></span><br><span class="line"><span class="comment">        this.next = null;</span></span><br><span class="line"><span class="comment">        this.random = null;</span></span><br><span class="line"><span class="comment">    &#125;</span></span><br><span class="line"><span class="comment">&#125;</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> Node <span class="title function_">copyRandomList</span><span class="params">(Node head)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span>(head == <span class="literal">null</span>) <span class="keyword">return</span> head;</span><br><span class="line">        HashMap&lt;Node, Node&gt; map = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">        <span class="comment">// 用哈希表记录（旧:新）的关系</span></span><br><span class="line">        <span class="type">Node</span> <span class="variable">cur</span> <span class="operator">=</span> head;</span><br><span class="line">        <span class="keyword">while</span>(cur != <span class="literal">null</span>)&#123;</span><br><span class="line">            map.put(cur, <span class="keyword">new</span> <span class="title class_">Node</span>(cur.val));</span><br><span class="line">            cur = cur.next;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 再次遍历连接 next 和 random（此时已拷贝完所有节点）</span></span><br><span class="line">        <span class="comment">// 通过旧的 random 去找新的 random</span></span><br><span class="line">        cur = head;</span><br><span class="line">        <span class="type">Node</span> <span class="variable">dummyHead</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Node</span>(<span class="number">0</span>), tail = dummyHead;</span><br><span class="line">        <span class="keyword">while</span>(cur != <span class="literal">null</span>)&#123;</span><br><span class="line">            <span class="type">Node</span> <span class="variable">copy</span> <span class="operator">=</span> map.get(cur);</span><br><span class="line">            copy.random = map.get(cur.random);</span><br><span class="line">            tail.next = copy;</span><br><span class="line">            tail = tail.next;</span><br><span class="line">            cur = cur.next;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> dummyHead.next;</span><br><span class="line">    </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="合并-K-个升序链表"><a href="#合并-K-个升序链表" class="headerlink" title="合并 K 个升序链表"></a>合并 K 个升序链表</h2><p><img src="/../assets/image-20240724200047683-17218224489991-17218224496733.png" alt="image-20240724200047683"></p>
+<p>由于链表本身有序，借助两个有序链表合并的思路，可以新开一条链表 ans，数组中每一条链表依次合并进去。</p>
+<p>时间复杂度分析：假设每个链表的最长长度是 n。第一次合并 ans 长度为 n，第二次为 2 x n，第 i 次是 i x n，数组总共有 k 组，总共就是 k 次，总时间为 O(k^2^n) 近似 O(n^3^)</p>
+<p>经过分析，发现在一组一组的比较中，开头部分一直重复比较浪费时间，</p>
+<p>而每个链表都是有序的，因此可以借助【优先队列】先有序存储每一组的链表的头节点，“一层一层”排序，</p>
+<p>每次出队加入 ans 中，如果还有后继节点继续加入其中，保证每个节点只访问一次。</p>
+<p>时间：总数 kn 个，堆排序时间 logk，总时间 O(kn x logk)。</p>
+<p><strong>解题代码：</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Definition for singly-linked list.</span></span><br><span class="line"><span class="comment"> * public class ListNode &#123;</span></span><br><span class="line"><span class="comment"> *     int val;</span></span><br><span class="line"><span class="comment"> *     ListNode next;</span></span><br><span class="line"><span class="comment"> *     ListNode() &#123;&#125;</span></span><br><span class="line"><span class="comment"> *     ListNode(int val) &#123; this.val = val; &#125;</span></span><br><span class="line"><span class="comment"> *     ListNode(int val, ListNode next) &#123; this.val = val; this.next = next; &#125;</span></span><br><span class="line"><span class="comment"> * &#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> ListNode <span class="title function_">mergeKLists</span><span class="params">(ListNode[] lists)</span> &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">n</span> <span class="operator">=</span> lists.length;</span><br><span class="line">        PriorityQueue&lt;ListNode&gt; pq = <span class="keyword">new</span> <span class="title class_">PriorityQueue</span>&lt;&gt;(Comparator.comparingInt(b -&gt; b.val));</span><br><span class="line">        <span class="comment">// 先传入每个链表的头节点，保证容器长度不会超过 k 。</span></span><br><span class="line">        <span class="keyword">for</span>(ListNode p: lists)&#123;</span><br><span class="line">            <span class="keyword">if</span>(p != <span class="literal">null</span>) pq.offer(p);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">ListNode</span> <span class="variable">dummy</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ListNode</span>(), cur = dummy;</span><br><span class="line">        <span class="keyword">while</span>(!pq.isEmpty())&#123;</span><br><span class="line">            cur.next = pq.poll();</span><br><span class="line">            cur = cur.next;</span><br><span class="line">            <span class="comment">// 如果这一组还有节点剩下，继续加入。</span></span><br><span class="line">            <span class="keyword">if</span>(cur.next != <span class="literal">null</span>)&#123;</span><br><span class="line">                pq.offer(cur.next);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> dummy.next;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="LRU-缓存"><a href="#LRU-缓存" class="headerlink" title="LRU 缓存"></a>LRU 缓存</h2><p>LRU是Least Recently Used的缩写，即最近最少使用。</p>
+<p>当容量满的时候，需淘汰 LRU 元素。</p>
+<p>【在 Java 中，LinkedHashMap 就遵循了该规则】</p>
+<p><strong>什么是 LinkedHashMap ？</strong></p>
+<p>答：在做到哈希表的同时，能够记录每个节点（键值对）相对的位置。</p>
+<p><img src="/../assets/image-20240724213343570.png" alt="image-20240724213343570"></p>
+<p>O(1) 的获取必然要用到哈希表。</p>
+<p>如果超出容量就要移出最久未使用的，就必然要根据每次 get 和 put 保留操作元素的记录，然后得到最久未用的。</p>
+<p>乍一看，可以用队列来存储操作记录，先入队的表示之前使用的，后入队的表示现在使用的；</p>
+<p>这样的话，当溢出时，直接出队然后移除哈希表中的值就可以了？</p>
+<p>但是存在： 1 2 3 2 这一种情况，即最新操作的节点记录在之前仍然存在，就会出现【误删】最新的节点。</p>
+<p>所以在插入前，应该遍历队列删除这个 key，然后保留最新记录。</p>
+<p>【但是这样违背了 put 操作 O(1) 的时间规定】</p>
+<p>因此，可以将哈希表和双链表结合起来！</p>
+<p>哈希表存储 key 对应的节点，做到元素 O(1) 的删除（先哈希索引，然后删除），需要自己实现链表的删除方法；</p>
+<p>然后双链表充当队列，头部记录最新的操作节点，随着节点增加，尾部就作为【最久未使用】的节点了。</p>
+<p>至此保证了 put 和 get 的 O(1) 时间。</p>
+<blockquote>
+<p>put 也算一次操作哦，需要更新最新操作节点记录。</p>
+</blockquote>
+<p><strong>解题代码：</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">LRUCache</span> &#123;</span><br><span class="line">    <span class="comment">// 建立一个双链表，使得能够快速删除和索引前一个元素</span></span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">DNode</span> &#123;</span><br><span class="line">        <span class="type">int</span> key;</span><br><span class="line">        <span class="type">int</span> value;</span><br><span class="line">        DNode pre;</span><br><span class="line">        DNode next;</span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">DNode</span><span class="params">()</span> &#123;&#125;</span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">DNode</span><span class="params">(<span class="type">int</span> _key, <span class="type">int</span> _value)</span> &#123;key = _key; value = _value;&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 存储 key:node 关系，方便更新操作记录，删除最久未使用节点</span></span><br><span class="line">    HashMap&lt;Integer, DNode&gt; map = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">    <span class="comment">// 头存储最新操作节点，尾巴为最久</span></span><br><span class="line">    DNode head, tail;</span><br><span class="line">    <span class="type">int</span> capacity;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">LRUCache</span><span class="params">(<span class="type">int</span> capacity)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.capacity = capacity;</span><br><span class="line">        <span class="comment">// 建立伪头节点和尾节点，方便操作</span></span><br><span class="line">        head = <span class="keyword">new</span> <span class="title class_">DNode</span>();</span><br><span class="line">        tail = <span class="keyword">new</span> <span class="title class_">DNode</span>();</span><br><span class="line">        head.next = tail;</span><br><span class="line">        tail.pre = head;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">get</span><span class="params">(<span class="type">int</span> key)</span> &#123;</span><br><span class="line">        <span class="type">DNode</span> <span class="variable">node</span> <span class="operator">=</span> map.get(key);</span><br><span class="line">        <span class="keyword">if</span>(node == <span class="literal">null</span>) <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">        <span class="comment">// 更新操作记录</span></span><br><span class="line">        moveToHead(node);</span><br><span class="line">        <span class="keyword">return</span> node.value;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">put</span><span class="params">(<span class="type">int</span> key, <span class="type">int</span> value)</span> &#123;</span><br><span class="line">        <span class="comment">// 先新增再移除，因为如果改变的是已有的key，是不需要移除的。</span></span><br><span class="line">        <span class="type">DNode</span> <span class="variable">p</span> <span class="operator">=</span> map.get(key);</span><br><span class="line">        <span class="keyword">if</span>(p != <span class="literal">null</span>)&#123;</span><br><span class="line">            p.value = value;</span><br><span class="line">            <span class="comment">// 更新操作记录</span></span><br><span class="line">            moveToHead(p);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="type">DNode</span> <span class="variable">node</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">DNode</span>(key, value);</span><br><span class="line">            map.put(key, node);</span><br><span class="line">            <span class="comment">// 最新节点添加至链表头部</span></span><br><span class="line">            addToHead(node);</span><br><span class="line">            <span class="keyword">if</span>(map.size() &gt; <span class="built_in">this</span>.capacity)&#123;</span><br><span class="line">                <span class="type">DNode</span> <span class="variable">r</span> <span class="operator">=</span> removeTail();</span><br><span class="line">                map.remove(r.key);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">addToHead</span><span class="params">(DNode node)</span> &#123;</span><br><span class="line">        node.pre = head;</span><br><span class="line">        node.next = head.next;</span><br><span class="line">        head.next.pre = node;</span><br><span class="line">        head.next = node;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> DNode <span class="title function_">removeNode</span><span class="params">(DNode node)</span> &#123;</span><br><span class="line">        node.pre.next = node.next;</span><br><span class="line">        node.next.pre = node.pre;</span><br><span class="line">        <span class="keyword">return</span> node;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">moveToHead</span><span class="params">(DNode node)</span> &#123;</span><br><span class="line">        removeNode(node);</span><br><span class="line">        addToHead(node);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> DNode <span class="title function_">removeTail</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> removeNode(tail.pre);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Your LRUCache object will be instantiated and called as such:</span></span><br><span class="line"><span class="comment"> * LRUCache obj = new LRUCache(capacity);</span></span><br><span class="line"><span class="comment"> * int param_1 = obj.get(key);</span></span><br><span class="line"><span class="comment"> * obj.put(key,value);</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>每日总结</category>
+      </categories>
+      <tags>
+        <tag>每日总结</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>每日杂记 day8</title>
+    <url>/2024/07/23/2024-7-23/</url>
+    <content><![CDATA[<h2 id="算法题"><a href="#算法题" class="headerlink" title="算法题"></a>算法题</h2><h3 id="链表的归并排序"><a href="#链表的归并排序" class="headerlink" title="链表的归并排序"></a>链表的归并排序</h3><p>关键在于分割点的寻找和边界的选择。</p>
+<ol>
+<li><strong>快慢指针</strong>找中点</li>
+<li>起始以<strong>空节点</strong>为右侧边界，保证分割点始终置于右半区域。</li>
+<li>当下一个节点为右边界时，此时只剩一个节点。</li>
+</ol>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Definition for singly-linked list.</span></span><br><span class="line"><span class="comment"> * public class ListNode &#123;</span></span><br><span class="line"><span class="comment"> *     int val;</span></span><br><span class="line"><span class="comment"> *     ListNode next;</span></span><br><span class="line"><span class="comment"> *     ListNode() &#123;&#125;</span></span><br><span class="line"><span class="comment"> *     ListNode(int val) &#123; this.val = val; &#125;</span></span><br><span class="line"><span class="comment"> *     ListNode(int val, ListNode next) &#123; this.val = val; this.next = next; &#125;</span></span><br><span class="line"><span class="comment"> * &#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line">    public <span class="title class_">ListNode</span> <span class="title function_">sortList</span>(<span class="params">ListNode head</span>) &#123;</span><br><span class="line">        <span class="comment">// 空节点也可以视为链表的节点，用来控制左右边界</span></span><br><span class="line">        <span class="keyword">return</span> <span class="title function_">sortList</span>(head, <span class="literal">null</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    public <span class="title class_">ListNode</span> <span class="title function_">sortList</span>(<span class="params">ListNode head, ListNode tail</span>)&#123;</span><br><span class="line">        <span class="keyword">if</span>(head == <span class="literal">null</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> head;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 一个元素时（排除tail），即永远取左边的值</span></span><br><span class="line">        <span class="keyword">if</span>(head.<span class="property">next</span> == tail)&#123;</span><br><span class="line">            <span class="comment">// 销毁后继节点</span></span><br><span class="line">            head.<span class="property">next</span> = <span class="literal">null</span>;</span><br><span class="line">            <span class="keyword">return</span> head;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 快慢指针找中点</span></span><br><span class="line">        <span class="title class_">ListNode</span> slow, fast;</span><br><span class="line">        slow = fast = head;</span><br><span class="line">        <span class="keyword">while</span>(fast != tail)&#123;</span><br><span class="line">            slow = slow.<span class="property">next</span>;</span><br><span class="line">            fast = fast.<span class="property">next</span>;</span><br><span class="line">            <span class="comment">// 一步一步走，当fast下一步是尾巴时，slow已经是中点了</span></span><br><span class="line">            <span class="keyword">if</span>(fast != tail)&#123;</span><br><span class="line">                fast = fast.<span class="property">next</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="title class_">ListNode</span> mid = slow;</span><br><span class="line">        <span class="comment">// 继续分治</span></span><br><span class="line">        <span class="title class_">ListNode</span> l1 = <span class="title function_">sortList</span>(head, mid);</span><br><span class="line">        <span class="title class_">ListNode</span> l2 = <span class="title function_">sortList</span>(mid, tail);</span><br><span class="line">        <span class="keyword">return</span> <span class="title function_">merge</span>(l1, l2);</span><br><span class="line">    &#125;</span><br><span class="line">    public <span class="title class_">ListNode</span> <span class="title function_">merge</span>(<span class="params">ListNode l1, ListNode l2</span>)&#123;</span><br><span class="line">        <span class="comment">// 重新建立链表</span></span><br><span class="line">        <span class="title class_">ListNode</span> head = <span class="keyword">new</span> <span class="title class_">ListNode</span>(<span class="number">0</span>);</span><br><span class="line">        <span class="title class_">ListNode</span> cur = head, cur1 = l1, cur2 = l2;</span><br><span class="line">        <span class="keyword">while</span>(cur1 != <span class="literal">null</span> &amp;&amp; cur2 != <span class="literal">null</span>)&#123;</span><br><span class="line">            <span class="keyword">if</span>(cur1.<span class="property">val</span> &lt;= cur2.<span class="property">val</span>)&#123;</span><br><span class="line">                cur.<span class="property">next</span> = cur1;</span><br><span class="line">                cur1 = cur1.<span class="property">next</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                cur.<span class="property">next</span> = cur2;</span><br><span class="line">                cur2 = cur2.<span class="property">next</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            cur = cur.<span class="property">next</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(cur1 != <span class="literal">null</span>)&#123;</span><br><span class="line">            cur.<span class="property">next</span> = cur1;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            cur.<span class="property">next</span> = cur2;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> head.<span class="property">next</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="链表的归并排序【非递归版】"><a href="#链表的归并排序【非递归版】" class="headerlink" title="链表的归并排序【非递归版】"></a>链表的归并排序【非递归版】</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Definition for singly-linked list.</span></span><br><span class="line"><span class="comment"> * public class ListNode &#123;</span></span><br><span class="line"><span class="comment"> *     int val;</span></span><br><span class="line"><span class="comment"> *     ListNode next;</span></span><br><span class="line"><span class="comment"> *     ListNode() &#123;&#125;</span></span><br><span class="line"><span class="comment"> *     ListNode(int val) &#123; this.val = val; &#125;</span></span><br><span class="line"><span class="comment"> *     ListNode(int val, ListNode next) &#123; this.val = val; this.next = next; &#125;</span></span><br><span class="line"><span class="comment"> * &#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line">    <span class="comment">// 本质是“主动的”分治</span></span><br><span class="line">    <span class="keyword">public</span> ListNode <span class="title function_">sortList</span><span class="params">(ListNode head)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span>(head == <span class="literal">null</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> head;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 记录链表长度</span></span><br><span class="line">        <span class="type">int</span> <span class="variable">length</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">        <span class="type">ListNode</span> <span class="variable">node</span> <span class="operator">=</span> head;</span><br><span class="line">        <span class="keyword">while</span>(node != <span class="literal">null</span>)&#123;</span><br><span class="line">            length++;</span><br><span class="line">            node = node.next;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 构建假头节点</span></span><br><span class="line">        <span class="type">ListNode</span> <span class="variable">dummyHead</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ListNode</span>(<span class="number">0</span>, head);</span><br><span class="line">        <span class="comment">// 将整体分割为 n 个长度 1 为的链表开始，一一排序merge构成n个长度2的链表。</span></span><br><span class="line">        <span class="comment">// 然后继续分割 n 个长度为 1*2 的链表（有序），再次merge（一定满足相对顺序）</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> subLen=<span class="number">1</span>; subLen &lt; length; subLen *= <span class="number">2</span>)&#123;</span><br><span class="line">            <span class="comment">// cur为第一个节点</span></span><br><span class="line">            <span class="type">ListNode</span> <span class="variable">pre</span> <span class="operator">=</span> dummyHead, cur = dummyHead.next;</span><br><span class="line">            <span class="keyword">while</span>(cur != <span class="literal">null</span>)&#123;</span><br><span class="line">                <span class="comment">// 拼接出第一个 subLen 链表</span></span><br><span class="line">                <span class="type">ListNode</span> <span class="variable">head1</span> <span class="operator">=</span> cur;</span><br><span class="line">                <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>; i&lt;subLen &amp;&amp; cur.next != <span class="literal">null</span>; i++)&#123;</span><br><span class="line">                    cur = cur.next;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 先记录第二个的起点</span></span><br><span class="line">                <span class="type">ListNode</span> <span class="variable">head2</span> <span class="operator">=</span> cur.next;</span><br><span class="line">                <span class="comment">// 断开第一个与剩下节点的连接</span></span><br><span class="line">                cur.next = <span class="literal">null</span>;</span><br><span class="line">                <span class="comment">// 拼接第二个 subLen 链表</span></span><br><span class="line">                cur = head2;</span><br><span class="line">                <span class="comment">// cur.next != null 让 cur 至少是最后一个节点</span></span><br><span class="line">                <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>; i&lt;subLen &amp;&amp; cur != <span class="literal">null</span> &amp;&amp; cur.next != <span class="literal">null</span>; i++)&#123;</span><br><span class="line">                    cur = cur.next;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 保留剩下的节点</span></span><br><span class="line">                <span class="type">ListNode</span> <span class="variable">next</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">                <span class="keyword">if</span>(cur != <span class="literal">null</span>) &#123;</span><br><span class="line">                    next = cur.next;</span><br><span class="line">                    <span class="comment">// 断开第二个的多余连接</span></span><br><span class="line">                    cur.next = <span class="literal">null</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// merge 两个有序链表并连接</span></span><br><span class="line">                pre.next = merge(head1, head2);</span><br><span class="line">                <span class="comment">// 移动 pre 到最后一个位置</span></span><br><span class="line">                <span class="keyword">while</span>(pre.next != <span class="literal">null</span>)&#123;</span><br><span class="line">                    pre = pre.next;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 继续切割下一组</span></span><br><span class="line">                cur = next;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// ...重复切割，直到 subLen&gt;=length 完成整个链表的排序。</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> dummyHead.next;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> ListNode <span class="title function_">merge</span><span class="params">(ListNode l1, ListNode l2)</span>&#123;</span><br><span class="line">        <span class="comment">// 重新建立链表</span></span><br><span class="line">        <span class="type">ListNode</span> <span class="variable">head</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ListNode</span>(<span class="number">0</span>);</span><br><span class="line">        <span class="type">ListNode</span> <span class="variable">cur</span> <span class="operator">=</span> head, cur1 = l1, cur2 = l2;</span><br><span class="line">        <span class="keyword">while</span>(cur1 != <span class="literal">null</span> &amp;&amp; cur2 != <span class="literal">null</span>)&#123;</span><br><span class="line">            <span class="keyword">if</span>(cur1.val &lt;= cur2.val)&#123;</span><br><span class="line">                cur.next = cur1;</span><br><span class="line">                cur1 = cur1.next;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                cur.next = cur2;</span><br><span class="line">                cur2 = cur2.next;</span><br><span class="line">            &#125;</span><br><span class="line">            cur = cur.next;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(cur1 != <span class="literal">null</span>)&#123;</span><br><span class="line">            cur.next = cur1;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            cur.next = cur2;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> head.next;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="K-个一组翻转链表"><a href="#K-个一组翻转链表" class="headerlink" title="K 个一组翻转链表"></a>K 个一组翻转链表</h3><p>关键在于如何反转完每一组后，新的尾节点能够接上下一组。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Definition for singly-linked list.</span></span><br><span class="line"><span class="comment"> * public class ListNode &#123;</span></span><br><span class="line"><span class="comment"> *     int val;</span></span><br><span class="line"><span class="comment"> *     ListNode next;</span></span><br><span class="line"><span class="comment"> *     ListNode() &#123;&#125;</span></span><br><span class="line"><span class="comment"> *     ListNode(int val) &#123; this.val = val; &#125;</span></span><br><span class="line"><span class="comment"> *     ListNode(int val, ListNode next) &#123; this.val = val; this.next = next; &#125;</span></span><br><span class="line"><span class="comment"> * &#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> ListNode <span class="title function_">reverseKGroup</span><span class="params">(ListNode head, <span class="type">int</span> k)</span> &#123;</span><br><span class="line">        <span class="type">ListNode</span> <span class="variable">hair</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ListNode</span>(<span class="number">0</span>, head);</span><br><span class="line">        <span class="comment">// 用于连接新的头节点</span></span><br><span class="line">        <span class="type">ListNode</span> <span class="variable">pre</span> <span class="operator">=</span> hair;</span><br><span class="line">        <span class="keyword">while</span>(head != <span class="literal">null</span>)&#123;</span><br><span class="line">            <span class="type">ListNode</span> <span class="variable">tail</span> <span class="operator">=</span> pre;</span><br><span class="line">            <span class="comment">// 移动到分组的最后一个元素</span></span><br><span class="line">            <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>; i&lt;k; i++) &#123;</span><br><span class="line">                tail = tail.next;</span><br><span class="line">                <span class="comment">// 如果变为了空表示长度过短直接返回（始终是连着的）</span></span><br><span class="line">                <span class="keyword">if</span>(tail == <span class="literal">null</span>)&#123;</span><br><span class="line">                    <span class="keyword">return</span> hair.next;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 保留下一个分组的节点</span></span><br><span class="line">            <span class="comment">// ListNode nex = tail.next;</span></span><br><span class="line">            <span class="comment">// 反转分组链表，接收该分组新的头尾节点（尾节点已连接下一分组）</span></span><br><span class="line">            ListNode[] reverse = myReverse(head, tail);</span><br><span class="line">            head = reverse[<span class="number">0</span>];</span><br><span class="line">            tail = reverse[<span class="number">1</span>];</span><br><span class="line">            <span class="comment">// 连接反转后的分组链表</span></span><br><span class="line">            pre.next = head;</span><br><span class="line">            <span class="comment">// pre设为该分组的最后一个节点，用于连接下一分组</span></span><br><span class="line">            pre = tail;</span><br><span class="line">            <span class="comment">// 继续反转</span></span><br><span class="line">            head = tail.next;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> hair.next;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> ListNode[] myReverse(ListNode head, ListNode tail)&#123;</span><br><span class="line">        <span class="comment">// 起始值顺势连接下一段分组</span></span><br><span class="line">        <span class="type">ListNode</span> <span class="variable">pre</span> <span class="operator">=</span> tail.next;</span><br><span class="line">        <span class="comment">// 开始反转</span></span><br><span class="line">        <span class="type">ListNode</span> <span class="variable">p</span> <span class="operator">=</span> head;</span><br><span class="line">        <span class="comment">// 正常方向 tail 本是尾巴，但是从 head 开始逐一遍历反转连接时，pre 会移动到 tail 的位置。</span></span><br><span class="line">        <span class="keyword">while</span>(pre != tail)&#123;</span><br><span class="line">            <span class="type">ListNode</span> <span class="variable">next</span> <span class="operator">=</span> p.next;</span><br><span class="line">            p.next = pre;</span><br><span class="line">            pre = p;</span><br><span class="line">            p = next;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">ListNode</span>[]&#123;tail, head&#125;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>反转算法：</strong>以尾节点为条件，反转链表。</p>
+]]></content>
+      <categories>
+        <category>每日总结</category>
+      </categories>
+      <tags>
+        <tag>每日总结</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>排序算法总结</title>
+    <url>/2024/07/22/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95%E6%80%BB%E7%BB%93/</url>
+    <content><![CDATA[<h2 id="各大排序算法比较"><a href="#各大排序算法比较" class="headerlink" title="各大排序算法比较"></a>各大排序算法比较</h2><table>
+<thead>
+<tr>
+<th>排序算法</th>
+<th>时间复杂度（平均）</th>
+<th>时间复杂度（最差）</th>
+<th>时间复杂度（最好）</th>
+<th>空间复杂度</th>
+<th>排序方式</th>
+<th>稳定性</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>冒泡排序</td>
+<td>O(n^2^)</td>
+<td>O(n^2^)</td>
+<td>O(n)</td>
+<td>O(1)</td>
+<td>比较排序</td>
+<td>稳定</td>
+</tr>
+<tr>
+<td>选择排序</td>
+<td>O(n^2^)</td>
+<td>O(n^2^)</td>
+<td>O(n^2^)</td>
+<td>O(1)</td>
+<td>比较排序</td>
+<td>不稳定</td>
+</tr>
+<tr>
+<td>插入排序</td>
+<td>O(n^2^)</td>
+<td>O(n^2^)</td>
+<td>O(n)</td>
+<td>O(1)</td>
+<td>比较排序</td>
+<td>稳定</td>
+</tr>
+<tr>
+<td>希尔排序</td>
+<td>O(nlogn)</td>
+<td>O(n^2^)</td>
+<td>O(nlogn)</td>
+<td>O(1)</td>
+<td>比较排序</td>
+<td>不稳定</td>
+</tr>
+<tr>
+<td>归并排序</td>
+<td>O(nlogn)</td>
+<td>O(nlogn)</td>
+<td>O(nlogn)</td>
+<td>O(n)</td>
+<td>比较排序</td>
+<td>稳定</td>
+</tr>
+<tr>
+<td>快速排序</td>
+<td>O(nlogn)</td>
+<td>O(n^2^)</td>
+<td>O(nlogn)</td>
+<td>O(logn)</td>
+<td>比较排序</td>
+<td>不稳定</td>
+</tr>
+<tr>
+<td>堆排序</td>
+<td>O(nlogn)</td>
+<td>O(nlogn)</td>
+<td>O(nlogn)</td>
+<td>O(1)</td>
+<td>比较排序</td>
+<td>不稳定</td>
+</tr>
+</tbody></table>
+<h3 id="术语解释："><a href="#术语解释：" class="headerlink" title="术语解释："></a><strong>术语解释：</strong></h3><p><strong>内部排序</strong>：所有排序操作都在内存中完成，不需要额外的磁盘或其他存储设备的辅助。这适用于数据量小到足以完全加载到内存中的情况。</p>
+<p><strong>外部排序</strong>：当数据量过大，不可能全部加载到内存中时使用。外部排序通常涉及到数据的分区处理，部分数据被暂时存储在外部磁盘等存储设备上。</p>
+<p><strong>稳定</strong>：如果 A 原本在 B 前面，而 A&#x3D;B，排序之后 A 仍然在 B 的前面。</p>
+<p><strong>不稳定</strong>：如果 A 原本在 B 的前面，而 A&#x3D;B，排序之后 A 可能会出现在 B 的后面。</p>
+<blockquote>
+<p><strong>是否稳定</strong>决定于，相同的元素在排序后是否还能保持原有位置。</p>
+</blockquote>
+<h3 id="排序分类"><a href="#排序分类" class="headerlink" title="排序分类"></a>排序分类</h3><p><img src="/../assets/sort2.png" alt="排序算法分类"></p>
+<p>比较类又被称为非线性时间排序，因为时间无法突破O(nlogn)</p>
+<p>非比较类排序又被称为线性时间排序，可以达到O(n)</p>
+<h2 id="冒泡排序"><a href="#冒泡排序" class="headerlink" title="冒泡排序"></a>冒泡排序</h2><p>重复遍历要排序序列，依次比较两个元素，一层一层往顶端方向缩短，越小的元素逐渐“浮”到尾端。</p>
+<p><strong>算法步骤</strong></p>
+<ol>
+<li><p>比较相邻的元素。如果第一个比第二个大，就交换它们两个；</p>
+</li>
+<li><p>对每一对相邻元素作同样的工作，从开始第一对到结尾的最后一对，这样在最后的元素应该会是最大的数；</p>
+</li>
+<li><p>然后向头部缩短一个位置，即排除当次遍历区间的最后一个数（已经确定）；</p>
+</li>
+<li><p>重复步骤 1~3，直到排序完成。</p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 冒泡排序</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> arr</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> arr</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="type">int</span>[] bubbleSort(<span class="type">int</span>[] arr) &#123;</span><br><span class="line">    <span class="comment">// 从 1 开始，因为是往后预知一位来比较</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">1</span>; i &lt; arr.length; i++) &#123;</span><br><span class="line">        <span class="comment">// 设置一个标志，用来确定当次遍历是否已经有序</span></span><br><span class="line">        <span class="type">boolean</span> <span class="variable">flag</span> <span class="operator">=</span> <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">j</span> <span class="operator">=</span> <span class="number">0</span>; j &lt; arr.length - i; j++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (arr[j] &gt; arr[j + <span class="number">1</span>]) &#123;</span><br><span class="line">                <span class="type">int</span> <span class="variable">tmp</span> <span class="operator">=</span> arr[j];</span><br><span class="line">                arr[j] = arr[j + <span class="number">1</span>];</span><br><span class="line">                arr[j + <span class="number">1</span>] = tmp;</span><br><span class="line">                <span class="comment">// 出现乱序</span></span><br><span class="line">                flag = <span class="literal">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 如果已经有序，就退出排序</span></span><br><span class="line">        <span class="keyword">if</span> (flag) &#123;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> arr;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过设置 flag ，可以使得最好时间达到 O(n)。</p>
+<h2 id="选择排序"><a href="#选择排序" class="headerlink" title="选择排序"></a>选择排序</h2><p>首先在未排序序列中找到最小的元素，然后放到开头，</p>
+<p>再继续从剩下的序列中找到最小的元素，放到开头的下一个，</p>
+<p>如此重复。</p>
+<p><strong>算法步骤</strong></p>
+<ol>
+<li>首先在未排序序列中找到最小（大）元素，存放到排序序列的起始位置</li>
+<li>再从剩余未排序元素中继续寻找最小（大）元素，然后放到已排序序列的末尾。</li>
+<li>重复第 2 步，直到所有元素均排序完毕。</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 选择排序</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> arr</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> arr</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="type">int</span>[] selectionSort(<span class="type">int</span>[] arr) &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; arr.length - <span class="number">1</span>; i++) &#123;</span><br><span class="line">        <span class="comment">// 记录最小元素的索引</span></span><br><span class="line">        <span class="type">int</span> <span class="variable">minIndex</span> <span class="operator">=</span> i;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">j</span> <span class="operator">=</span> i + <span class="number">1</span>; j &lt; arr.length; j++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (arr[j] &lt; arr[minIndex]) &#123;</span><br><span class="line">                minIndex = j;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 排除自己</span></span><br><span class="line">        <span class="keyword">if</span> (minIndex != i) &#123;</span><br><span class="line">            <span class="type">int</span> <span class="variable">tmp</span> <span class="operator">=</span> arr[i];</span><br><span class="line">            arr[i] = arr[minIndex];</span><br><span class="line">            arr[minIndex] = tmp;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> arr;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>为什么说选择排序不稳定？</strong></p>
+<p>以 <code>[3a,7,6,5,3b,2]</code> 为例：</p>
+<p>当第一层找到最小元素 2 时，因为3a &#x3D; 3b，本应该 3a 应该在前面，却被换到了 3b 后面。</p>
+<h2 id="插入排序"><a href="#插入排序" class="headerlink" title="插入排序"></a>插入排序</h2><p>以第一个元素为基准，类似于扑克牌排序，将后面的数往大小往前面插入，当插好最后一张牌的时候就排好序了</p>
+<p><strong>算法步骤：</strong></p>
+<ol>
+<li><p>从第一个元素开始，该元素可以认为已经被排序；</p>
+</li>
+<li><p>取出下一个元素，在已经排序的元素序列中从后向前扫描；</p>
+</li>
+<li><p>如果该元素（已排序）大于新元素，将该元素移到下一位置，目的是空出位置；</p>
+</li>
+<li><p>重复步骤 3，直到找到已排序的元素小于或者等于新元素的位置；</p>
+</li>
+<li><p>将新元素插入到该位置后；</p>
+</li>
+<li><p>重复步骤 2~5。</p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 插入排序</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> arr</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> arr</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="type">int</span>[] insertionSort(<span class="type">int</span>[] arr) &#123;</span><br><span class="line">    <span class="comment">// 从 1 开始，以第 0 个元素为基准</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">1</span>; i &lt; arr.length; i++) &#123;</span><br><span class="line">        <span class="comment">// 从已排序序列的最后一个开始</span></span><br><span class="line">        <span class="type">int</span> <span class="variable">preIndex</span> <span class="operator">=</span> i - <span class="number">1</span>;</span><br><span class="line">        <span class="comment">// 保留当前元素，防止位置被覆盖找不到</span></span><br><span class="line">        <span class="type">int</span> <span class="variable">current</span> <span class="operator">=</span> arr[i];</span><br><span class="line">        <span class="keyword">while</span> (preIndex &gt;= <span class="number">0</span> &amp;&amp; current &lt; arr[preIndex]) &#123;</span><br><span class="line">            <span class="comment">// 如果扫描到的元素更大，就往后移</span></span><br><span class="line">            arr[preIndex + <span class="number">1</span>] = arr[preIndex];</span><br><span class="line">            preIndex -= <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 遇到小于或等于的元素，直接插入到后一个位置。</span></span><br><span class="line">        arr[preIndex + <span class="number">1</span>] = current;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> arr;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最好时间为：O(n)，当有序的时候，无需向前扫描。</p>
+<h2 id="希尔排序"><a href="#希尔排序" class="headerlink" title="希尔排序"></a>希尔排序</h2><p>其实就是给插入排序做了一个“预处理”。</p>
+<p>将一个完整的序列分为 n 个增量间隔子序列，分别进行插入排序，最后增量变为 1，重新形成一个完整的序列。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 希尔排序</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> arr</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> arr</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="type">int</span>[] shellSort(<span class="type">int</span>[] arr) &#123;</span><br><span class="line">    <span class="type">int</span> <span class="variable">n</span> <span class="operator">=</span> arr.length;</span><br><span class="line">    <span class="type">int</span> <span class="variable">gap</span> <span class="operator">=</span> n / <span class="number">3</span>;</span><br><span class="line">    <span class="keyword">while</span> (gap &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> gap; i &lt; n; i++) &#123;</span><br><span class="line">            <span class="type">int</span> <span class="variable">current</span> <span class="operator">=</span> arr[i];</span><br><span class="line">            <span class="type">int</span> <span class="variable">preIndex</span> <span class="operator">=</span> i - gap;</span><br><span class="line">            <span class="comment">// Insertion sort</span></span><br><span class="line">            <span class="keyword">while</span> (preIndex &gt;= <span class="number">0</span> &amp;&amp; arr[preIndex] &gt; current) &#123;</span><br><span class="line">                arr[preIndex + gap] = arr[preIndex];</span><br><span class="line">                preIndex -= gap;</span><br><span class="line">            &#125;</span><br><span class="line">            arr[preIndex + gap] = current;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        gap /= <span class="number">3</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> arr;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>不稳定：相同的元素会破坏顺序</strong></p>
+<h2 id="归并排序"><a href="#归并排序" class="headerlink" title="归并排序"></a>归并排序</h2><p>将序列不断分为两半，直到单位为 1 时开始回溯，将子序列进行有序合并，最后形成一个完整的有序序列。</p>
+<blockquote>
+<p>为保证有序合并，需单独创建一个 O(logn) 的空间。</p>
+</blockquote>
+<p><strong>算法步骤：</strong></p>
+<ol>
+<li><p>如果输入内只有一个元素，则直接返回，否则将序列一分为二；</p>
+</li>
+<li><p>分别对这两个子序列进行归并排序，使子序列变为有序状态；</p>
+</li>
+<li><p>设定两个指针，分别指向两个已经排序子序列的起始位置；</p>
+</li>
+<li><p>比较两个指针所指向的元素，选择相对小的元素放入到合并空间（用于存放排序结果），并移动指针到下一位置；</p>
+</li>
+<li><p>重复步骤 3 ~ 4 直到某一指针达到序列尾；</p>
+</li>
+<li><p>将另一序列<strong>剩下的</strong>所有元素直接复制到合并序列。</p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 归并排序</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> arr</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> arr</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="type">int</span>[] mergeSort(<span class="type">int</span>[] arr) &#123;</span><br><span class="line">    <span class="keyword">if</span> (arr.length &lt;= <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> arr;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">int</span> <span class="variable">middle</span> <span class="operator">=</span> arr.length / <span class="number">2</span>;</span><br><span class="line">    <span class="type">int</span>[] arr_1 = Arrays.copyOfRange(arr, <span class="number">0</span>, middle);</span><br><span class="line">    <span class="type">int</span>[] arr_2 = Arrays.copyOfRange(arr, middle, arr.length);</span><br><span class="line">    <span class="comment">// 分治，回溯时完成排序</span></span><br><span class="line">    <span class="keyword">return</span> merge(mergeSort(arr_1), mergeSort(arr_2));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 合并两个数组</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> arr_1</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> arr_2</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> sorted_arr</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="type">int</span>[] merge(<span class="type">int</span>[] arr_1, <span class="type">int</span>[] arr_2) &#123;</span><br><span class="line">    <span class="comment">// 创建一个能够容纳两个数组合并后所有元素的空间</span></span><br><span class="line">    <span class="type">int</span>[] sorted_arr = <span class="keyword">new</span> <span class="title class_">int</span>[arr_1.length + arr_2.length];</span><br><span class="line">    <span class="type">int</span> <span class="variable">idx</span> <span class="operator">=</span> <span class="number">0</span>, idx_1 = <span class="number">0</span>, idx_2 = <span class="number">0</span>;</span><br><span class="line">    <span class="comment">// 有序合并</span></span><br><span class="line">    <span class="keyword">while</span> (idx_1 &lt; arr_1.length &amp;&amp; idx_2 &lt; arr_2.length) &#123;</span><br><span class="line">        <span class="comment">// 由于arr1属于左半边，arr2属于右半边，如果相同应保证左边元素先加入</span></span><br><span class="line">        <span class="keyword">if</span> (arr_1[idx_1] &lt;= arr_2[idx_2]) &#123;</span><br><span class="line">            sorted_arr[idx] = arr_1[idx_1];</span><br><span class="line">            idx_1 += <span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            sorted_arr[idx] = arr_2[idx_2];</span><br><span class="line">            idx_2 += <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        idx += <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 数组1还有元素</span></span><br><span class="line">    <span class="keyword">if</span> (idx_1 &lt; arr_1.length) &#123;</span><br><span class="line">        <span class="keyword">while</span> (idx_1 &lt; arr_1.length) &#123;</span><br><span class="line">            sorted_arr[idx] = arr_1[idx_1];</span><br><span class="line">            idx_1 += <span class="number">1</span>;</span><br><span class="line">            idx += <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 数组2还有元素</span></span><br><span class="line">        <span class="keyword">while</span> (idx_2 &lt; arr_2.length) &#123;</span><br><span class="line">            sorted_arr[idx] = arr_2[idx_2];</span><br><span class="line">            idx_2 += <span class="number">1</span>;</span><br><span class="line">            idx += <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 返回本次归并的有序序列。</span></span><br><span class="line">    <span class="keyword">return</span> sorted_arr;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="快速排序"><a href="#快速排序" class="headerlink" title="快速排序"></a>快速排序</h2><p>和归并排序相似，区别是<strong>在分治的同时</strong>进行<strong>分区</strong>，</p>
+<p>而前者是<strong>在回溯的时候</strong>借助额外空间返回有序序列。</p>
+<p>先选定一个基准，根据基准分隔成两个部分（分区1 &lt; 分区2），然后在基准的位置分裂进行分区。</p>
+<p>只要保证每次分区左边的小于右边的，那么当分裂到 1 个时就排好序了。</p>
+<p><strong>算法步骤：</strong></p>
+<ol>
+<li><p>从序列中<strong>随机</strong>挑出一个元素，做为 “基准”(<code>pivot</code>)；</p>
+</li>
+<li><p>改变序列分布，将所有比基准值小的元素摆放在基准前面，所有比基准值大的摆在基准的后面（相同的数可以到任一边）。</p>
+</li>
+<li><p>操作结束之后，该基准就分割了两片区域（分区1 &lt; 分区2）。</p>
+</li>
+<li><p>分别对两片区域继续进行递归分区。</p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="type">int</span> <span class="title function_">partition</span><span class="params">(<span class="type">int</span>[] array, <span class="type">int</span> low, <span class="type">int</span> high)</span> &#123;</span><br><span class="line">    <span class="comment">// 默认以尾部为基准</span></span><br><span class="line">    <span class="type">int</span> <span class="variable">pivot</span> <span class="operator">=</span> array[high];</span><br><span class="line">    <span class="comment">// 从开头开始</span></span><br><span class="line">    <span class="type">int</span> <span class="variable">pointer</span> <span class="operator">=</span> low;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> low; i &lt; high; i++) &#123;</span><br><span class="line">        <span class="comment">// 只要小于等于基准值的就移动到前半部分</span></span><br><span class="line">        <span class="keyword">if</span> (array[i] &lt;= pivot) &#123;</span><br><span class="line">            <span class="type">int</span> <span class="variable">temp</span> <span class="operator">=</span> array[i];</span><br><span class="line">            array[i] = array[pointer];</span><br><span class="line">            array[pointer] = temp;</span><br><span class="line">            pointer++;</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(Arrays.toString(array));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 此时 pointer 为基准的分区位置，交换基准值过来</span></span><br><span class="line">    <span class="comment">// 如果默认选取中间值为基准，则无需移动。</span></span><br><span class="line">    <span class="type">int</span> <span class="variable">temp</span> <span class="operator">=</span> array[pointer];</span><br><span class="line">    array[pointer] = array[high];</span><br><span class="line">    array[high] = temp;</span><br><span class="line">    <span class="keyword">return</span> pointer;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">quickSort</span><span class="params">(<span class="type">int</span>[] array, <span class="type">int</span> low, <span class="type">int</span> high)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (low &lt; high) &#123;</span><br><span class="line">        <span class="comment">// 先分区再分治</span></span><br><span class="line">        <span class="type">int</span> <span class="variable">position</span> <span class="operator">=</span> partition(array, low, high);</span><br><span class="line">        quickSort(array, low, position - <span class="number">1</span>);</span><br><span class="line">        quickSort(array, position + <span class="number">1</span>, high);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>最坏时间原因：当每次分治选取的基准值都是极值（max or min）时，时间等同于O(n^2^)</p>
+<p>不稳定的原因：无相对位置的交换</p>
+<ol>
+<li>分区元素交换</li>
+<li>基准值位置交换</li>
+</ol>
+<p>可能存在比基准值大的数，被交换到了尾部</p>
+<p>如：<code>[1,2,3,4,6a,7,8,6b,5]</code></p>
+<p>在确定了左半区（&lt;&#x3D;5）时，需要移动 5 到分区位置，此时 6a 被交换到了原先 5 的位置</p>
+<p><code>[1,2,3,4,5,7,8,6b,6a]</code></p>
+</blockquote>
+<h2 id="堆排序"><a href="#堆排序" class="headerlink" title="堆排序"></a>堆排序</h2><p>关键在于建立大顶堆，将顶部和最后一个元素交换，再重新堆化，重复取出最大元素放在尾部，直到只剩一个元素即排序完成。</p>
+<ol>
+<li><p>将初始待排序列 (R1,R2,…,Rn) 构建成大顶堆，此堆为初始的无序区；</p>
+</li>
+<li><p>将堆顶元素 R1 与最后一个元素 Rn 交换，此时得到新的无序区 (R1,R2,…,Rn−1) 和新的有序区 Rn, 且满足 Ri⩽Rn(i∈1,2,…,n−1)；</p>
+</li>
+<li><p>由于交换后新的堆顶 R1 可能违反堆的性质，因此需要对当前无序区 (R1,R2,…,Rn−1) 调整为新堆，然后再次将 R1 与无序区最后一个元素交换，得到新的无序区 (R1,R2,…,Rn−2) 和新的有序区 (Rn−1,Rn)。不断重复此过程直到有序区的元素个数为 n−1，则整个排序过程完成。</p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 交换</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> arr</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> i</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> j</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">swap</span><span class="params">(<span class="type">int</span>[] arr, <span class="type">int</span> i, <span class="type">int</span> j)</span> &#123;</span><br><span class="line">    <span class="type">int</span> <span class="variable">tmp</span> <span class="operator">=</span> arr[i];</span><br><span class="line">    arr[i] = arr[j];</span><br><span class="line">    arr[j] = tmp;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 构建大顶堆</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> arr</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">buildMaxHeap</span><span class="params">(<span class="type">int</span>[] arr)</span> &#123;</span><br><span class="line">    <span class="comment">// 从最后一个非叶子结点开始，由底向上选举最大值。</span></span><br><span class="line">    <span class="comment">// 如果从上往下，无法确定顶部和隔层哪个更大，应该从底部一层一层往上。</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> arr.length / <span class="number">2</span> - <span class="number">1</span>; i &gt;= <span class="number">0</span>; i--) &#123;</span><br><span class="line">        heapify(arr, i);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 堆化</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> arr</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> i</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">heapify</span><span class="params">(<span class="type">int</span>[] arr, <span class="type">int</span> i, <span class="type">int</span> heapLen)</span> &#123;</span><br><span class="line">    <span class="type">int</span> <span class="variable">left</span> <span class="operator">=</span> <span class="number">2</span> * i + <span class="number">1</span>;</span><br><span class="line">    <span class="type">int</span> <span class="variable">right</span> <span class="operator">=</span> <span class="number">2</span> * i + <span class="number">2</span>;</span><br><span class="line">    <span class="comment">// 选取最大值，构建大顶堆</span></span><br><span class="line">    <span class="type">int</span> <span class="variable">largest</span> <span class="operator">=</span> i;</span><br><span class="line">    <span class="keyword">if</span> (right &lt; heapLen &amp;&amp; arr[right] &gt; arr[largest]) &#123;</span><br><span class="line">        largest = right;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (left &lt; heapLen &amp;&amp; arr[left] &gt; arr[largest]) &#123;</span><br><span class="line">        largest = left;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (largest != i) &#123;</span><br><span class="line">        swap(arr, largest, i);</span><br><span class="line">        <span class="comment">// 逐层选举最大值</span></span><br><span class="line">        heapify(arr, largest);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 堆排序</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> arr</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="type">int</span>[] heapSort(<span class="type">int</span>[] arr) &#123;</span><br><span class="line">    <span class="comment">// 堆的线性长度</span></span><br><span class="line">    <span class="type">int</span> <span class="variable">heapLen</span> <span class="operator">=</span> arr.length;</span><br><span class="line">    <span class="comment">// 构建大顶堆</span></span><br><span class="line">    buildMaxHeap(arr);</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> arr.length - <span class="number">1</span>; i &gt; <span class="number">0</span>; i--) &#123;</span><br><span class="line">        <span class="comment">// 逐一移动最大到数组尾部</span></span><br><span class="line">        swap(arr, <span class="number">0</span>, i);</span><br><span class="line">        <span class="comment">// 缩减堆空间，重新从顶向下堆化</span></span><br><span class="line">        heapLen -= <span class="number">1</span>;</span><br><span class="line">        heapify(arr, <span class="number">0</span>, heapLen);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> arr;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>不稳定：因为在构建堆的时候比较最大值和相对位置无关，并且还有可能分在了不同子树上</strong></p>
+]]></content>
+      <categories>
+        <category>排序</category>
+      </categories>
+      <tags>
+        <tag>排序</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>每日杂记 day7</title>
+    <url>/2024/07/20/2024-7-20/</url>
+    <content><![CDATA[<h2 id="并发常见面试题"><a href="#并发常见面试题" class="headerlink" title="并发常见面试题"></a>并发常见面试题</h2><h3 id="什么是进程、线程"><a href="#什么是进程、线程" class="headerlink" title="什么是进程、线程"></a>什么是进程、线程</h3><h3 id="用户线程和内核线程"><a href="#用户线程和内核线程" class="headerlink" title="用户线程和内核线程"></a>用户线程和内核线程</h3><h3 id="线程和进程的区别"><a href="#线程和进程的区别" class="headerlink" title="线程和进程的区别"></a>线程和进程的区别</h3><p><img src="/../assets/java-runtime-data-areas-jdk1.8.png" alt="Java 运行时数据区域（JDK1.8 之后）"></p>
+<h3 id="程序计数器和栈信息为什么是私有的"><a href="#程序计数器和栈信息为什么是私有的" class="headerlink" title="程序计数器和栈信息为什么是私有的"></a>程序计数器和栈信息为什么是私有的</h3><h3 id="线程的生命周期切换的流程是？"><a href="#线程的生命周期切换的流程是？" class="headerlink" title="线程的生命周期切换的流程是？"></a>线程的生命周期切换的流程是？</h3><p><img src="/../assets/640.png" alt="Java 线程状态变迁图"></p>
+<h3 id="线程之间是如何切换的？"><a href="#线程之间是如何切换的？" class="headerlink" title="线程之间是如何切换的？"></a>线程之间是如何切换的？</h3><p>时间分片，上下文切换。</p>
+<h3 id="什么是上下文切换"><a href="#什么是上下文切换" class="headerlink" title="什么是上下文切换"></a>什么是上下文切换</h3><h3 id="sleep和wait的区别"><a href="#sleep和wait的区别" class="headerlink" title="sleep和wait的区别"></a>sleep和wait的区别</h3><ol>
+<li>锁</li>
+<li>目的</li>
+<li>苏醒时间</li>
+<li>挂载对象</li>
+</ol>
+<h3 id="为什么要使用多线程"><a href="#为什么要使用多线程" class="headerlink" title="为什么要使用多线程?"></a>为什么要使用多线程?</h3><ol>
+<li>计算机底层：多核 CPU 时代意味着多个线程可以同时运行</li>
+<li>应用环境趋势</li>
+</ol>
+<h3 id="Java-的线程调度方式"><a href="#Java-的线程调度方式" class="headerlink" title="Java 的线程调度方式"></a>Java 的线程调度方式</h3><p>操作系统：</p>
+<ol>
+<li>抢占式调度</li>
+<li>协同式调度</li>
+</ol>
+<h3 id="单核CPU上多个线程效率一定会高吗"><a href="#单核CPU上多个线程效率一定会高吗" class="headerlink" title="单核CPU上多个线程效率一定会高吗"></a>单核CPU上多个线程效率一定会高吗</h3><ol>
+<li>CPU密集型</li>
+<li>IO密集型，利用响应时间</li>
+</ol>
+<h3 id="多线程会带来什么问题？"><a href="#多线程会带来什么问题？" class="headerlink" title="多线程会带来什么问题？"></a>多线程会带来什么问题？</h3><ol>
+<li>内存泄漏</li>
+<li>死锁</li>
+<li>线程不安全</li>
+</ol>
+<h3 id="什么是死锁？产生的必要条件？"><a href="#什么是死锁？产生的必要条件？" class="headerlink" title="什么是死锁？产生的必要条件？"></a>什么是死锁？产生的必要条件？</h3><p>必要条件</p>
+<ol>
+<li>互斥条件</li>
+<li>请求与保持</li>
+<li>不剥夺</li>
+<li>循环等待</li>
+</ol>
+<h3 id="如何破坏死锁？"><a href="#如何破坏死锁？" class="headerlink" title="如何破坏死锁？"></a>如何破坏死锁？</h3><p>破坏必要条件</p>
+<p><strong>如何避免死锁</strong>：银行家算法</p>
+<h3 id="双检锁单例为什么需要-volatile-关键字？"><a href="#双检锁单例为什么需要-volatile-关键字？" class="headerlink" title="双检锁单例为什么需要 volatile 关键字？"></a>双检锁单例为什么需要 volatile 关键字？</h3><h3 id="乐观锁和悲观锁，区别？"><a href="#乐观锁和悲观锁，区别？" class="headerlink" title="乐观锁和悲观锁，区别？"></a>乐观锁和悲观锁，区别？</h3><h3 id="CAS规则，ABA问题"><a href="#CAS规则，ABA问题" class="headerlink" title="CAS规则，ABA问题"></a>CAS规则，ABA问题</h3><p><strong>如何做到多个变量的原子性</strong>：引用类型CAS</p>
+<h2 id="多益网络笔试题"><a href="#多益网络笔试题" class="headerlink" title="多益网络笔试题"></a>多益网络笔试题</h2><h3 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h3><p>哈希表，二叉树，链表</p>
+<h3 id="排序算法"><a href="#排序算法" class="headerlink" title="排序算法"></a>排序算法</h3><p>希尔排序、堆排序、选择排序、插入排序。</p>
+<h3 id="算法题"><a href="#算法题" class="headerlink" title="算法题"></a>算法题</h3><ol>
+<li>一个 m*n 的矩阵，从左到右和从上到下都是递增的，判断某个数是否存在</li>
+</ol>
+<p>普通思路：两层遍历，一一比对。</p>
+<p>利用数据变化特性：</p>
+<p>从左上角开始，可以利用递增的特性往前和往后，但是<strong>无法具体确定横向还是纵向移动。</strong></p>
+<p>而从右上角开始，就有唯一确定的移动方向：小于即左移，大于即下移。</p>
+<ol start="2">
+<li>螺旋遍历矩阵</li>
+</ol>
+<p>应该是边界与边界的控制问题，但是没解决。</p>
+]]></content>
+      <categories>
+        <category>每日总结</category>
+      </categories>
+      <tags>
+        <tag>每日总结</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>每日杂记 day6</title>
+    <url>/2024/07/19/2024-7-19/</url>
+    <content><![CDATA[<h2 id="多线程"><a href="#多线程" class="headerlink" title="多线程"></a>多线程</h2><p>概念 -&gt; 使用 -&gt; 同步 -&gt; 锁 -&gt; 线程池 -&gt; 并发</p>
+<p>多线程的本质是：多个任务“快速”的轮流进行。</p>
+<p>进程：一个任务的基本单位，线程是CPU调度的基本单位。</p>
+<p><strong>特性区别：</strong></p>
+<p><strong>进程</strong></p>
+<ol>
+<li>资源独立</li>
+<li>开销大</li>
+<li>稳定性高</li>
+<li>通信慢</li>
+</ol>
+<p><strong>线程</strong></p>
+<ol>
+<li>资源共享，局部变量不共享。</li>
+<li>开销小</li>
+<li>稳定性差</li>
+</ol>
+<p>使用线程的方法</p>
+<ol>
+<li>创建线程<ol>
+<li>继承 Thread 类</li>
+<li>new 匿名内部类</li>
+<li>传入 Runnable 接口</li>
+</ol>
+</li>
+<li>start 方法开启线程</li>
+</ol>
+<p>通过 join 方法还可以加入其他线程，其他线程需要等待该线程才能结束。</p>
+<p>通过 interrupt 方法可以中断线程，但是这里仅是改变一个状态量，实际结束线程需通过 Thread 提供的方法 isInterrupted() 方法检测线程状态。</p>
+<blockquote>
+<p>如果线程处于等待状态，interrupt 会抛异常，导致状态更改失败。</p>
+<p>等待状态：</p>
+<ul>
+<li>当前线程正在 sleep</li>
+<li>当前线程正在等待其他 join 的线程</li>
+</ul>
+</blockquote>
+<p>线程的状态分为 new -&gt; running, waiting -&gt; interrupted。</p>
+<p><strong>守护线程</strong></p>
+<p>“守护”其他所有线程的线程。</p>
+<p>&#x3D;&#x3D;只有所有线程结束，它才会停止（包括 Main JVM主线程）&#x3D;&#x3D;</p>
+<p><code>setDeamon(true)</code> 即可将线程设置为守护线程。</p>
+<h3 id="同步问题"><a href="#同步问题" class="headerlink" title="同步问题"></a><strong>同步问题</strong></h3><p>由于多线程是异步操作，如果同时对变量进行操作，会有状态竞争问题。</p>
+<p>因此需要同步这些操作：一个一个操作。</p>
+<p>通过 synchronized 关键字、原子操作、Atomic 类都可以做到同步操作。</p>
+<p><strong>协调问题</strong></p>
+<p>有时候一个线程可能和另一个线程相关，但又被限制为了同步操作，导致这个方法不能结束另一个方法又不能执行，这被称为死锁。</p>
+<p>这时可以通过 wait() 方法使当前线程暂时休眠，等另一个线程执行完对应任务后通过 <code>notifyAll()</code> 来唤醒它，最后达成同步。</p>
+<p><strong>锁除了 synchronized 外，还有一个专门的包专门提供锁。</strong></p>
+<ol>
+<li>ReentrantLock 可重入锁</li>
+<li>ReadWriteLock 读写锁</li>
+<li>StampedLock 读写锁的优化版</li>
+<li>Semaphore 信号量</li>
+</ol>
+<p>除此之外，还有一些个专门的线程安全集合类</p>
+<ol>
+<li>CopyOnWriteArrayList</li>
+<li>ArrayBlockingQueue</li>
+<li>等等</li>
+</ol>
+<h3 id="线程池"><a href="#线程池" class="headerlink" title="线程池"></a><strong>线程池</strong></h3><p>因为线程的创建需要资源和时间，频繁的创建和销毁会浪费大量的性能。</p>
+<p>因此就可以创建线程池，存储创建过的线程，复用线程。</p>
+<p>创建方式：</p>
+<p>大多都是通过 Executors 的方法创建</p>
+<ol>
+<li>newFixedThreadPool</li>
+<li>newScheduledThreadPool</li>
+</ol>
+<p>Schedule 表示定时操作</p>
+<p>又分为</p>
+<ol>
+<li>schedule 定时</li>
+<li>scheduleAtFixedRate 以固定频率定时</li>
+<li>scheduleWithFixedDelay 以固定间隔定时</li>
+</ol>
+<h3 id="并发操作"><a href="#并发操作" class="headerlink" title="并发操作"></a>并发操作</h3><p>普通的 Thread 创建子线程只能执行操作，而不能获取返回值。</p>
+<p>因此 Future 就出场了，可以获得返回值。</p>
+<p>但是其 <code>get()</code> 操作确实阻塞的。</p>
+<p>这时候 CompletableFuture 又出现了，提供异步回调的方式。</p>
+<p>同时还有多种方法实现“并行”和“串行”的并发操作，非常好用。</p>
+<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><h3 id="轮转数组"><a href="#轮转数组" class="headerlink" title="轮转数组"></a><strong>轮转数组</strong></h3><p>通过分析轮转后数组中各元素的位置变化。</p>
+<p>首先发现尾部的数组会变到数组的头部（首位翻转数组）</p>
+<p>同时还保持着原有的顺序（切割数组，将数组各部分翻转回来）</p>
+<p>最终实现了<strong>原地</strong>转了过去。</p>
+<h3 id="除自身以外数组的乘积"><a href="#除自身以外数组的乘积" class="headerlink" title="除自身以外数组的乘积"></a><strong>除自身以外数组的乘积</strong></h3><p><strong>题目要求不能用除法</strong></p>
+<p>不然就是一个求积，然后除以当前元素得到结果了。【O(n), O(1)空间爽歪歪！】</p>
+<p>常规思路就是除去当前位置，左右求积然后再积，O(n^2^)</p>
+<p>略微思考可以发现左右求积的过程都是【无后效性】的，即一个状态是另一个状态的基础。</p>
+<p>没错！！动态规划，提前求出每个状态的前后累乘积。</p>
+<p>那么在遍历求结果时，只需要 O(1) 的时间就可以得到结果了，最终 O(n)。</p>
+<h3 id="缺失的第一个正数"><a href="#缺失的第一个正数" class="headerlink" title="缺失的第一个正数"></a><strong>缺失的第一个正数</strong></h3><p><strong>给定一个数组，要求找出数组确实的第一个正整数</strong></p>
+<p>常规思路：建立哈希表（优化查找效率），然后从 1 开始遍历，第一个不存在的即为答案。</p>
+<p>深度思考：</p>
+<p>结果要么属于 [1, N]，要么就是 N+1。</p>
+<p>因为数组只有两种情况，要么[1, N]刚好塞满，要么中间差了谁，被区间外的数占了。</p>
+<blockquote>
+<p>不要专注于什么没有，而是要看什么已经有了。</p>
+</blockquote>
+<p>同时，题目要求：<strong>必须使用 O(1) 的空间</strong>。</p>
+<p>那建立哈希表不是泡汤了？</p>
+<p>错！！既然结果属于 [1, N] 就让数组本身成为哈希表。</p>
+<p><strong>核心：</strong>通过遍历数组标记索引为 [0, N-1] 的位置，第一个没有被标记的位置 + 1 即为结果。</p>
+<blockquote>
+<p>怎么标记不影响原数组呢？</p>
+<p>设为负数</p>
+<p>本身就是负数呢？</p>
+<p>设为N+1，不干扰到索引范围内的数。</p>
+</blockquote>
+<h3 id="矩阵置零"><a href="#矩阵置零" class="headerlink" title="矩阵置零"></a><strong>矩阵置零</strong></h3><p><strong>要求使用额外常数空间 O(1)</strong></p>
+<p>只要某个位置存在 0，就将整行和整列变为 0。</p>
+<blockquote>
+<p>摆脱固定思维：真的一行一列遍历赋值为0。。。O(n^3^)</p>
+</blockquote>
+<p>O(M+N) ：分别建立行和列的数组，标记出现 0 的行或列，遍历整个矩阵，只要当前行或列存在 0，当前元素就赋值为 0，时间：O(n^2^)。</p>
+<p>O(2)：从矩阵<strong>本身</strong>挑出第一行和第一列作为标记数组，并且设置 flagRow，flagCol 两个标记变量标记原第一行或列是否存在 0。</p>
+<p><strong>和上一题很像，以自身为空间</strong></p>
+<p>O(1)：省去 flagRow，用第一列的第一个元素代替标记。</p>
+<blockquote>
+<p>在用第一行或列作为标记数组，并将存在 0 的行或列对应位置赋值为 0，并不影响原位置元素。</p>
+<p>因为如果这一行或列存在 0 的话，它本身就应该变为 0。</p>
+</blockquote>
+<h3 id="旋转图像"><a href="#旋转图像" class="headerlink" title="旋转图像"></a><strong>旋转图像</strong></h3><p>n * n 矩阵顺时针旋转。</p>
+<p><strong>顺时针旋转 &#x3D; （上下）左右翻转 + （负）正时针对角线交换</strong></p>
+<p><strong>对角线交换公式（正方形）</strong></p>
+<p><code>X(i, j) =&gt; X(n-1-j, n-1-i)</code> n为边长。</p>
+<p>位置交换，并转化为长度的“找补”。</p>
+<p>代码如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">            <span class="keyword">for</span>(<span class="type">int</span> <span class="variable">j</span> <span class="operator">=</span> <span class="number">0</span>; j &lt; n-<span class="number">1</span>-i; j++) &#123;</span><br><span class="line">                swap(matrix, i, j, n-<span class="number">1</span>-j, n-<span class="number">1</span>-i);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>每日总结</category>
+      </categories>
+      <tags>
+        <tag>每日总结</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>每日杂记 day5</title>
+    <url>/2024/07/18/2024-7-18/</url>
+    <content><![CDATA[<h2 id="八股"><a href="#八股" class="headerlink" title="八股"></a>八股</h2><h3 id="HashMap-实现原理"><a href="#HashMap-实现原理" class="headerlink" title="HashMap 实现原理"></a>HashMap 实现原理</h3><h3 id="hashmap和hashtable的区别，为什么不使用hashtable"><a href="#hashmap和hashtable的区别，为什么不使用hashtable" class="headerlink" title="hashmap和hashtable的区别，为什么不使用hashtable"></a>hashmap和hashtable的区别，为什么不使用hashtable</h3><ol>
+<li>继承类不同</li>
+<li>null 值的允许规则不同</li>
+<li>hashtable是线程安全的</li>
+<li>遍历方式</li>
+<li>容量分配</li>
+<li>hash计算方式</li>
+</ol>
+<h3 id="Class-的获取方式"><a href="#Class-的获取方式" class="headerlink" title="Class 的获取方式"></a>Class 的获取方式</h3><h3 id="Field，Method，Constructor的使用方式"><a href="#Field，Method，Constructor的使用方式" class="headerlink" title="Field，Method，Constructor的使用方式"></a>Field，Method，Constructor的使用方式</h3><ul>
+<li>自身属性</li>
+<li>调用API</li>
+</ul>
+<h3 id="Method-的反射多态调用"><a href="#Method-的反射多态调用" class="headerlink" title="Method 的反射多态调用"></a>Method 的反射多态调用</h3>]]></content>
+      <categories>
+        <category>每日总结</category>
+      </categories>
+      <tags>
+        <tag>每日总结</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>每日杂记 day4</title>
+    <url>/2024/07/17/2024-7-17/</url>
+    <content><![CDATA[<p>。。昨天被几道算法题弄的迷失了方向</p>
+<hr>
+<h2 id="八股"><a href="#八股" class="headerlink" title="八股"></a>八股</h2><h3 id="Spring"><a href="#Spring" class="headerlink" title="Spring"></a>Spring</h3><h4 id="IOC"><a href="#IOC" class="headerlink" title="IOC"></a>IOC</h4><p>控制反转，将创建、管理对象的权力交给第三方容器，在开发时只需要注入对象就可以直接使用，不需要关心复杂的依赖关系。</p>
+<h4 id="Component-和-Bean-注解的区别"><a href="#Component-和-Bean-注解的区别" class="headerlink" title="Component 和 Bean 注解的区别"></a>Component 和 Bean 注解的区别</h4><p>Component 作用于类，通过 ComponentScan 指明路径可以将标注的类转化为 Spring 管理的 Bean。</p>
+<p>Bean 作用于方法，将方法的返回值作为一个 Spring Bean，生效的前提是所在的类被声明为了 bean，如 Configuration；</p>
+<p>Bean 比 Component 的自定义性能力强，比如再需要引入第三方库的依赖时，可以声明一个 Bean 标注的方法来实现。</p>
+<h4 id="如何获得-Bean"><a href="#如何获得-Bean" class="headerlink" title="如何获得 Bean"></a>如何获得 Bean</h4><ol>
+<li>通过 Spring 容器上下文来手动获取 bean</li>
+<li>通过注解的方式来自动注入 bean<ol>
+<li>Autowired</li>
+<li>Resource</li>
+<li>Inject</li>
+</ol>
+</li>
+</ol>
+<h4 id="autowired-和-resource-的区别"><a href="#autowired-和-resource-的区别" class="headerlink" title="autowired 和 resource 的区别"></a>autowired 和 resource 的区别</h4><p>前者是 Spring 提供的注解，后者是 jdk 提供的。</p>
+<p>前者通过类型获取 bean，如果同一个类型有多个实现类会会按照名称来获取。这时候可以借助 Qualified 注解声明需要注入类的名称。</p>
+<p>后者默认通过名称获取 bean，如果无法匹配就会根据类型的方式来获取。</p>
+<blockquote>
+<p>如果也有多个实现类呢？</p>
+<p>那 resource 就要结合名称来获取了。</p>
+</blockquote>
+<p>Resource注解有两个属性分别是 name，type。</p>
+<p>指定哪一个，默认获取方式就是哪一个。</p>
+<p>如果都指定，就结合两个属性进行获取。</p>
+<p>:question: autowired还支持在构造函数上在使用？Resource 只支持在字段和方法上。</p>
+<h4 id="Bean-的作用域有哪些？"><a href="#Bean-的作用域有哪些？" class="headerlink" title="Bean 的作用域有哪些？"></a>Bean 的作用域有哪些？</h4><p>主要有：</p>
+<ul>
+<li>singleton，单例模式</li>
+<li>prototype，每次获取的都是不同的实例</li>
+<li>request：每次 HTTP 请求都会产生一个 bean，只有在 web 应用中可以用。</li>
+<li>session，类似request</li>
+</ul>
+<p><strong>如何配置</strong></p>
+<p>通过 @Scope 注解</p>
+<h4 id="Bean-是线程安全的吗？"><a href="#Bean-是线程安全的吗？" class="headerlink" title="Bean 是线程安全的吗？"></a>Bean 是线程安全的吗？</h4><p>在单例模式下，bean 线程不安全，如果它是有状态的，多线程修改会存在资源竞争问题。</p>
+<h4 id="Bean-的生命周期"><a href="#Bean-的生命周期" class="headerlink" title="Bean 的生命周期"></a>Bean 的生命周期</h4><p>实例化 -&gt; 属性赋值 -&gt; 初始化 -&gt; 销毁</p>
+<p><img src="/../assets/spring-bean-lifestyle.png" alt="img"></p>
+<h4 id="AOP"><a href="#AOP" class="headerlink" title="AOP"></a>AOP</h4><p>面向切面编程，是一个对横切关注点的增强，抽象出公共业务，降低不同模块间的耦合度。</p>
+<p><strong>实现原理</strong>就是动态代理，如果要代理的对象实现了接口就使用 jdk 的 proxy 创建代理，没有接口就用第三方库 cglib 进行动态代理。</p>
+<blockquote>
+<p>jdk proxy 和 cglib 的区别？</p>
+<p><strong>JDK 动态代理只能代理实现了接口的类或者直接代理接口，而 CGLIB 可以代理未实现任何接口的类。</strong> 另外， CGLIB 动态代理是通过生成一个被代理类的<strong>子类</strong>来拦截被代理类的方法调用，因此不能代理声明为 final 类型的类和方法。</p>
+<p>就二者的<strong>效率</strong>来说，大部分情况都是 JDK 动态代理更优秀，随着 JDK 版本的升级，这个优势更加明显</p>
+<p>和 OOP 的区别：</p>
+<p>oop 是封装为对象，实现代码的模块化和层次化。</p>
+</blockquote>
+<h4 id="Spring-aop-和-aspectj-aop-的区别"><a href="#Spring-aop-和-aspectj-aop-的区别" class="headerlink" title="Spring aop 和 aspectj aop 的区别"></a>Spring aop 和 aspectj aop 的区别</h4><p>前者是运行时增强，后者是编译期增强，将增强的代码写入字节码中，效率更高。</p>
+<h4 id="aop-的通知类型有哪些？"><a href="#aop-的通知类型有哪些？" class="headerlink" title="aop 的通知类型有哪些？"></a>aop 的通知类型有哪些？</h4><ol>
+<li><p>before 方法执行前</p>
+</li>
+<li><p>after 方法执行后</p>
+</li>
+<li><p>afterReturning 方法返回结果后</p>
+</li>
+<li><p>afterThrowing 方法抛出异常后</p>
+</li>
+<li><p>around 编程式的控制目标对象的调用，可以直接拿到目标对象和要执行的方法。</p>
+</li>
+</ol>
+<h4 id="多个切面如何控制执行顺序"><a href="#多个切面如何控制执行顺序" class="headerlink" title="多个切面如何控制执行顺序"></a>多个切面如何控制执行顺序</h4><p>通过 @Order 注解，值越小优先级越高</p>
+<h4 id="aop-应用场景"><a href="#aop-应用场景" class="headerlink" title="aop 应用场景"></a>aop 应用场景</h4><ol>
+<li>日志记录</li>
+<li>事务管理</li>
+<li>权限控制</li>
+<li>接口限流等</li>
+</ol>
+<h3 id="Spring-MVC"><a href="#Spring-MVC" class="headerlink" title="Spring MVC"></a>Spring MVC</h3><p>将业务逻辑、数据、界面分离来组织代码</p>
+<p><strong>核心组件：</strong></p>
+<p>DispatcherServlet：核心处理器，复杂接受请求、分发、给予客户端响应。</p>
+<p>HandlerMapping：根据 Url 匹配查找能处理的 Handler，并且将拦截器和 Handler 一起封装。</p>
+<p>HandlerAdapter：根据 handlermapping 找到的Handler，去适配执行对应的Handler</p>
+<p>Handler：实际处理的处理器</p>
+<p>ViewResovler：视图解析器，根据 Handler 返回的逻辑视图，解析渲染界面，并传递给 dispatcherservlet 响应给客户端。</p>
+<p><img src="/../assets/de6d2b213f112297298f3e223bf08f28.png" alt="img"></p>
+<h4 id="如果有多个拦截了异常类（或父类）的统一异常处理通知，会都执行吗？"><a href="#如果有多个拦截了异常类（或父类）的统一异常处理通知，会都执行吗？" class="headerlink" title="如果有多个拦截了异常类（或父类）的统一异常处理通知，会都执行吗？"></a>如果有多个拦截了异常类（或父类）的统一异常处理通知，会都执行吗？</h4><p>首先会根据拦截异常类型，添加所有符合类型（包括父类）异常处理，最后根据匹配程度选取优先级最高的 1 个。</p>
+<h4 id="Spring-的三级缓存"><a href="#Spring-的三级缓存" class="headerlink" title="Spring 的三级缓存"></a>Spring 的三级缓存</h4><p>一级缓存：存放最终创建完成的 bean</p>
+<p>二级缓存：存放刚刚实例化后的 bean 或 代理对象。</p>
+<p>三级缓存，存放对象工厂，可以生成原始 Bean 或代理对象，只对单例 bean 生效，多例直接生成新的即可。</p>
+<p><strong>获取顺序：</strong>一级 -&gt; 二级 -&gt; 三级</p>
+<h3 id="Spring-事务"><a href="#Spring-事务" class="headerlink" title="Spring 事务"></a>Spring 事务</h3><p>编程式事务，通过 TransactionTemplate 或 TransactionManager 手动管理事务。</p>
+<p>声明式事务，基于 @Transactional 注解通过 aop 实现事务。</p>
+<h4 id="TransactionManager-使用"><a href="#TransactionManager-使用" class="headerlink" title="TransactionManager 使用"></a>TransactionManager 使用</h4><ol>
+<li>注入 PlatformTransactionManager。</li>
+<li>定义事务信息 TransactionDefinition</li>
+<li>得到事务运行状态 TransactionStatus</li>
+<li>修改状态<ol>
+<li>commit</li>
+<li>rollback</li>
+</ol>
+</li>
+</ol>
+<h4 id="事务的传播行为"><a href="#事务的传播行为" class="headerlink" title="事务的传播行为"></a>事务的传播行为</h4><ol>
+<li>RRQUIRED 加入事务，没有则新建，是默认的行为</li>
+<li>REQUIRES_NEW 新建事务</li>
+<li>REQUIRED_NESTED 嵌套事务</li>
+<li>MANDATORY 强制事务，没有则抛出异常</li>
+</ol>
+<p>新建事务外部回滚不会影响内部新建的事务，但是如果内存回滚并抛出了相应异常，外部也会回滚，因为会捕捉到异常。</p>
+<p>嵌套事务如果外部回滚，其也会回滚；反之不会。</p>
+<h4 id="事务的隔离"><a href="#事务的隔离" class="headerlink" title="事务的隔离"></a>事务的隔离</h4><p>主要分为</p>
+<ol>
+<li>READ_COMMITED 只能读取事务提交后的值。</li>
+<li>REPETABLE_READ 允许重复读。</li>
+</ol>
+<h4 id="Transaction-默认回滚策略"><a href="#Transaction-默认回滚策略" class="headerlink" title="@Transaction 默认回滚策略"></a>@Transaction 默认回滚策略</h4><p>runtimeException ，而checked exception 不会回滚</p>
+<h4 id="只读事务"><a href="#只读事务" class="headerlink" title="只读事务"></a>只读事务</h4><p>一组查询语句应该声明为只读事务。</p>
+<p>MySQL 默认对每一个新建立的连接都启用了<code>autocommit</code>模式</p>
+<p>MySQL 内部每一条 sql 语句都会新建一个事务，相互之间是独立的，执行时间不同就有可能同个值读取不一致问题，造成读取逻辑错乱。</p>
+<p>同时声明为只读事务，还可以优化性能。</p>
+<h4 id="事务的-ACID-特性"><a href="#事务的-ACID-特性" class="headerlink" title="事务的 ACID 特性"></a>事务的 ACID 特性</h4><p>A：原子性，C：一致性，I：隔离性，D：持久性</p>
+<p>A, I, D -&gt; C</p>
+<h2 id="算法题"><a href="#算法题" class="headerlink" title="算法题"></a>算法题</h2><h3 id="最大子数组和"><a href="#最大子数组和" class="headerlink" title="最大子数组和"></a>最大子数组和</h3><p><strong>普通解法：</strong></p>
+<p>遍历两两区间，通过 sum 记录所有子数组，并保留 max。</p>
+<p><strong>动态规划解法：</strong></p>
+<p>将问题转化为 n 个“无后效性”问题：即前一个问题的结果与后一个问题无关。</p>
+<p>再找到“状态方程”的变换条件：由于连续，后一个问题的最大子数组和一定是基于前一个问题的和。</p>
+<ul>
+<li>小于 0 直接“中断”，sum 从头算起。</li>
+<li>大于 0 继续计算。</li>
+</ul>
+<p>最后遍历完所有问题，得到最终结果 max。</p>
+<h3 id="合并区间"><a href="#合并区间" class="headerlink" title="合并区间"></a>合并区间</h3><p>将能够相接的区间合并在一起：相接即区间有重合部分。</p>
+<p><strong>关键在于排序</strong>，因为能够合并的区间，一定在相邻位置。</p>
+<p><strong>双指针建立左右边界</strong>，同时需要记录最大右边界。</p>
+<p><strong>移动条件</strong>：只要区间 x 的左边界&lt;=就表示有重合部分，右边界继续扩张；否则重新记录左边界。</p>
+<p>最后返回所有的区间结果。</p>
+]]></content>
+      <categories>
+        <category>每日总结</category>
+      </categories>
+      <tags>
+        <tag>每日总结</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>MySQL(三) 分组函数</title>
     <url>/2024/07/15/MySQL-%E4%B8%89-%E5%88%86%E7%BB%84%E5%87%BD%E6%95%B0/</url>
     <content><![CDATA[<p>区别于“数据处理函数”：</p>
@@ -2090,6 +3237,10 @@
 <p>直接调用 <code>newInstance()</code> 方法只能调用该类的<strong>public无参数</strong>构造方法。</p>
 <p>如果构造方法带有参数，或者不是public，就无法直接通过Class.newInstance()来调用。</p>
 <p>因此，Java提供了这个类似Field、Method的Constructor类，包含了一个 Class 的所有构造方法信息。</p>
+<h4 id="属性相关"><a href="#属性相关" class="headerlink" title="属性相关"></a>属性相关</h4><ul>
+<li><code>getName()</code>：返回方法名称，例如：<code>&quot;getScore&quot;</code>；</li>
+<li><code>getParameterTypes()</code>：返回方法的参数类型，是一个Class数组，例如：<code>&#123;String.class, int.class&#125;</code>；</li>
+</ul>
 <h4 id="获取方法"><a href="#获取方法" class="headerlink" title="获取方法"></a><strong>获取方法</strong></h4><ul>
 <li><code>getConstructor(Class...)</code>：获取某个<code>public</code>的<code>Constructor</code>；</li>
 <li><code>getConstructors()</code>：获取所有<code>public</code>的<code>Constructor</code>；</li>
@@ -2565,7 +3716,7 @@
 <li>插入元素：<code>V put(K key, V value)</code></li>
 <li>访问value：<code>V get(K key)</code></li>
 <li>是否包含某个key：<code>boolean containsKey(K key)</code></li>
-<li>是否包含某个value：<code>boolean containsKey(K key)</code></li>
+<li>是否包含某个value：<code>boolean containsValue(K key)</code></li>
 <li>返回所有的key：<code>Set&lt;K&gt; keySet()</code></li>
 <li>返回所有的value：<code>Collection&lt;V&gt; values()</code></li>
 <li>返回所有的键值对：<code>Set&lt;Entry&lt;K, v&gt;&gt; entrySet()</code></li>
@@ -2583,8 +3734,8 @@
 <h4 id="HashMap的本质"><a href="#HashMap的本质" class="headerlink" title="HashMap的本质"></a>HashMap的本质</h4><p>通过空间换时间，用一个大数组来存储value，这样就可以直接索引。</p>
 <p><strong>步骤：</strong></p>
 <ol>
-<li>通过 key 的 equals 方法进行匹配到对应的 key</li>
 <li>再通过 key 的 hashCode 方法计算出 hash 值，即该 key 对应 value 在数组中存储的索引值。</li>
+<li>如果 hash 值相同，再根据 key 的 equals 方法重新计算。</li>
 </ol>
 <p><strong>数组长度</strong></p>
 <p>HashMap 初始化时默认的数组大小只有 16。</p>
@@ -2726,7 +3877,7 @@
 <p>多进程的优点：</p>
 <ol>
 <li><p>稳定性高，多进程稳定性比多线程高，</p>
-<p>因为在多进程的情况下，一个进Java程崩溃不会影响其他进程，而在多线程的情况下，任何一个线程崩溃会直接导致整个进程崩溃。</p>
+<p>因为在多进程的情况下，一个Java进程崩溃不会影响其他进程，而在多线程的情况下，任何一个线程崩溃会直接导致整个进程崩溃。</p>
 </li>
 </ol>
 <h3 id="JVM-多线程"><a href="#JVM-多线程" class="headerlink" title="JVM 多线程"></a>JVM 多线程</h3><p>Java 语言内置了多线程支持，一个Java程序实际上是一个JVM进程。</p>
@@ -2762,7 +3913,7 @@
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">Thread</span> <span class="variable">t</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;ok&quot;</span>);</span><br><span class="line">        &#125;);</span><br><span class="line">        t.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <ol start="5">
-<li>又或者使用T创建 Thread 匿名类，重写run方法</li>
+<li>又或者创建 Thread 匿名类，重写run方法</li>
 </ol>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">Thread</span> <span class="variable">t</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>() &#123;</span><br><span class="line">            <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;ok&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        t.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -3176,7 +4327,7 @@
 
 <p>但是它实际上是封装了了非线程安全的<code>Map</code>，对所有读写方法都用<code>synchronized</code>加锁。</p>
 <p>这样获得的线程安全集合的性能比<code>java.util.concurrent</code>集合要低很多，所以不推荐使用。</p>
-<h3 id="Atomic-类"><a href="#Atomic-类" class="headerlink" title="Atomic 类"></a>Atomic 类</h3><p>ava的<code>java.util.concurrent</code>包除了提供底层锁、并发集合外，还提供了一组原子操作的封装类，它们位于<code>java.util.concurrent.atomic</code>包。</p>
+<h3 id="Atomic-类"><a href="#Atomic-类" class="headerlink" title="Atomic 类"></a>Atomic 类</h3><p>Java的<code>java.util.concurrent</code>包除了提供底层锁、并发集合外，还提供了一组原子操作的封装类，它们位于<code>java.util.concurrent.atomic</code>包。</p>
 <p>我们以<code>AtomicInteger</code>为例，它提供的主要操作有：</p>
 <ul>
 <li>增加值并返回新值：<code>int addAndGet(int delta)</code></li>

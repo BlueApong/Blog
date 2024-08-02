@@ -276,7 +276,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://blueapong.github.io/2024/07/15/MySQL-%E4%B8%89-%E5%88%86%E7%BB%84%E5%87%BD%E6%95%B0/">
+    <link itemprop="mainEntityOfPage" href="https://blueapong.github.io/2024/08/02/MySQL-%E7%B4%A2%E5%BC%95/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -290,7 +290,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2024/07/15/MySQL-%E4%B8%89-%E5%88%86%E7%BB%84%E5%87%BD%E6%95%B0/" class="post-title-link" itemprop="url">MySQL(三) 分组函数</a>
+            <a href="/2024/08/02/MySQL-%E7%B4%A2%E5%BC%95/" class="post-title-link" itemprop="url">MySQL-索引</a>
         </h2>
 
         <div class="post-meta">
@@ -302,7 +302,173 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2024-07-15 21:51:37" itemprop="dateCreated datePublished" datetime="2024-07-15T21:51:37+08:00">2024-07-15</time>
+              <time title="创建时间：2024-08-02 14:00:18" itemprop="dateCreated datePublished" datetime="2024-08-02T14:00:18+08:00">2024-08-02</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>介绍</p>
+<p>类似书的目录一样对数据进行分类，加快数据查找速度。</p>
+<p>分类</p>
+<ul>
+<li>按数据结构分类</li>
+<li>按物理存储分类</li>
+<li>按字段特性分类</li>
+<li>按字段个数分类</li>
+</ul>
+<p>数据结构分类</p>
+<p><img src="/../assets/%E7%B4%A2%E5%BC%95%E5%88%86%E7%B1%BB.drawio.png" alt="img"></p>
+<p>InnoDB选择索引的方式</p>
+<ul>
+<li>有主键</li>
+<li>无主键，全有效列</li>
+<li>都没有，隐式自增id</li>
+</ul>
+<p>B+树</p>
+<p>多叉树，叶子结点存放数据，非叶子结点存放索引</p>
+<p>每个结点按主键顺序存放，非叶子结点，则用来划分区域</p>
+<p><img src="/../assets/btree.drawio.png" alt="主键索引 B+Tree"></p>
+<p>存储千万级的数据最多需要 3-4 次磁盘IO ？？？</p>
+<p><strong>对于二级索引</strong></p>
+<p>叶子结点只存储主键值。</p>
+<p>使用二级索引查询后，需要再查一次主键的 B+树，称作【回表】</p>
+<p>如果只查询二级索引树存储的值，如主键，就能直接返回结果——【覆盖索引】</p>
+<p>对比B+树、B树、二叉树、哈希的区别</p>
+<ol>
+<li>B树非叶子结点也要存数据，而是是单链表；空间消耗大，无法查询范围。</li>
+<li>二叉树只能存两个子结点，高度相比多叉树会高出很多。</li>
+<li>hash无法做范围查询</li>
+</ol>
+<p>物理存储分类</p>
+<p>主键和二级索引的叶子结点存储结构不同</p>
+<p>字段特性分类</p>
+<p>主键索引：即以主键为索引</p>
+<p>唯一索引：以唯一 UNIQUE 字段为索引，允许空值</p>
+<p>普通索引：以普通的字段为索引</p>
+<p>前缀索引：以字符类型的字段的前几个字符建立索引，可以减少索引占用的存储空间。</p>
+<p>字段个数分类</p>
+<p>单列索引</p>
+<p>联合索引（多列、复合索引）</p>
+<p>需要遵循最左匹配原则，where从左边开始匹配，顺序打乱索引会失效。</p>
+<p>进行到范围查询时，之后的字段会失效。</p>
+<p>key_len 记录使用了多少个</p>
+<p><code>&gt;, &gt;=, BETWEEN...AND..., like j%</code></p>
+<p>索引下推</p>
+<p>Extra: <code>using index condition</code></p>
+<p>索引区分度</p>
+<p><img src="/../assets/%E5%8C%BA%E5%88%86%E5%BA%A6.png" alt="区分度计算公式"></p>
+<p>性别就很小，不适合放在前面</p>
+<p>查询优化器：全表扫描</p>
+<p>什么时候需要、不需要索引？</p>
+<p>缺点：</p>
+<ol>
+<li>空间消耗</li>
+<li>维护耗时</li>
+</ol>
+<p>适用场景：</p>
+<ol>
+<li>唯一性限制</li>
+<li>经常条件查询的</li>
+<li>经常 group by 和 order by 的，无需二次排序。</li>
+</ol>
+<p>不适用场景：</p>
+<ol>
+<li><p>适用场景反例</p>
+</li>
+<li><p>经常需要修改的字段</p>
+</li>
+</ol>
+<p>优化方式：</p>
+<ol>
+<li><p>前缀索引优化</p>
+</li>
+<li><p>覆盖索引优化</p>
+</li>
+<li><p>自增索引，减少树结构的维护时间</p>
+<p>页分裂问题</p>
+</li>
+<li><p>非 NULL</p>
+</li>
+<li><p>防止索引失效</p>
+<ol>
+<li>左边、左右模糊匹配</li>
+<li>对索引列进行计算</li>
+<li>联合索引违背最左原则</li>
+<li>OR两边有一边不是索引列</li>
+</ol>
+<p>可以通过 explain 的 key查看实际用的索引、key_len 查看生效的索引长度、type查看扫描类型</p>
+</li>
+</ol>
+<p>EXPLAIN type 介绍</p>
+<ol>
+<li>All 全表扫描</li>
+<li>Index 全索引扫描，只返回索引列</li>
+<li>Range 索引范围扫描</li>
+<li>ref 非唯一索引扫描</li>
+<li>eq_ref 唯一索引扫描，通常发生在基于唯一索引的连表查询（相等的）</li>
+<li>const 结果只有一条的唯一主键或唯一索引扫描</li>
+</ol>
+<p>extra</p>
+<ul>
+<li>using filesort</li>
+<li>using temporary</li>
+<li>using index 覆盖索引</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://blueapong.github.io/2024/08/01/TCP%E8%AF%A6%E8%A7%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Apong">
+      <meta itemprop="description" content="个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Apong's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/08/01/TCP%E8%AF%A6%E8%A7%A3/" class="post-title-link" itemprop="url">TCP详解</a>
+        </h2>
+
+        <div class="post-meta">
+        <!--置顶功能-->
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-08-01 13:00:31" itemprop="dateCreated datePublished" datetime="2024-08-01T13:00:31+08:00">2024-08-01</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -310,7 +476,11 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">计算机网络</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/TCP/" itemprop="url" rel="index"><span itemprop="name">TCP</span></a>
                 </span>
             </span>
 
@@ -325,15 +495,322 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>区别于“数据处理函数”：</p>
-<p><strong>分组函数是多行函数</strong>，多行数据产生一个结果 (如果没有 group by)</p>
+          <p>OSI七层模型</p>
+<p>应用层</p>
+<p>表示层</p>
+<p>会话层</p>
+<p>传输层</p>
+<p>网络层</p>
+<p>数据链路层</p>
+<p>物理层</p>
+<p>tcp，udp位于传输层</p>
+<p>tcp&#x2F;ip 标识：源IP、端口号，目的IP、端口号，协议号</p>
+<p><strong>端口范围</strong></p>
+<p>0-1023 知名端口号</p>
+<p>1024-65535 动态分配的端口号</p>
+<p><strong>常见知名端口号</strong></p>
+<p>ssh: 22</p>
+<p>ftp: 21</p>
+<p>http: 80</p>
+<p>telnet: 23</p>
+<p>https: 443</p>
 <blockquote>
-<p>没加 group by 即一整张表就是一组。</p>
+<p>在 linux 中使用 cat &#x2F;etc&#x2F;services 查看已记录端口号</p>
 </blockquote>
-<p><strong>数据处理函数是单行函数</strong>，一行数据一个结果。</p>
+<h2 id="UDP协议"><a href="#UDP协议" class="headerlink" title="UDP协议"></a>UDP协议</h2><p>结构图</p>
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/00d1821abded524b2e9429691b0cc153.png" alt="在这里插入图片描述"></p>
+<p><strong>特点：</strong></p>
+<ul>
+<li>无连接</li>
+<li>不可靠：没有确认和重传机制</li>
+<li>面向数据报：只能一次性发送全部报文</li>
+</ul>
+<p><strong>缓冲区：</strong></p>
+<p>存在接收缓冲区，没有发送缓存区</p>
+<p>因为 UDP 不保证可靠性，即使报文丢失，也不需要重发。</p>
+<p>而 TCP 必须要有，当报文丢失，需要重新发送。</p>
+<p>虽然具有接收缓冲区，但是无法保证接收的顺序，当缓冲区满了的时候再到达的报文会被丢弃。</p>
+<p>UDP 是全双工协议，最多传送 64 k【计算方式？？】，如果超过需要手动分包。</p>
+<p>基于 UDP 的应用层协议：</p>
+<p>NFS：网络文件协议</p>
+<p>TFTP：简单文件传输协议</p>
+<p>DHCP：动态主机配置协议</p>
+<p>BOOTP：无盘设备启动协议</p>
+<p>DNS：域名解析协议</p>
+<h2 id="TCP协议"><a href="#TCP协议" class="headerlink" title="TCP协议"></a>TCP协议</h2><p><img src="https://i-blog.csdnimg.cn/blog_migrate/26bb30f0808ad9fd94ba350157f278e7.png" alt="在这里插入图片描述"></p>
+<p><strong>源端口号&#x2F;目的端口号：</strong>表示数据从哪个进程来，要到那个进程去</p>
+<p><strong>32位序号：</strong>TCP将要传输的每段数据组进行了编号，序号是本报文段发送的数据组的第一个字节的编号，可以保证传输信息的有效性。</p>
+<p>比如：一个报文段的序号为300，此报文段数据部分共有100字节，则下一个报文段的序号为401。</p>
+<p><strong>32位确认序号：</strong>每一个ACK一个确认号：表示下一个期待收到的字节序号，且该序号之前的所有数据已经正确无误的收到。</p>
+<p>确认号只有当ACK标志为1时才有效。比如建立连接时，<strong>SYN报文</strong>的ACK标志位为0。</p>
+<p><strong>4位首部长度(数据偏移)：</strong> 表示该TCP头部有多少个32位bit(有多少个4字节)，可以将TCP报头和有效载荷分离。</p>
+<p>TCP报文首部固定为20个字节即偏移量 5，最大能扩充到 15*4 &#x3D; 60个字节。</p>
+<p><strong>6位标志位：</strong></p>
+<ul>
+<li>URG：标志<strong>紧急指针</strong>是否有效。</li>
+<li>ACK：标识<strong>确认号</strong>是否有效。</li>
+<li>PSH：提示<strong>接收端</strong>应用程序立即将<strong>接收缓冲区</strong>的数据拿走。</li>
+<li>RST：它是为了<strong>处理异常连接</strong>的， 告诉连接不一致的一方，我们的连接还没有建立好， 要求对方重新建立连接。我们把携带RST标识的称为<strong>复位报文段</strong>。</li>
+<li>SYN: 请求<strong>建立连接</strong>; 我们把携带SYN标识的称为<strong>同步报文段</strong>。</li>
+<li>FIN：通知对方, 本端要<strong>关闭连接</strong>了, 我们称携带FIN标识的为<strong>结束报文段</strong>。</li>
+</ul>
+<p><strong>16位的紧急指针：</strong>指定<strong>优先被处理</strong>的报文段，这时就可以设置紧急指针，指向该报文段【序号？？】即可，然后将紧急标志设置为1。<br><strong>16位窗口大小：</strong>用于控制<strong>发送方</strong>发送的流量。接收方将自己接收<strong>缓冲器剩余空间</strong>的大小告诉发送方叫做16位窗口大小。</p>
+<p>发送发可以根据窗口大小来适配发送的速度和大小，窗口大小最大是2的16次方，表示最多能表示发送64KB，但也可以根据选项中的某些位置扩展，最大扩展1G。<br><strong>16位校验和：</strong>发送端填充，<strong>CRC校验</strong>。如果接收端校验不通过， 则认为数据有问题</p>
+<p>(此处的检验和不光包含TCP首部也包含TCP数据部分？？？)。</p>
+<h3 id="确认应答机制"><a href="#确认应答机制" class="headerlink" title="确认应答机制"></a>确认应答机制</h3><p>发送端向接收端发送消息后，如果接收端成功收到了信息，会返回 ACK 和下一个报文段的确认号。</p>
+<blockquote>
+<p>如，主机A给主机B发送了1-1000的数据，ACK应答，携带了1001序列号。告诉主机A，我已经接受到了1-1000数据，下一次你从1001开始发送数据。</p>
+</blockquote>
+<h3 id="超时重传"><a href="#超时重传" class="headerlink" title="超时重传"></a>超时重传</h3><p>当接收端没有接受到消息，或者发出的 ACK 消息丢失了，发送端就会在特定的时间间隔内重发信息。</p>
+<p>因此接收端会产生重复信息，需要根据【16位序列号？？？？】去重。</p>
+<p><strong>如何确定超时的时间？</strong></p>
+<p>太短会导致频繁发送重复的包，太长会影响重传效率，因此 TCP 为了保证高性能，会动态计算这个时间。</p>
+<p>如 linux，以 500 ms 为单位进行控制，以整数倍递增，倍数以指数型递增。</p>
+<p>当首次重发后，仍然超时就会等待 2*500ms、4*500ms…</p>
+<h3 id="连接管理机制"><a href="#连接管理机制" class="headerlink" title="连接管理机制"></a>连接管理机制</h3><p><strong>三次握手</strong>：确保两端都有发送和接收的能力，两次握手只能确认一端能够发送，另一端能够回应，但无法确认另一端发送后，这一端也能正常回应。</p>
+<p><img src="/../assets/image-20240801223020726.png" alt="image-20240801223020726"></p>
+<p><strong>四次挥手</strong></p>
+<p><img src="/../assets/851c5465701a9220100681120c61609e.png" alt="img"></p>
+<p>收到 FIN 的时候无法立即关闭，需要等待 2 TTL（发收都完成），因此需要先返回确认 ACK，表示收到。</p>
+<p>然后处理完成后，再发送 FIN 给客户端（第三次挥手），最后客户端回应，连接正确断开。</p>
+<p><strong>TIME_WAIT 状态</strong></p>
+<p>当我们实现一个TCP服务器时，我们把这个服务器运行起来。</p>
+<p>然后将服务器关闭掉，再次重新启动服务器会发现一个问题：</p>
+<p>就是不能马上再次绑定这个端口号和ip，需要等一会才可以重新绑定，其实等的这一会就是<strong>TIME_WAIT</strong> 状态。</p>
+<p>TCP协议规定主动关闭连接的一方要处于TIME_WAIT状态，等待<strong>两个MSL</strong>的时间后才能回到CLOSED状态。<br>当我们使用Ctrl-C终止了server，server是主动关闭连接的一方在TIME_WAIT期间仍然<strong>不能再次监听同样的server端口。</strong></p>
+<p><strong>MSL</strong></p>
+<p>MSL在RFC1122中规定为<strong>两分钟</strong>(120s)，但是各操作系统的实现不同。</p>
+<p>在Centos7上默认配置的值是60s可以通过cat &#x2F;proc&#x2F;sys&#x2F;net&#x2F;ipv4&#x2F;tcp_fin_timeout查看MSL的值。</p>
+<p><strong>为什么TIME_WAIT时间一定是2MSL：</strong></p>
+<p>保证两端都发送和接收都已完成。</p>
+<p>首先，TIME_WAIT是为了防止最后一个ACK丢失，如果没有TIME_WAIT，那么主动断开连接的一方就已经关闭连接，但是另一方还没有断开连接，它收不到确认ACK会认为自己上次发送的FIN报文丢失会重发该报文，但是另一方已经断开连接了，这就会造成连接不一致的问题，所以TIME_WAIT是必须的。</p>
+<p><strong>MSL是TCP报文在发送缓冲区的最大生存时间</strong>，如果TIME_WAIT持续存在2MSL的话就能保证在两个传输方向上的尚未被接收或迟到的报文段都已经消失。</p>
+<p>(否则如果服务器立刻重启，可能会收到来自上一个进程的<strong>迟到的</strong>数据，但是这种数据很可能是错误的)。</p>
+<p>同时也是在理论上保证最后一个报文可靠到达。</p>
+<p>(假设最后一个ACK丢失, 那么服务器会再重发一个FIN，这时虽然客户端的进程不在了，但是TCP连接还在，仍然可以重发LAST_ACK，这就会导致问题) ？？？？</p>
+<p><strong>解决TIME_WAIT状态引起的bind失败的方法：</strong></p>
+<p>在server的TCP连接没有完全断开之前不允许重新绑定，也就是TIME_WAIT时间没有过，但是这样不允许立即绑定在某些情况下是不合理的：</p>
+<p>比如：服务器需要处理<strong>大量的</strong>、<strong>短暂的</strong>客户端的连接<br>(每个连接的生存时间可能很短，但是每秒都有很大数量的客户 端来请求)<br>这个时候如果由服务器端主动关闭连接(比如某些客户端不活跃，就需要被服务器端主动清理掉)，</p>
+<p>这样服务器端就会有大量的端口产生大量TIME_WAIT状态，无法立刻重用，需要等待。<br>每个连接都会占用一个通信五元组(源ip, 源端口, 目的ip, 目的端口, 协议)。其中服务器的ip和端口和协议是固定的，如果新来的客户端连接的ip和端口号和TIME_WAIT占用的<strong>连接重复</strong>就造成等待。<br><strong>解决方法：</strong>使用setsockopt()设置socket描述符的选项SO_REUSEADDR为1，表示允许创建端口号相同但IP地址不同的多个socket描述符。</p>
+<p><strong>CLOSE_WAIT 状态</strong></p>
+<p>在两次挥手过后，如果服务器还没有第三次挥手，此时就是 CLOSE_WAIT 状态。</p>
+<h3 id="滑动窗口"><a href="#滑动窗口" class="headerlink" title="滑动窗口"></a>滑动窗口</h3><p>确认应答策略要求每一个发送的数据段都要给一个ACK，收到后再发送下一个数据段。</p>
+<p>相当于 2L 的时间发送一段数据，性能较差，尤其是数据往返的时间较长的时候。</p>
+<p>滑动窗口可以同时发送多条消息，将多个段的等待时间重叠在一起。</p>
+<p>想当于 1L 的时间发送多条数据，大大的提高了吞吐率。</p>
+<p><img src="/../assets/177935b496ee7d7f11ed9c9a9e894dcf.png" alt="在这里插入图片描述"></p>
+<p><strong>窗口大小</strong>：指的是无需等待确认应答而可以继续发送数据的最大值。</p>
+<p>上图的窗口大小就是4000个字节(四个数据段段)。</p>
+<blockquote>
+<p>和 TCP 协议头的窗口大小是一个东西吗？？控制发送流量</p>
+</blockquote>
+<p>发送前四个段的时候，不需要等待任何ACK直接发送即可。</p>
+<p>当收到第一个ACK后滑动窗口向后移动，继续发送第五个段的数据，然后依次类推。</p>
+<p>操作系统内核通过<strong>发送缓冲区</strong>来记录当前还有哪些数据没有应答。</p>
+<p>只有确认应答过的数据，才能从缓冲区删掉，窗口越大，则网络的吞吐率就越高。</p>
+<p>滑动窗口左边代表已经发送过并且确认，可以从发送缓冲区中删除了，</p>
+<p>滑动窗口里边代表发送出去但是没有确认。</p>
+<p>滑动窗口右边代表还没有发送的数据。</p>
+<p><img src="/../assets/df5e0a10e3053d58d6db9e339defdda3.png" alt="在这里插入图片描述"></p>
+<p>如果在这种情况中出现了丢包现象，应该如何重发呢？</p>
+<p><strong>ACK丢失：</strong>数据到达接收方，但是 ACK 报文丢失：可以根据后边的ACK确认。</p>
+<blockquote>
+<p>因为接收方也是一段一段同步接收的，所以如果丢失了前面的 ACK，后面的可以帮忙确定。</p>
+</blockquote>
+<p>假设发送方发送1-1000的数据，接收方收到返回确认ACK，但是返回的ACK丢失了，</p>
+<p>另一边发送1001-2000收到的确认ACK 2001，就可以认为1-1000数据接收成功 。</p>
+<p><strong>数据段丢失：</strong> 当某一段报文段丢失之后，发送端会<strong>持续</strong>收到 1001 这样的ACK，就像是在提醒发送端 “我想要的是 1001” 一样。</p>
+<p>如果发送端主机连续<strong>三次</strong>收到了同样一个”1001” 这样的应答，就会将对应的数据 1001 - 2000 重新发送；</p>
+<p>并且这个时候接收端收到了 1001 之后， 再次返回的ACK就是7001了。</p>
+<p>因为2001 - 7000接收端其实之前就已经收到了，被放到了接收端操作系统内核的接收缓冲区中。</p>
+<p>这种机制被称为 “<strong>高速重发控制</strong>”(也叫 “<strong>快重传</strong>“)。</p>
+<p><img src="/../assets/400205f0f6d346180974888623079274.png" alt="在这里插入图片描述"></p>
+<p><strong>快重传</strong>要求接收方在收到一个失序的报文段后就立即发出重复确认</p>
+<blockquote>
+<p> （为的是使发送方及早知道有报文段没有到达对方）而不要等到自己发送数据时捎带确认。</p>
+</blockquote>
+<p>快重传算法规定：发送方只要一连收到<strong>三个重复确认</strong>就应当立即重传对方尚未收到的报文段，而<strong>不必继续等待设置的重传计时器</strong>时间到期。</p>
+<p>由于不需要等待设置的重传计时器到期，能尽早重传未被确认的报文段，能提高整个网络的吞吐量。</p>
+<h3 id="流量控制"><a href="#流量控制" class="headerlink" title="流量控制"></a><strong>流量控制</strong></h3><p>接收端处理数据的速度是有限的，如果发送端发的太快，导致接收端的<strong>缓冲区被装满</strong>；</p>
+<p>这个时候如果发送端继续发送，就会造成<strong>丢包</strong>，然后引起丢包重传等等一系列连锁反应。</p>
+<p>因此TCP支持根据接收端的处理能力，来决定发送端的发送速度，这个机制就叫做流量控制(Flow Control)。-&gt; 窗口字段</p>
+<p>接收端将自己可以接收的缓冲区大小放入TCP首部中的”窗口大小”字段，通过ACK确认报文通知发送端<br>窗口大小字段越大，说明网络的吞吐量越高</p>
+<p>接收端一旦发现自己的缓冲区快满了，就会将窗口大小设置成一个更小的值通知给发送端;<br>发送端接受到这个窗口之后，就会减慢自己的发送速度;</p>
+<p>如果接收端缓冲区满了， 就会将窗口置为0。</p>
+<p>这时发送方不再发送数据，但是需要定期发送一个<strong>窗口探测数据段</strong>，使接收端把窗口大小告诉发送端。<br>除了窗口大小，TCP首部的 40 字节选项中还包含了一个窗口扩大因子M，实际窗口大小是 窗口字段的值左移M位。</p>
+<p>接收端窗口如果更新，会向发送端发送一个更新通知，如果这个更新通知在中途丢失了，会导致无法继续通信，所以发送端要定时发送窗口探测包。</p>
+<blockquote>
+<p>这个窗口探测数据段的数据是无意义的，目的是得到返回的窗口大小。</p>
+</blockquote>
+<h3 id="拥塞控制"><a href="#拥塞控制" class="headerlink" title="拥塞控制"></a><strong>拥塞控制</strong></h3><p>虽然 TCP 有了滑动窗口能够同时发送大量的数据，但是如果在刚开始阶段就发送大量的数据，仍然可能引发问题。</p>
+<p>因为网络上有很多的计算机，可能当前的网络状态就已经比较拥堵，在不清楚当前网络状态下，贸然发送大量的数据是很有可能引起雪上加霜的，造成网络更加堵塞。</p>
+<p>TCP引入<strong>慢启动机制</strong>，先发少量的数据探探路，摸清当前的网络拥堵状态，再决定按照多大的速度传输数据。</p>
+<p><img src="/../assets/bd3f071631a537919e41921a104fc8bc.png" alt="在这里插入图片描述"></p>
+<p>图中的 cwnd 表示拥塞窗口大小，开始时大小为1，根据应答情况进行递增或重置。</p>
+<p>每次发送数据包的时候，将拥塞窗口和接收端主机反馈的窗口大小做比较，<strong>取较小的值</strong>作为实际发送的窗口。</p>
+<p>像上面这样的拥塞窗口增长速度，是指数级别的。</p>
+<p>“慢启动”只是指初使时慢，但是增长速度非常快。</p>
+<p>为了控制增长的速率，引入一个叫做<strong>慢启动的阈值</strong>。</p>
+<p>当拥塞窗口超过这个阈值的时候，不再按照指数方式增长， 而是按照线性方式增长。</p>
+<p><img src="/../assets/41d1659ebe0b087e7fbb4912ae2c6929.png" alt="在这里插入图片描述"></p>
+<p>当TCP开始启动的时候，慢启动阈值等于窗口最大值？？</p>
+<blockquote>
+<p>哪个阶段的窗口最大值，第二次握手获得的窗口大小？？</p>
+</blockquote>
+<p>在每次<strong>超时重发</strong>后，慢启动阈值会变成原来的一半同时拥塞窗口置回 1<br>区别于超时重传：是少量的丢包。</p>
+<p>大量的丢包，我们就认为网络拥塞。当TCP通信开始后，网络吞吐量会逐渐上升。</p>
+<p>随着网络发生拥堵，吞吐量会立刻下降。</p>
+<p>拥塞控制归根结底是TCP协议想尽可能快的把数据传输给对方，但是又要避免给网络造成太大压力的折中方案。</p>
+<p><img src="/../assets/0eea54ca2d2109be4248007f60e564cd.png" alt="在这里插入图片描述"></p>
+<h4 id="拥塞控制与流量控制的区别："><a href="#拥塞控制与流量控制的区别：" class="headerlink" title="拥塞控制与流量控制的区别："></a><strong>拥塞控制与流量控制的区别：</strong></h4><p><strong>拥塞控制</strong>是防止过多的数据突然注入到网络中，考虑到了网络中的路由器或链路过载，是一个<strong>全局性</strong>的过程。 <strong>流量控制</strong>是基于<strong>缓冲区</strong>的，某个时间点的通信量控制，主要就是控制发送端发送数据的速率，以便接收端来得及接收。</p>
+<h4 id="拥塞控制的标志："><a href="#拥塞控制的标志：" class="headerlink" title="拥塞控制的标志："></a><strong>拥塞控制的标志：</strong></h4><ul>
+<li>重传计时器超时</li>
+<li>接收到三个重复确认</li>
+</ul>
+<p>拥塞避免并非完全能够避免拥塞，只是尽量使网络不容易出现拥塞。</p>
+<p>拥塞避免的思路是让拥塞窗口 cwnd 缓慢地增大。</p>
+<p>无论是在慢开始阶段还是在拥塞避免阶段，只要发送方判断网络出现拥塞</p>
+<p>（其根据就是没有收到确认，虽然没有收到确认可能是其他原因的分组丢失，但是因为无法判定，所以都当做拥塞来处理）</p>
+<p>这时就把慢开始门限设置为出现拥塞时的门限的一半。然后把拥塞窗口设置为1，执行慢开始算法。</p>
+<p><img src="/../assets/cf57209e259ba0966c38cd1a6949463b.png" alt="在这里插入图片描述"></p>
+<p><strong>线性-加法增大：</strong>执行拥塞避免算法后，拥塞窗口线性缓慢增大，防止网络过早出现拥塞<br><strong>超时-乘法减小：</strong>无论是慢开始阶段还是拥塞避免，只要出现了网络拥塞（超时），那就把慢开始门限值ssthresh减半</p>
+<h4 id="快恢复（与快重传配合使用）"><a href="#快恢复（与快重传配合使用）" class="headerlink" title="快恢复（与快重传配合使用）"></a><strong>快恢复（与快重传配合使用）</strong></h4><p>采用快恢复算法时，慢启动只在TCP开始连接建立时和网络出现超时时才使用。</p>
+<p>当发送方连续收到三个重复确认时，就执行“乘法减小”算法，但是只把 ssthresh 门限减半，并把 cwnd 设置为 ssthresh 的大小。</p>
+<p>因为考虑到如果网络出现拥塞的话就不会收到好几个重复的确认，所以发送方现在认为<strong>网络可能没有出现拥塞。</strong></p>
+<h3 id="延迟应答"><a href="#延迟应答" class="headerlink" title="延迟应答"></a><strong>延迟应答</strong></h3><p>如果接收数据的主机立刻返回ACK应答，这时候返回的窗口可能比较小。</p>
+<blockquote>
+<p>可能会根据本次接收的数据大小来控制窗口。</p>
+</blockquote>
+<p>假设接收端缓冲区为1M 一次收到了 500 K 的数据。如果立刻应答，返回的窗口就是500K。</p>
+<p> 但实际上可能处理端处理的速度很快，10ms之内就把500K数据从缓冲区消费掉了，在这种情况下，接收端处理还远没有达到自己的极限，即使窗口再放大一些也能处理过来。</p>
+<p>如果接收端稍微等一会再应答，比如等待200ms再应答，那么这个时候返回的窗口大小就是1M。</p>
+<p>因为窗口越大，网络吞吐量就越大，传输效率就越高。</p>
+<p>所以我们的目标是在保证网络不拥塞的情况下尽量提高传输效率。</p>
+<p><strong>延迟策略：</strong></p>
+<ul>
+<li>数量限制: 每隔N个包就应答一次</li>
+<li>时间限制: 超过延迟时间就应答一次</li>
+</ul>
+<blockquote>
+<p>具体的数量和超时时间, 依操作系统不同也有差异; 一般N取2, 超时时间取200ms</p>
+</blockquote>
+<h3 id="捎带应答"><a href="#捎带应答" class="headerlink" title="捎带应答"></a><strong>捎带应答</strong></h3><p>在延迟应答的基础上，存在很多情况下，客户端服务器在应用层也是”一发一收” 的。 </p>
+<p>意味着客户端给服务器说了”How are you”， 服务器也会给客户端回一个”Fine, thank you”。那么这个时候ACK就可以搭顺风车，和服务器回应的 “Fine, thank you” 一起回给客户端</p>
+<p>就是发送 ACK 的同时顺便带上这边要发送的数据（3次握手）</p>
+<h3 id="面向字节流"><a href="#面向字节流" class="headerlink" title="面向字节流"></a><strong>面向字节流</strong></h3><p>当我们创建一个TCP的socket，会同时在内核中创建一个<strong>发送缓冲区</strong>和一个<strong>接收缓冲区</strong>。</p>
+<p>调用 <strong>write</strong> 时，内核将数据会先写入发送缓冲区中，</p>
+<p>如果发送的字节数太长，会被拆分成多个TCP的数据包发出，</p>
+<p>如果发送的字节数太短，就会先在缓冲区里等待， 等到缓冲区长度达到设置长度，然后等到其他合适的时机发送出去。<br>调用 <strong>read</strong> 接收数据的时候， 数据也是从网卡驱动程序到达内核的接收缓冲区。</p>
+<p>然后应用程序可以调用read从接收缓冲区拿数据。</p>
+<p>TCP的一个连接，既有发送缓冲区, 也有接收缓冲区，那么对于这一个连接，既可以读数据，也可以写数据。所以是<strong>全双工</strong>的。</p>
+<p><strong>并且由于缓冲区的存在，TCP程序的读和写不需要一一匹配。</strong></p>
+<p>例如: </p>
+<p>写100个字节数据时, 可以调用一次write写100个字节, 也可以调用100次write, 每次写一个字节; </p>
+<p>读100个字节数据时, 也完全不需要考虑写的时候是怎么写的, 既可以一次read 100个字节, 也可以一次 read一个字节, 重复100次</p>
+<h3 id="粘包问题"><a href="#粘包问题" class="headerlink" title="粘包问题"></a><strong>粘包问题</strong></h3><p>粘包问题中的 “包”是指的<strong>应用层的</strong>数据包。</p>
+<p>在TCP的协议头中，没有如同<strong>UDP</strong>一样的 “<strong>报文长度</strong>“这样的字段，只有一个序号这样的字段。</p>
+<p>站在传输层的角度， TCP是一个一个报文过来的，按照序号排好序放在缓冲区中，但是站在应用层的角度，它看到的只是一串连续的字节数据。</p>
+<p>但是不知道从哪个部分开始到哪个部分结束是一个<strong>完整的</strong>应用层数据包，这就是粘包问题。</p>
+<p><strong>如何避免粘包问题呢?</strong> </p>
+<p>明确两个包之间的边界。</p>
+<ul>
+<li>对于<strong>定长</strong>的包，保证每次都按<strong>固定大小</strong>读取即可。</li>
+</ul>
+<blockquote>
+<p>例如一个Request结构, 是固定大小的, 那么就从缓冲区从头开始按sizeof(Request)依次读取即可</p>
+</blockquote>
+<ul>
+<li>对于<strong>变长</strong>的包，可以在包头的位置，<strong>约定一个包总长度的字段</strong>，从而就知道了包的结束位置。</li>
+<li>对于<strong>变长</strong>的包，还可以在包和包之间使用明确的<strong>分隔符</strong></li>
+</ul>
+<p>(应用层协议是程序员自己来定义的, 只要保证分隔符不和正文冲突即可)。</p>
+<p><strong>对比UDP协议</strong></p>
+<p>UDP是一个一个把数据交付给应用层，有明确的数据边界。</p>
+<p>站在应用层的角度， 使用UDP的时候要么收到完整的UDP报文要么不收，不会出现”半个”的情况。</p>
+<h3 id="TCP连接异常情况"><a href="#TCP连接异常情况" class="headerlink" title="TCP连接异常情况"></a><strong>TCP连接异常情况</strong></h3><ol>
+<li><p><strong>进程终止：</strong>进程终止会释放文件描述符，仍然可以发送 FIN，和正常关闭没有什么区别。<strong>机器重启和进程终止一样。</strong></p>
+</li>
+<li><p><strong>机器掉电&#x2F;网线断开：</strong>接收端认为连接还在，一旦接收端有写入操作，接收端发现连接已经不在了，就会进行 reset。</p>
+</li>
+</ol>
+<p>即使没有写入操作，TCP自己也内置了一个<strong>保活定时器</strong>，会定期询问对方是否还在。<br>如果对方不在，也会把连接释放。<br>应用层的某些协议, 也有一些这样的检测机制.例如HTTP长连接中, 也会定期检测对方的状态.</p>
+<p>比如 QQ 断线之后, 也会定期尝试重新连接。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://blueapong.github.io/2024/07/27/leetcode-top100/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Apong">
+      <meta itemprop="description" content="个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Apong's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/07/27/leetcode-top100/" class="post-title-link" itemprop="url">leetcode top100详解</a>
+        </h2>
+
+        <div class="post-meta">
+        <!--置顶功能-->
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-07-27 16:29:52" itemprop="dateCreated datePublished" datetime="2024-07-27T16:29:52+08:00">2024-07-27</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">算法</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AE%97%E6%B3%95/leetcode/" itemprop="url" rel="index"><span itemprop="name">leetcode</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>逐一分析和解释 LeetCode top100 的各种解法。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2024/07/15/MySQL-%E4%B8%89-%E5%88%86%E7%BB%84%E5%87%BD%E6%95%B0/#more" rel="contents">
+              <a class="btn" href="/2024/07/27/leetcode-top100/">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -357,7 +834,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://blueapong.github.io/2024/07/15/2024-7-15/">
+    <link itemprop="mainEntityOfPage" href="https://blueapong.github.io/2024/07/24/2024-7-24/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -371,7 +848,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2024/07/15/2024-7-15/" class="post-title-link" itemprop="url">每日杂记 day3</a>
+            <a href="/2024/07/24/2024-7-24/" class="post-title-link" itemprop="url">每日杂记 day9</a>
         </h2>
 
         <div class="post-meta">
@@ -383,7 +860,7 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2024-07-15 10:01:26" itemprop="dateCreated datePublished" datetime="2024-07-15T10:01:26+08:00">2024-07-15</time>
+              <time title="创建时间：2024-07-24 17:11:02" itemprop="dateCreated datePublished" datetime="2024-07-24T17:11:02+08:00">2024-07-24</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -406,10 +883,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>今天收获了：八股（String，序列化，OSI七层网络）、算法（哈希、双指针）、MySQL（分组）</p>
+          <p>复习了树和 5 道算法题（链表，堆排序，并查集，LRU规则）</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2024/07/15/2024-7-15/">
+              <a class="btn" href="/2024/07/24/2024-7-24/">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -433,7 +910,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://blueapong.github.io/2024/07/14/2024-7-14/">
+    <link itemprop="mainEntityOfPage" href="https://blueapong.github.io/2024/07/23/2024-7-23/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -447,7 +924,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2024/07/14/2024-7-14/" class="post-title-link" itemprop="url">每日总结 day2</a>
+            <a href="/2024/07/23/2024-7-23/" class="post-title-link" itemprop="url">每日杂记 day8</a>
         </h2>
 
         <div class="post-meta">
@@ -459,7 +936,7 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2024-07-14 20:12:20" itemprop="dateCreated datePublished" datetime="2024-07-14T20:12:20+08:00">2024-07-14</time>
+              <time title="创建时间：2024-07-23 16:17:21" itemprop="dateCreated datePublished" datetime="2024-07-23T16:17:21+08:00">2024-07-23</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -482,10 +959,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>今天成果：3道算法题（双指针），记下 16 道八股文，MySQL 剩下的几个数据处理函数。</p>
+          <p>链表归并排序，链表反转</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2024/07/14/2024-7-14/">
+              <a class="btn" href="/2024/07/23/2024-7-23/">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -509,7 +986,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://blueapong.github.io/2024/07/13/2024-7-13/">
+    <link itemprop="mainEntityOfPage" href="https://blueapong.github.io/2024/07/22/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95%E6%80%BB%E7%BB%93/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -523,7 +1000,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2024/07/13/2024-7-13/" class="post-title-link" itemprop="url">每日总结 day1</a>
+            <a href="/2024/07/22/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95%E6%80%BB%E7%BB%93/" class="post-title-link" itemprop="url">排序算法总结</a>
         </h2>
 
         <div class="post-meta">
@@ -535,7 +1012,83 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2024-07-13 23:56:00" itemprop="dateCreated datePublished" datetime="2024-07-13T23:56:00+08:00">2024-07-13</time>
+              <time title="创建时间：2024-07-22 11:07:45" itemprop="dateCreated datePublished" datetime="2024-07-22T11:07:45+08:00">2024-07-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8E%92%E5%BA%8F/" itemprop="url" rel="index"><span itemprop="name">排序</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>记录了七大比较排序的代码实现和对比分析。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2024/07/22/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95%E6%80%BB%E7%BB%93/">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://blueapong.github.io/2024/07/20/2024-7-20/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Apong">
+      <meta itemprop="description" content="个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Apong's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/07/20/2024-7-20/" class="post-title-link" itemprop="url">每日杂记 day7</a>
+        </h2>
+
+        <div class="post-meta">
+        <!--置顶功能-->
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-07-20 10:58:59" itemprop="dateCreated datePublished" datetime="2024-07-20T10:58:59+08:00">2024-07-20</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -558,10 +1111,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>四道算法题：两道链表，两道哈希表；API开放平台 8 道面试题，涉及 gateway、dubbo、maven、aksk算法。</p>
+          <p>今日深入学习了线程的工作原理以及 CAS 算法和 ABA 问题，另外做了一套“多益网络”的笔试题：对数据结构和排序遗忘的比较严重。。。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2024/07/13/2024-7-13/">
+              <a class="btn" href="/2024/07/20/2024-7-20/">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -585,7 +1138,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://blueapong.github.io/2024/07/12/MySQL-%E4%BA%8C-%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E5%87%BD%E6%95%B0/">
+    <link itemprop="mainEntityOfPage" href="https://blueapong.github.io/2024/07/19/2024-7-19/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -599,7 +1152,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2024/07/12/MySQL-%E4%BA%8C-%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E5%87%BD%E6%95%B0/" class="post-title-link" itemprop="url">MySQL(二) 数据处理函数</a>
+            <a href="/2024/07/19/2024-7-19/" class="post-title-link" itemprop="url">每日杂记 day6</a>
         </h2>
 
         <div class="post-meta">
@@ -611,7 +1164,7 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2024-07-12 21:32:58" itemprop="dateCreated datePublished" datetime="2024-07-12T21:32:58+08:00">2024-07-12</time>
+              <time title="创建时间：2024-07-19 23:17:42" itemprop="dateCreated datePublished" datetime="2024-07-19T23:17:42+08:00">2024-07-19</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -619,7 +1172,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+                  <a href="/categories/daily/" itemprop="url" rel="index"><span itemprop="name">每日总结</span></a>
                 </span>
             </span>
 
@@ -634,12 +1187,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>在数据库操作中，除了需要查询数据，</p>
-<p>有时候还需要对数据进行一些简单的处理，</p>
-<p>用于优化数据显示效果等。</p>
+          <p>今日算法题感觉信手拈来啊（可能是做的大部分都是旧题，嘿嘿），然后复习了一遍多线程的知识。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2024/07/12/MySQL-%E4%BA%8C-%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E5%87%BD%E6%95%B0/#more" rel="contents">
+              <a class="btn" href="/2024/07/19/2024-7-19/">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -663,7 +1214,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://blueapong.github.io/2024/07/09/JMeter%E6%B5%8B%E8%AF%95%E5%A4%9A%E4%BA%BA%E5%B9%B6%E5%8F%91%E6%93%8D%E4%BD%9C/">
+    <link itemprop="mainEntityOfPage" href="https://blueapong.github.io/2024/07/18/2024-7-18/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -677,7 +1228,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2024/07/09/JMeter%E6%B5%8B%E8%AF%95%E5%A4%9A%E4%BA%BA%E5%B9%B6%E5%8F%91%E6%93%8D%E4%BD%9C/" class="post-title-link" itemprop="url">JMeter 测试教程</a>
+            <a href="/2024/07/18/2024-7-18/" class="post-title-link" itemprop="url">每日杂记 day5</a>
         </h2>
 
         <div class="post-meta">
@@ -689,7 +1240,7 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2024-07-09 12:52:28" itemprop="dateCreated datePublished" datetime="2024-07-09T12:52:28+08:00">2024-07-09</time>
+              <time title="创建时间：2024-07-18 11:27:50" itemprop="dateCreated datePublished" datetime="2024-07-18T11:27:50+08:00">2024-07-18</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -697,11 +1248,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%B5%8B%E8%AF%95/" itemprop="url" rel="index"><span itemprop="name">测试</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%B5%8B%E8%AF%95/JMeter/" itemprop="url" rel="index"><span itemprop="name">JMeter</span></a>
+                  <a href="/categories/daily/" itemprop="url" rel="index"><span itemprop="name">每日总结</span></a>
                 </span>
             </span>
 
@@ -716,258 +1263,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>一个好的项目不仅需要完整的业务功能，</p>
-<p>更应该保证处理响应的效率！</p>
-<p>在业务中经常需要检验并发的可靠性，特别是多人同时操作对业务的影响。</p>
-<p>这时候就可以借助 JMeter 进行测试。</p>
-<p>本文提供两种方式：串行测试、全局属性</p>
+          <p>。。。看了点集合和反射的知识。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2024/07/09/JMeter%E6%B5%8B%E8%AF%95%E5%A4%9A%E4%BA%BA%E5%B9%B6%E5%8F%91%E6%93%8D%E4%BD%9C/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://blueapong.github.io/2024/05/06/240506/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Apong">
-      <meta itemprop="description" content="个人博客">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Apong's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/05/06/240506/" class="post-title-link" itemprop="url">240506</a>
-        </h2>
-
-        <div class="post-meta">
-        <!--置顶功能-->
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-05-06 00:22:42" itemprop="dateCreated datePublished" datetime="2024-05-06T00:22:42+08:00">2024-05-06</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Vue/" itemprop="url" rel="index"><span itemprop="name">Vue</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>今天深刻研究了下组件化的思想：业务分离。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2024/05/06/240506/">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://blueapong.github.io/2024/04/19/%E6%94%AF%E4%BB%98%E5%AE%9D%E6%B2%99%E7%AE%B1%E6%94%AF%E4%BB%98/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Apong">
-      <meta itemprop="description" content="个人博客">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Apong's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/04/19/%E6%94%AF%E4%BB%98%E5%AE%9D%E6%B2%99%E7%AE%B1%E6%94%AF%E4%BB%98/" class="post-title-link" itemprop="url">SpringBoot集成沙箱支付——不墨迹版</a>
-        </h2>
-
-        <div class="post-meta">
-        <!--置顶功能-->
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-04-19 14:26:30" itemprop="dateCreated datePublished" datetime="2024-04-19T14:26:30+08:00">2024-04-19</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%B2%99%E7%AE%B1%E6%94%AF%E4%BB%98/" itemprop="url" rel="index"><span itemprop="name">沙箱支付</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%95%99%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">教程</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>从0到1集成沙箱支付，简单易懂，跟着操作就完事了。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2024/04/19/%E6%94%AF%E4%BB%98%E5%AE%9D%E6%B2%99%E7%AE%B1%E6%94%AF%E4%BB%98/">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://blueapong.github.io/2024/04/12/240412/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Apong">
-      <meta itemprop="description" content="个人博客">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Apong's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/04/12/240412/" class="post-title-link" itemprop="url">Java多线程、SortedSet</a>
-        </h2>
-
-        <div class="post-meta">
-        <!--置顶功能-->
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-04-12 23:42:14" itemprop="dateCreated datePublished" datetime="2024-04-12T23:42:14+08:00">2024-04-12</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Redis/" itemprop="url" rel="index"><span itemprop="name">Redis</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java/concurrent/" itemprop="url" rel="index"><span itemprop="name">多线程</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java/lock/" itemprop="url" rel="index"><span itemprop="name">锁</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>学习了wait和notify，concurrent包下的各种锁：ReentrantLock、ReadWriteLock、StampedLock、Semaphore，还有线程池，Future，CompletableFuture，ForkJoin，ThreadLocal。还有借助Redis的SortedSet实现点赞和点赞排行榜的功能。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2024/04/12/240412/">
+              <a class="btn" href="/2024/07/18/2024-7-18/">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -990,7 +1289,7 @@
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1055,18 +1354,18 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">18</span>
+          <span class="site-state-item-count">28</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
-        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-count">20</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">35</span>
+        <span class="site-state-item-count">39</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
